@@ -1,10 +1,23 @@
 #from rucio.client import Client
 #import rucio.client as rucio
-
-import os
-
-from os.path import exists
 #Client= Client()
+
+#l=(Client.list_scopes())
+#print(l)
+#print(list(Client.list_datasets_per_rse(rse='LUND', limit=10)))
+#print(list(Client.get_rse_usage('LUND')))
+#print(list(Client.list_rse_attributes('LUND')))
+#print(list(Client.list_rses()))
+#for scope in l:
+#    print(scope)
+#    L=(Client.list_replicas([{'scope':'{}'.format(scope)}], rse_expression='LUND'))
+#    print(L)
+
+#Why not use python rse wrapper? its inconsistent so I have no idea what to write where becouse sometimes dids have to be scope=mc20 and sometimes {"scope":"mc20"}
+import os
+from os.path import exists
+
+
 
 os.system("cd; cd rucio-client-venv; source bin/activate")
 
@@ -12,29 +25,37 @@ datasets=[]
 for n in range(1):
     datasets.append("mc20:v9-8GeV-1e-inclusive")
 
-#l=(Client.list_scopes())
-#print(l)
-#print(list(Client.list_datasets_per_rse(rse='LUND', limit=10)))
-#print(list(Client.get_rse_usage('LUND')))
-#print(list(Client.list_rse_attributes('LUND')))
 
-#print(list(Client.list_rses()))
 
-"""
-for scope in l:
-    print(scope)
-    L=(Client.list_replicas([{'scope':'{}'.format(scope)}], rse_expression='LUND'))
-    print(L)
-"""
-L2=[]
-print(datasets[0])
-for dataset in datasets:
-    L=((os.popen("rucio list-file-replicas {} | grep LUND".format(dataset)).read()).split('\n'))
-    #print(L)
-    for l in L:
-        l2=l.split('|')
-        L2.append(l2)
-    break
+
+
+
+def get_scopes:
+   scopes=list(os.popen("rucio list-scopes"))
+   return(scopes)
+
+
+def get_datasets_scopes(scopes):
+    #currently broken, have to figure out why
+    datasets_scopes=list(os.popen("rucio list-dids --filter type=DATASET test:*"))
+    
+    return datasets_scopes
+
+def get_datasets_rse(rse):
+    #currently broken
+    datasets_rse=list(os.popen("rucio list-datasets-rse {}".format(rse))
+    return datasets_rse
+
+
+def files_from_datasets(datasets):
+    L2=[]
+    for dataset in datasets:
+        L=((os.popen("rucio list-file-replicas {} | grep LUND".format(dataset)).read()).split('\n'))
+        #print(L)
+        for l in L:
+            l2=l.split('|')
+            L2.append(l2)
+        break
 
 print(len(L2))
 
