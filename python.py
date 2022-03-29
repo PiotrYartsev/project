@@ -35,6 +35,10 @@ for dataset in datasets:
         l2=l.split('|')
         L2.append(l2)
     break
+
+print(len(L2))
+
+"""
 for value in range(len(L2)-1):
     address=(L2[value][5])
     address=address.replace("LUND: file://", "")
@@ -45,7 +49,7 @@ for value in range(len(L2)-1):
     fille=address[address.rindex('/')+1:]
     address=address.replace(fille,"")
     #print(address)
-    #print(fille)
+    print(fille)
     #print(exists(address))
 
     #address="/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/"
@@ -54,7 +58,10 @@ for value in range(len(L2)-1):
     #fille="mc_v9-8GeV-1e-target_photonuclear_6563_t1589182453.root"
 
     os.system("cd; cd {}; pwd; echo {}; test -e {} && echo True || echo False".format(address,address,fille))
-    
+    break
 
 def count_the_files(directory):
     pass
+
+
+"""
