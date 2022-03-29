@@ -1,14 +1,15 @@
-from rucio.client import Client
-import rucio.client as rucio
+#from rucio.client import Client
+#import rucio.client as rucio
 
 import os
 
-Client= Client()
-print('sas')
+from os.path import exists
+#Client= Client()
+
 os.system("cd; cd rucio-client-venv; source bin/activate")
 
 datasets=[]
-for n in range(10):
+for n in range(1):
     datasets.append("mc20:v9-8GeV-1e-inclusive")
 
 #l=(Client.list_scopes())
@@ -34,7 +35,26 @@ for dataset in datasets:
         l2=l.split('|')
         L2.append(l2)
     break
+for value in range(len(L2)-1):
+    address=(L2[value][5])
+    address=address.replace("LUND: file://", "")
 
-for l in L2:
-    print(l)
+    #print(address)
 
+    
+    fille=address[address.rindex('/')+1:]
+    address=address.replace(fille,"")
+    #print(address)
+    #print(fille)
+    #print(exists(address))
+
+    #address="/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/"
+
+
+    #fille="mc_v9-8GeV-1e-target_photonuclear_6563_t1589182453.root"
+
+    os.system("cd; cd {}; pwd; echo {}; test -e {} && echo True || echo False".format(address,address,fille))
+    
+
+def count_the_files(directory):
+    pass
