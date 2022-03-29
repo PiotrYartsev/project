@@ -67,12 +67,23 @@ def count_the_files(directory):
 
 def get_info_from_data_storage(rse):
     if rse=="LUND":
-        pass
+        
+
+
+
+
+
+
+
+
+
+
+        
     else:
         print
 
 L2=files_from_datasets(datasets)
-
+def 
 for value in range(len(L2)-1):
     address=(L2[value][5])
     address=address.replace("LUND: file://", "")
