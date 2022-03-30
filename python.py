@@ -21,7 +21,8 @@ from datetime import datetime
 import subprocess
 from subprocess import check_output
 from tqdm import *
-
+from os import path
+import os.path
 
 
 os.system("cd; cd rucio-client-venv; source bin/activate")
@@ -62,7 +63,7 @@ def files_from_datasets(datasets):
             L2.append(l2)
             number_of_files=number_of_files+0
         break
-    return(L2,number_of_files)
+    return(L2)
 
 
 
@@ -91,7 +92,7 @@ def get_adler32_checksum(dir2, file2):
 
 
 
-def get_info_from_data_storage(rse, directory):
+def get_info_from_all_data_storage(rse, directory):
     f = open("/home/pioyar/Desktop/project/files.txt", "w")
     print("Get information about all files at a directory such as their name and their adler32 checksum")
     if rse=="LUND":
@@ -103,20 +104,39 @@ def get_info_from_data_storage(rse, directory):
             #print(adler32_checksum)
             info_from_data=(file+", "+str(adler32_checksum)+"\n")
             f.write(info_from_data)
+            #Temporary limit for test speed
+            
+            if n>10:
+                break
         
     else:
         pass
 
 
+def get_info_from_some_data_storage(file, directory):
+    f = open("/home/pioyar/Desktop/project/files.txt", "w")
+    print("Get information about file at a directory such as its name and their adler32 checksum")
+    adler32_checksum=get_adler32_checksum(directory,file)
+    adler32_checksum=hex(adler32_checksum)
+    adler32_checksum=adler32_checksum.lstrip("0x").rstrip("L")
+    #print(adler32_checksum)
+    #info_from_data=(file+", "+str(adler32_checksum)+"\n")
+    return(adler32_checksum)
 
 
-def check_if_the_file_exist(files_to_search_for_as_list):
+
+
+
+
+def check_if_the_file_exist_bash(files_to_search_for_as_list):
     now = datetime.now()
     not_missing="/home/pioyar/Desktop/project/not_missing_{}.txt".format(now).replace(" ","_")
     missing="/home/pioyar/Desktop/project/missing_{}.txt".format(now).replace(" ","_")
     print("For each file in datasets look for it in storage and put the files it matches in  not_missing_timestamp.txt and the dataset entry without a match in missing_timestamp.txt")
     for value in tqdm(range(len(files_to_search_for_as_list)-1)):
         address=(files_to_search_for_as_list[value][5])
+        schecksum=(files_to_search_for_as_list[value][4])
+        #print(schecksum)
         address=address.replace("LUND: file://", "")
         #print(address)
         fille=address[address.rindex('/')+1:]
@@ -125,7 +145,48 @@ def check_if_the_file_exist(files_to_search_for_as_list):
         #print(fille)
         #print(exists(address))
         
-        os.system("cd; cd {}; test -e {} && echo {} >> {} || echo {} >> {}".format(address,address, fille, not_missing, fille, missing))
+        os.system("cd; cd {}; test -e {} && echo {} , {} >> {} || echo {} >> {} ".format(address,address, fille,schecksum, not_missing, fille, missing))
 
-    return(not_missing, missing)
+    return([not_missing, missing])
+
+
+
+def check_if_the_file_exist_python(files_to_search_for_as_list):
+    now = datetime.now()
+    not_missing="/home/pioyar/Desktop/project/not_missing_{}.txt".format(now).replace(" ","_")
+    missing="/home/pioyar/Desktop/project/missing_{}.txt".format(now).replace(" ","_")
+    print("For each file in datasets look for it in storage and put the files it matches in  not_missing_timestamp.txt and the dataset entry without a match in missing_timestamp.txt")
+    for value in tqdm(range(len(files_to_search_for_as_list)-1)):
+        address=(files_to_search_for_as_list[value][5])
+        schecksum=(files_to_search_for_as_list[value][4])
+        #print(schecksum)
+        address=address.replace("LUND: file://", "")
+        #print(address)
+        fille=address[address.rindex('/')+1:]
+        address=address.replace(fille,"")
+        address=address.replace(" ","")
+        #print(address)
+        #print(fille)
+        #print(exists(address))
+        
+        if path.exists("{}{}".format(address,fille)):
+            print("yes")
+        else:
+            print("no")
+            print("{}{}".format(address,fille))     
+    #return([not_missing, missing])
+
+
+
+
+def compere_checksum(not_missing_files):
+    not_missing_files_file = open(not_missing_files, 'r')
+    info_from_data=open("/home/pioyar/Desktop/project/files.txt", 'r')
+    lines_not_missing_files_file = not_missing_files_file.readlines()
+    lines_info_from_data = info_from_data.readlines()
+    print(lines_info_from_data[1])
+    for line in lines_not_missing_files_file:
+        line_list=line.split(",")
+        if line_list[0] in lines_info_from_data:
+            print(line_list[0])
 
