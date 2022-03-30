@@ -1,1 +1,2 @@
-from
+
+            if asum < 0:

@@ -16,7 +16,7 @@
 #Why not use python rse wrapper? its inconsistent so I have no idea what to write where becouse sometimes dids have to be scope=mc20 and sometimes {"scope":"mc20"}
 import os
 from os.path import exists
-
+from zlib import adler32
 
 
 os.system("cd; cd rucio-client-venv; source bin/activate")
@@ -65,25 +65,43 @@ def count_the_files(directory):
     pass
 
 
+BLOCKSIZE=256*1024*1024
+
+def get_adler32_checksum(dir2, file2):
+    asum=1
+    with open("{}{}".format(dir2,file2),"rb") as f:
+        while True:
+            data = f.read(BLOCKSIZE)
+            if not data:
+                print(data)
+                break
+            asum = adler32(data, asum)
+            if asum < 0:
+                asum += 2**32
+    return(asum)
+            
+
+
+
 def get_info_from_data_storage(rse):
+    f = open("/home/pioyar/Desktop/files.txt", "w")
     if rse=="LUND":
-        
-
-
-
-
-
-
-
-
-
-
+        for file in  os.listdir("/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/"):
+            
+            adler32_checksum=get_adler32_checksum("/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/",file)
+            adler32_checksum=hex(adler32_checksum)
+            adler32_checksum=adler32_checksum.lstrip("0x").rstrip("L")
+            #print(adler32_checksum)
+            info_from_data=(file+", "+str(adler32_checksum))
+            f.write(info_from_data)
         
     else:
-        print
+        pass
 
+get_info_from_data_storage("LUND")
+"""
 L2=files_from_datasets(datasets)
-def 
+ 
 for value in range(len(L2)-1):
     address=(L2[value][5])
     address=address.replace("LUND: file://", "")
@@ -99,3 +117,4 @@ for value in range(len(L2)-1):
 
     os.system("cd; cd {}; pwd; echo {}; test -e {} && echo True || echo False".format(address,address,fille))
     break
+"""
