@@ -18,7 +18,8 @@ import os
 from os.path import exists
 from zlib import adler32
 from datetime import datetime
-
+import subprocess
+from subprocess import check_output
 os.system("cd; cd rucio-client-venv; source bin/activate")
 
 
@@ -31,14 +32,11 @@ os.system("cd; cd rucio-client-venv; source bin/activate")
 def get_scopes():
    scopes=list(os.popen("rucio list-scopes"))
    return(scopes)
-
-
 def get_datasets_scopes(scopes):
     #currently broken, have to figure out why
     datasets_scopes=list(os.popen("rucio list-dids --filter type=DATASET test:*"))
     
     return(datasets_scopes)
-
 def get_datasets_rse(rse):
     #currently broken
     datasets_rse=list(os.popen("rucio list-datasets-rse {}".format(rse))
@@ -79,13 +77,16 @@ def get_adler32_checksum(dir2, file2):
             if asum < 0:
                 asum += 2**32
     return(asum)
-
-def get_info_from_data_storage(rse):
-    f = open("/home/pioyar/Desktop/files.txt", "w")
-    if rse=="LUND":
-        for file in  os.listdir("/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/"):
             
-            adler32_checksum=get_adler32_checksum("/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/",file)
+
+
+
+def get_info_from_data_storage(rse, directory):
+    f = open("/home/pioyar/Desktop/project/files.txt", "w")
+    if rse=="LUND":
+        for file in  os.listdir(directory):
+            
+            adler32_checksum=get_adler32_checksum(directory,file)
             adler32_checksum=hex(adler32_checksum)
             adler32_checksum=adler32_checksum.lstrip("0x").rstrip("L")
             #print(adler32_checksum)
@@ -96,12 +97,20 @@ def get_info_from_data_storage(rse):
         pass
 
 
+#get_info_from_data_storage("LUND","/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/")
+
 L2=files_from_datasets(datasets)
 print(len(L2)-1)
 
-def check_if_the_file_exist():
-    for value in range(len(L2)-1):
-        address=(L2[value][5])
+def check_if_the_file_exist(files_to_search_for_as_list):
+    now = datetime.now()
+    not_missing="/home/pioyar/Desktop/project/not_missing_{}.txt".format(now).replace(" ","_")
+    missing="/home/pioyar/Desktop/project/missing_{}.txt".format(now).replace(" ","_")
+
+    print(not_missing)
+    print(missing)
+    for value in range(len(files_to_search_for_as_list)-1):
+        address=(files_to_search_for_as_list[value][5])
         address=address.replace("LUND: file://", "")
         #print(address)
         fille=address[address.rindex('/')+1:]
@@ -109,5 +118,9 @@ def check_if_the_file_exist():
         #print(address)
         #print(fille)
         #print(exists(address))
+        
+        os.system("cd; cd {}; test -e {} && echo {} >> {} || echo {} >> {}".format(address,address, fille, not_missing, fille, missing))
 
-        os.system("cd; cd {}; test -e {} && echo {} >> /home/pioyar/Desktop/not_missing.txt || echo {} >> /home/pioyar/Desktop/missing.txt".format(address,address,fille, not_missing, fille, missing))
+    return(not_missing, missing)
+
+check_if_the_file_exist(L2)
