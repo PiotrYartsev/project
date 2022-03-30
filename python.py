@@ -79,9 +79,6 @@ def get_adler32_checksum(dir2, file2):
             if asum < 0:
                 asum += 2**32
     return(asum)
-            
-
-
 
 def get_info_from_data_storage(rse):
     f = open("/home/pioyar/Desktop/files.txt", "w")
@@ -112,7 +109,5 @@ def check_if_the_file_exist():
         #print(address)
         #print(fille)
         #print(exists(address))
-        
-        os.system("cd; cd {}; test -e {} && echo {} >> /home/pioyar/Desktop/not_missing.txt || echo {} >> /home/pioyar/Desktop/missing.txt".format(address,address, fille, not_missing, fille, missing))
 
-        return(not_missing, missing)
+        os.system("cd; cd {}; test -e {} && echo {} >> /home/pioyar/Desktop/not_missing.txt || echo {} >> /home/pioyar/Desktop/missing.txt".format(address,address,fille, not_missing, fille, missing))
