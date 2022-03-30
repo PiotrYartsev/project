@@ -98,10 +98,11 @@ def get_info_from_data_storage(rse):
     else:
         pass
 
-get_info_from_data_storage("LUND")
-"""
+
 L2=files_from_datasets(datasets)
- 
+print(len(L2)-1)
+
+
 for value in range(len(L2)-1):
     address=(L2[value][5])
     address=address.replace("LUND: file://", "")
@@ -112,9 +113,7 @@ for value in range(len(L2)-1):
     fille=address[address.rindex('/')+1:]
     address=address.replace(fille,"")
     #print(address)
-    print(fille)
-    print(exists(address))
+    #print(fille)
+    #print(exists(address))
 
-    os.system("cd; cd {}; pwd; echo {}; test -e {} && echo True || echo False".format(address,address,fille))
-    break
-"""
+    os.system("cd; cd {}; test -e {} && echo {}>>/home/pioyar/Desktop/not_missing.txt || echo {} >> /home/pioyar/Desktop/missing.txt".format(address,address,fille, fille, fille))
