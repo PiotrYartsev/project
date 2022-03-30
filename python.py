@@ -115,13 +115,7 @@ def check_if_the_file_exist():
         now = datetime.now()
         not_missing="/home/pioyar/Desktop/not_missing_{}.txt".format(now)
         missing="/home/pioyar/Desktop/missing_{}.txt".format(now)
-        f_1=open(not_missing, "w+")
-        f_2=open(missing, "w+")
-
-
-        f_1.close()
-        f_2.close()
-
+        
         print(not_missing)
         print(missing)
 
