@@ -14,8 +14,9 @@ for n in range(5):
 L2=files_from_datasets(datasets)
 
 #get information about the files in storage, such as their name and 
-get_info_from_data_storage("LUND","/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/")
+get_info_from_all_data_storage("LUND","/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/")
 
 #compare the files from rucio with the files in storage
-check_if_the_file_exist(L2)
-
+#a=check_if_the_file_exist_bash(L2)
+check_if_the_file_exist_python(L2)
+compere_checksum(a[0])
