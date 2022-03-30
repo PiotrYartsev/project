@@ -73,7 +73,7 @@ def get_adler32_checksum(dir2, file2):
         while True:
             data = f.read(BLOCKSIZE)
             if not data:
-                print(data)
+                #print(data)
                 break
             asum = adler32(data, asum)
             if asum < 0:
@@ -92,7 +92,7 @@ def get_info_from_data_storage(rse):
             adler32_checksum=hex(adler32_checksum)
             adler32_checksum=adler32_checksum.lstrip("0x").rstrip("L")
             #print(adler32_checksum)
-            info_from_data=(file+", "+str(adler32_checksum))
+            info_from_data=(file+", "+str(adler32_checksum)+"\n")
             f.write(info_from_data)
         
     else:
