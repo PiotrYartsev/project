@@ -17,7 +17,7 @@
 import os
 from os.path import exists
 from zlib import adler32
-
+from datetime import datetime
 
 os.system("cd; cd rucio-client-venv; source bin/activate")
 
@@ -102,18 +102,27 @@ def get_info_from_data_storage(rse):
 L2=files_from_datasets(datasets)
 print(len(L2)-1)
 
+def check_if_the_file_exist():
+    for value in range(len(L2)-1):
+        address=(L2[value][5])
+        address=address.replace("LUND: file://", "")
+        #print(address)
+        fille=address[address.rindex('/')+1:]
+        address=address.replace(fille,"")
+        #print(address)
+        #print(fille)
+        #print(exists(address))
+        now = datetime.now()
+        not_missing="/home/pioyar/Desktop/not_missing_{}.txt".format(now)
+        missing="/home/pioyar/Desktop/missing_{}.txt".format(now)
+        f_1=open(not_missing, "w+")
+        f_2=open(missing, "w+")
 
-for value in range(len(L2)-1):
-    address=(L2[value][5])
-    address=address.replace("LUND: file://", "")
 
-    #print(address)
+        f_1.close()
+        f_2.close()
 
-    
-    fille=address[address.rindex('/')+1:]
-    address=address.replace(fille,"")
-    #print(address)
-    #print(fille)
-    #print(exists(address))
+        print(not_missing)
+        print(missing)
 
-    os.system("cd; cd {}; test -e {} && echo {}>>/home/pioyar/Desktop/not_missing.txt || echo {} >> /home/pioyar/Desktop/missing.txt".format(address,address,fille, fille, fille))
+        os.system("cd; cd {}; test -e {} && echo {}>>{} || echo {} >> {}}".format(address,address,fille, not_missing, fille, missing))

@@ -1,2 +1,2 @@
 
-            if asum < 0:
+        f_2=open(missing, "w+")
