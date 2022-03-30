@@ -112,11 +112,7 @@ def check_if_the_file_exist():
         #print(address)
         #print(fille)
         #print(exists(address))
-        now = datetime.now()
-        not_missing="/home/pioyar/Desktop/not_missing_{}.txt".format(now)
-        missing="/home/pioyar/Desktop/missing_{}.txt".format(now)
         
-        print(not_missing)
-        print(missing)
+        os.system("cd; cd {}; test -e {} && echo {} >> /home/pioyar/Desktop/not_missing.txt || echo {} >> /home/pioyar/Desktop/missing.txt".format(address,address, fille, not_missing, fille, missing))
 
-        os.system("cd; cd {}; test -e {} && echo {}>>{} || echo {} >> {}}".format(address,address,fille, not_missing, fille, missing))
+        return(not_missing, missing)
