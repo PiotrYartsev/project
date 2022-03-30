@@ -20,6 +20,10 @@ from zlib import adler32
 from datetime import datetime
 import subprocess
 from subprocess import check_output
+from tqdm import *
+
+
+
 os.system("cd; cd rucio-client-venv; source bin/activate")
 
 
@@ -42,36 +46,42 @@ def get_datasets_rse(rse):
     datasets_rse=list(os.popen("rucio list-datasets-rse {}".format(rse))
     return(datasets_rse)
 """
-#current bypas for the problems 
-datasets=[]
-for n in range(5):
-    datasets.append("mc20:v9-8GeV-1e-inclusive")
+
 
 
 def files_from_datasets(datasets):
+    number_of_files=0
     L2=[]
-    for dataset in datasets:
+    print("Get a list of all the files in a dataset")
+    for n in tqdm(range(len(datasets))):
+        dataset=datasets[n]
         L=((os.popen("rucio list-file-replicas {} | grep LUND".format(dataset)).read()).split('\n'))
         #print(L)
         for l in L:
             l2=l.split('|')
             L2.append(l2)
+            number_of_files=number_of_files+0
         break
-    return(L2)
+    return(L2,number_of_files)
+
+
+
+
 
 def count_the_files(directory):
     pass
 
 
-BLOCKSIZE=256*1024*1024
+
+
 
 def get_adler32_checksum(dir2, file2):
+    BLOCKSIZE=256*1024*1024
     asum=1
     with open("{}{}".format(dir2,file2),"rb") as f:
         while True:
             data = f.read(BLOCKSIZE)
             if not data:
-                #print(data)
                 break
             asum = adler32(data, asum)
             if asum < 0:
@@ -83,9 +93,10 @@ def get_adler32_checksum(dir2, file2):
 
 def get_info_from_data_storage(rse, directory):
     f = open("/home/pioyar/Desktop/project/files.txt", "w")
+    print("Get information about all files at a directory such as their name and their adler32 checksum")
     if rse=="LUND":
-        for file in  os.listdir(directory):
-            
+        for n in tqdm(range(len(os.listdir(directory)))):
+            file=os.listdir(directory)[n]
             adler32_checksum=get_adler32_checksum(directory,file)
             adler32_checksum=hex(adler32_checksum)
             adler32_checksum=adler32_checksum.lstrip("0x").rstrip("L")
@@ -97,19 +108,14 @@ def get_info_from_data_storage(rse, directory):
         pass
 
 
-#get_info_from_data_storage("LUND","/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/")
 
-L2=files_from_datasets(datasets)
-print(len(L2)-1)
 
 def check_if_the_file_exist(files_to_search_for_as_list):
     now = datetime.now()
     not_missing="/home/pioyar/Desktop/project/not_missing_{}.txt".format(now).replace(" ","_")
     missing="/home/pioyar/Desktop/project/missing_{}.txt".format(now).replace(" ","_")
-
-    print(not_missing)
-    print(missing)
-    for value in range(len(files_to_search_for_as_list)-1):
+    print("For each file in datasets look for it in storage and put the files it matches in  not_missing_timestamp.txt and the dataset entry without a match in missing_timestamp.txt")
+    for value in tqdm(range(len(files_to_search_for_as_list)-1)):
         address=(files_to_search_for_as_list[value][5])
         address=address.replace("LUND: file://", "")
         #print(address)
@@ -123,4 +129,3 @@ def check_if_the_file_exist(files_to_search_for_as_list):
 
     return(not_missing, missing)
 
-check_if_the_file_exist(L2)
