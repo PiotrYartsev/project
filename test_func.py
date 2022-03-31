@@ -54,15 +54,20 @@ def files_from_datasets(datasets):
     number_of_files=0
     L2=[]
     print("Get a list of all the files in a dataset")
+    if not os.path.exists('/home/pioyar/Desktop/project/{}'.format(datasets)):
+        os.makedirs('/home/pioyar/Desktop/project/{}'.format(datasets))
+        os.makedirs('/home/pioyar/Desktop/project/{}/missing'.format(datasets))
+        os.makedirs('/home/pioyar/Desktop/project/{}/not_missing'.format(datasets))
     for n in tqdm(range(len(datasets))):
         dataset=datasets[n]
         L=((os.popen("rucio list-file-replicas {} | grep LUND".format(dataset)).read()).split('\n'))
         #print(L)
         for l in L:
             l2=l.split('|')
+            l2.append(dataset)
             L2.append(l2)
+            L2.append(dataset)
             number_of_files=number_of_files+0
-        break
     return(L2)
 
 
@@ -135,21 +140,17 @@ def get_info_from_some_data_storage(file, directory):
     return(adler32_checksum)
 
 
-
-
-
-
 def check_if_the_file_exist_bash(files_to_search_for_as_list):
-    now = datetime.now()
+    now = datetime.now()        
     not_missing="/home/pioyar/Desktop/project/not_missing/not_missing_{}.txt".format(now).replace(" ","_")
     missing="/home/pioyar/Desktop/project/missing/missing_{}.txt".format(now).replace(" ","_")
     print("For each file in datasets look for it in storage and put the files it matches in  not_missing_timestamp.txt and the dataset entry without a match in missing_timestamp.txt")
     for value in tqdm(range(len(files_to_search_for_as_list)-1)):
         address=(files_to_search_for_as_list[value][5])
         schecksum=(files_to_search_for_as_list[value][4])
+        
         #print(schecksum)
         address=address.replace("LUND: file://", "")
-        #print(address)
         fille=address[address.rindex('/')+1:]
         address=address.replace(fille,"")
         fulladdress=address+fille
@@ -168,6 +169,7 @@ def check_if_the_file_exist_python(files_to_search_for_as_list):
     print("For each file in datasets look for it in storage and put the files it matches in  not_missing_timestamp.txt and the dataset entry without a match in missing_timestamp.txt")
     for value in tqdm(range(len(files_to_search_for_as_list)-1)):
         address=(files_to_search_for_as_list[value][5])
+        
         schecksum=(files_to_search_for_as_list[value][4])
         #print(schecksum)
         address=address.replace("LUND: file://", "")

@@ -1,4 +1,4 @@
-from python import *
+from test_func import *
 import sys
 
 
