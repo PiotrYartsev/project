@@ -6,7 +6,7 @@ import sys
 
 #current bypas for the problems with rucio list-scopes, rucio list-dids --filter type=DATASET, rucio list-datasets-rse
 datasets=[]
-for n in range(5):
+for n in range(1):
     datasets.append("mc20:v9-8GeV-1e-inclusive")
 
 
@@ -17,6 +17,8 @@ L2=files_from_datasets(datasets)
 get_info_from_all_data_storage("LUND","/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/")
 
 #compare the files from rucio with the files in storage
-#a=check_if_the_file_exist_bash(L2)
-check_if_the_file_exist_python(L2)
-compere_checksum(a[0])
+
+#check_if_the_file_exist_python(L2)
+
+a=check_if_the_file_exist_bash(L2)
+#compere_checksum(a[0])
