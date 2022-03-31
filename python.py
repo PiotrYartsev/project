@@ -106,11 +106,13 @@ def get_info_from_all_data_storage(rse, directory):
             f.write(info_from_data)
             #Temporary limit for test speed
             
-            if n>10:
+            if n>2:
                 break
-        
+            
     else:
         pass
+
+
 
 
 def get_info_from_some_data_storage(file, directory):
@@ -141,15 +143,14 @@ def check_if_the_file_exist_bash(files_to_search_for_as_list):
         #print(address)
         fille=address[address.rindex('/')+1:]
         address=address.replace(fille,"")
+        fulladdress=address+fille
         #print(address)
         #print(fille)
         #print(exists(address))
         
-        os.system("cd; cd {}; test -e {} && echo {} , {} >> {} || echo {} >> {} ".format(address,address, fille,schecksum, not_missing, fille, missing))
+        os.system("cd; cd {}; test -e {} && echo {} , {} , {} >> {} || echo {} , {} , {} >> {} ".format(address, fulladdress, fulladdress, fille, schecksum, not_missing, fulladdress, fille, schecksum, missing))
 
     return([not_missing, missing])
-
-
 
 def check_if_the_file_exist_python(files_to_search_for_as_list):
     now = datetime.now()
@@ -172,8 +173,9 @@ def check_if_the_file_exist_python(files_to_search_for_as_list):
         if path.exists("{}{}".format(address,fille)):
             print("yes")
         else:
-            print("no")
-            print("{}{}".format(address,fille))     
+            print(path.exists("{}{}".format(address,fille)))
+            print("{}{}".format(address,fille))
+            break
     #return([not_missing, missing])
 
 

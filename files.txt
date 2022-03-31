@@ -2,11 +2,3 @@ mc_v9-8GeV-1e-inclusive_2_t1588934488.root, 5896cf6e
 mc_v9-8GeV-1e-inclusive_1_t1588934503.root, a502dc7b
 mc_v9-8GeV-1e-target_photonuclear_1_t1588966200.root, bc3dafd6
 mc_v9-8GeV-1e-target_photonuclear_1_t1588966409.root, 444847bc
-mc_v9-8GeV-1e-target_photonuclear_2_t1588968947.root, 8dc0a07
-mc_v9-8GeV-1e-target_photonuclear_1_t1588968963.root, 3d7e79c8
-mc_v9-8GeV-1e-target_photonuclear_1_t1588969430.root, 1ea7c8d3
-mc_v9-8GeV-1e-target_photonuclear_2_t1588969447.root, 4f98e6fb
-mc_v9-8GeV-1e-target_photonuclear_5_t1589011701.root, 5fc444df
-mc_v9-8GeV-1e-target_photonuclear_2_t1589011714.root, e87a4c0e
-mc_v9-8GeV-1e-target_photonuclear_3_t1589011721.root, 6c75b0b1
-mc_v9-8GeV-1e-target_photonuclear_7_t1589011726.root, caf010e2
