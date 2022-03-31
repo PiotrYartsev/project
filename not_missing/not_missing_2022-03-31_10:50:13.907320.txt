@@ -1,0 +1,1 @@
+/projects/hep/fs9/shared/ldmx/ldcs/output/ldmx/mc-data/mc20/v12/4.0GeV/v2.2.1-3e/mc_v12-4GeV-3e-inclusive_run1310171_t1601590919.root , mc_v12-4GeV-3e-inclusive_run1310171_t1601590919.root , 58228d4f
