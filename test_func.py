@@ -129,8 +129,8 @@ def check_if_the_file_exist_bash(files_to_search_for_as_list_full):
     for n in range(len(files_to_search_for_as_list_full)):
         dataset=files_to_search_for_as_list_full[n][0]
         files_to_search_for_as_list=files_to_search_for_as_list_full[n][1]
-        not_missing="/home/pioyar/Desktop/project/{}/not_missing/not_missing_{}.txt".format(dataset,now).replace(" ","_")
-        missing="/home/pioyar/Desktop/project/{}/missing/missing_{}.txt".format(dataset,now).replace(" ","_")
+        not_missing="/home/pioyar/Desktop/project/{}/not_missing/not_missing_{}.txt".format(dataset,now).replace(" ","")
+        missing="/home/pioyar/Desktop/project/{}/missing/missing_{}.txt".format(dataset,now).replace(" ","")
         for value in tqdm(range(len(files_to_search_for_as_list)-1)):
             #print(files_to_search_for_as_list)
             address=(files_to_search_for_as_list[value][5])
