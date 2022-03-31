@@ -1,13 +1,11 @@
 #Why not use python rse wrapper? it's inconsistent so I have no idea what to write where because sometimes dids have to be scope=mc20 and sometimes {"scope":"mc20"}
 import os
-from os.path import exists
 from zlib import adler32
 from datetime import datetime
-import subprocess
-from subprocess import check_output
 from tqdm import *
-from os import path
-import os.path
+
+#disable status bar
+tqmdis=False
 
 #the part below doesn't work yet, problem with the rucio CLI commands. I will have study further
 """
@@ -32,7 +30,7 @@ def files_from_datasets(datasets, rse):
     L2=[]
 
     print("Get a list of all the files in a dataset")
-    for n in tqdm(range(len(datasets))):
+    for n in tqdm(range(len(datasets)), disable=tqmdis):
         dataset=datasets[n]
         if not os.path.exists('/home/pioyar/Desktop/project/output/{}'.format(dataset)):
             print("Output folders missing, generating them for the dataset {}.".format(dataset))
@@ -58,7 +56,7 @@ def get_info_from_all_data_storage(rse, directory):
     f = open("/home/pioyar/Desktop/project/files.txt", "w")
     print("Get information about all files at a directory such as their name and their adler32 checksum")
     if rse=="LUND":
-        for n in tqdm(range(len(os.listdir(directory)))):
+        for n in tqdm(range(len(os.listdir(directory))), disable=tqmdis):
             file=os.listdir(directory)[n]
             adler32_checksum=get_adler32_checksum(directory,file)
             adler32_checksum=hex(adler32_checksum)
@@ -105,7 +103,7 @@ def get_info_from_some_data_storage(file, directory):
 
 #bash version of the function that finds matches for files in datasets. For each dataset provided it will check if each entry has a match ins storage. If it does it will move the absolute path, name of file and its checksum (provided by rucio) to /home/pioyar/Desktop/project/output/"dataset"/not_missing/not_missing_"timestamp".txt and it does not find a match it moves the same stuff to /home/pioyar/Desktop/project/output/"dataset"/missing/missing_"timestamp".txt
 def check_if_the_file_exist_bash(files_to_search_for_as_list_full):
-    print("For each file in datasets look for it in storage and put the files it matches in  not_missing_timestamp.txt and the dataset entry without a match in missing_timestamp.txt")
+    print("For each file in datasets look for it in storage and put them in differnet txt files depending if they passed or failed.")
     
     for n in range(len(files_to_search_for_as_list_full)):
         now = datetime.now()
@@ -115,7 +113,7 @@ def check_if_the_file_exist_bash(files_to_search_for_as_list_full):
         missing="/home/pioyar/Desktop/project/output/{}/missing/missing_{}.txt".format(dataset,now).replace(" ","")
 
         print("Comparing {} with storage.".format(dataset))
-        for value in tqdm(range(len(files_to_search_for_as_list)-1)):
+        for value in tqdm(range(len(files_to_search_for_as_list)-1), disable=tqmdis):
             #print(files_to_search_for_as_list)
             address=(files_to_search_for_as_list[value][5])
             schecksum=(files_to_search_for_as_list[value][4])
@@ -136,6 +134,7 @@ def check_if_the_file_exist_bash(files_to_search_for_as_list_full):
 
 
 #does not work, but it is how it is. Perhaps a library will be found that actually works for large folders.
+"""
 def check_if_the_file_exist_python(files_to_search_for_as_list_full):
     print("For each file in datasets look for it in storage and put the files it matches in  not_missing_timestamp.txt and the dataset entry without a match in missing_timestamp.txt")
     now = datetime.now()
@@ -147,7 +146,7 @@ def check_if_the_file_exist_python(files_to_search_for_as_list_full):
         missing="/home/pioyar/Desktop/project/output/{}/missing/missing_{}.txt".format(dataset,now).replace(" ","")
 
         print("Comparing {} with storage.".format(dataset))
-        for value in tqdm(range(len(files_to_search_for_as_list)-1)):
+        for value in tqdm(range(len(files_to_search_for_as_list)-1), disable=tqmdis):
             #print(files_to_search_for_as_list)
             address=(files_to_search_for_as_list[value][5])
             schecksum=(files_to_search_for_as_list[value][4])
@@ -163,11 +162,11 @@ def check_if_the_file_exist_python(files_to_search_for_as_list_full):
                 print("yes")
             else:
                 print("no")
-                """
+                
                 print(path.exists("{}{}".format(address,fille)))
-                print("{}{}".format(address,fille))"""
+                print("{}{}".format(address,fille))
     #return([not_missing, missing])
-
+"""
 
 
 
@@ -199,7 +198,7 @@ def compere_checksum(not_missing_files):
     dataset=not_missing_files_file_address.replace('/home/pioyar/Desktop/project/output/','')
     dataset=dataset.replace('/not_missing/','')
     print("Comparing the adler32 checksum in rucio with checksum in storage for dataset {}.".format(dataset))
-    for n in tqdm(range(len(lines_not_missing_files_file))):
+    for n in tqdm(range(len(lines_not_missing_files_file)), disable=tqmdis):
         line=lines_not_missing_files_file[n]
         line_list=line.split(",")
         address=line_list[0].replace(' ','')

@@ -2,9 +2,8 @@ from test_func import *
 import sys
 
 #what do I want to run
-
 #current bypas for the problems with rucio list-scopes, rucio list-dids --filter type=DATASET, rucio list-datasets-rse
-datasets=["mc20:v2.2.1-3e","mc20:v2.2.1-3e","mc20:v2.2.1-3e","mc20:v2.2.1-3e"]
+datasets=["mc20:v2.2.1-3e","mc20:v2.2.1-3e","mc20:v9-8GeV-1e-inclusive"]
 
 #Get all the files in the dataset
 L2=files_from_datasets(datasets, "LUND")
