@@ -55,10 +55,11 @@ def files_from_datasets(datasets):
     print("Get a list of all the files in a dataset")
     for n in tqdm(range(len(datasets))):
         dataset=datasets[n]
-        if not os.path.exists('/home/pioyar/Desktop/project/{}'.format(dataset)):
-            os.makedirs('/home/pioyar/Desktop/project/{}'.format(dataset))
-            os.makedirs('/home/pioyar/Desktop/project/{}/missing'.format(dataset))
-            os.makedirs('/home/pioyar/Desktop/project/{}/not_missing'.format(dataset))
+        if not os.path.exists('/home/pioyar/Desktop/output/project/{}'.format(dataset)):
+            print("Output folders missing, generating them for the dataset {}.".format(dataset))
+            os.makedirs('/home/pioyar/Desktop/project/output/{}'.format(dataset))
+            os.makedirs('/home/pioyar/Desktop/project/output/{}/missing'.format(dataset))
+            os.makedirs('/home/pioyar/Desktop/project/output/{}/not_missing'.format(dataset))
         L=((os.popen("rucio list-file-replicas {} | grep LUND".format(dataset)).read()).split('\n'))
         #print(L)
         L1=[]
@@ -127,10 +128,13 @@ def check_if_the_file_exist_bash(files_to_search_for_as_list_full):
     print("For each file in datasets look for it in storage and put the files it matches in  not_missing_timestamp.txt and the dataset entry without a match in missing_timestamp.txt")
     now = datetime.now()
     for n in range(len(files_to_search_for_as_list_full)):
+        
         dataset=files_to_search_for_as_list_full[n][0]
         files_to_search_for_as_list=files_to_search_for_as_list_full[n][1]
-        not_missing="/home/pioyar/Desktop/project/{}/not_missing/not_missing_{}.txt".format(dataset,now).replace(" ","")
-        missing="/home/pioyar/Desktop/project/{}/missing/missing_{}.txt".format(dataset,now).replace(" ","")
+        not_missing="/home/pioyar/Desktop/project/output/{}/not_missing/not_missing_{}.txt".format(dataset,now).replace(" ","")
+        missing="/home/pioyar/Desktop/project/output/{}/missing/missing_{}.txt".format(dataset,now).replace(" ","")
+
+        print("Comparing {} with storage.".format(dataset))
         for value in tqdm(range(len(files_to_search_for_as_list)-1)):
             #print(files_to_search_for_as_list)
             address=(files_to_search_for_as_list[value][5])
