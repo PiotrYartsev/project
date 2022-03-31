@@ -195,7 +195,7 @@ def compere_checksum(not_missing_files):
     info_from_data=open("/home/pioyar/Desktop/project/files.txt", 'r')
     lines_not_missing_files_file = not_missing_files_file.readlines()
     lines_info_from_data = info_from_data.readlines()
-    print(lines_info_from_data[1])
+    #print(lines_info_from_data[1])
     for line in lines_not_missing_files_file:
         line_list=line.split(",")
         if line_list[0] in lines_info_from_data:
