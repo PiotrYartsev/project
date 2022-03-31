@@ -5,11 +5,12 @@ import sys
 #what do I want to run
 
 #current bypas for the problems with rucio list-scopes, rucio list-dids --filter type=DATASET, rucio list-datasets-rse
-datasets=[]
+datasets=["mc20:v2.2.1-3e"," mc20:v9-8GeV-1e-inclusive"]
+"""
 for n in range(1):
     #datasets.append("mc20:v9-8GeV-1e-inclusive")
     datasets.append("mc20:v2.2.1-3e")
-
+"""
 #Get all the files in the dataset
 L2=files_from_datasets(datasets)
 
