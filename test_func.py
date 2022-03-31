@@ -64,9 +64,9 @@ def files_from_datasets(datasets):
         L1=[]
         for l in L:
             l2=l.split('|')
-            L1.append([dataset,l2])
+            L1.append(l2)
             number_of_files=number_of_files+0
-        L2.append(L1)
+        L2.append([dataset,L1])
     return(L2)
 
 def count_the_files(directory):
@@ -126,30 +126,27 @@ def get_info_from_some_data_storage(file, directory):
 def check_if_the_file_exist_bash(files_to_search_for_as_list_full):
     print("For each file in datasets look for it in storage and put the files it matches in  not_missing_timestamp.txt and the dataset entry without a match in missing_timestamp.txt")
     now = datetime.now()
-    print()
-    for value in tqdm(range(len(files_to_search_for_as_list_full)-1)):
-        dataset=files_to_search_for_as_list_full[value][0]
-        files_to_search_for_as_list=files_to_search_for_as_list_full[value][1]
-        files_to_search_for_as_list=files_to_search_for_as_list.pop()
-        print(files_to_search_for_as_list) 
-        break  
+    for n in range(len(files_to_search_for_as_list_full)):
+        dataset=files_to_search_for_as_list_full[n][0]
+        files_to_search_for_as_list=files_to_search_for_as_list_full[n][1]
         not_missing="/home/pioyar/Desktop/project/{}/not_missing/not_missing_{}.txt".format(dataset,now).replace(" ","_")
         missing="/home/pioyar/Desktop/project/{}/missing/missing_{}.txt".format(dataset,now).replace(" ","_")
-        #print(files_to_search_for_as_list)
-        address=(files_to_search_for_as_list[5])
-        schecksum=(files_to_search_for_as_list[4])
-        #print(dataset)
-        address=address.replace("LUND: file://", "")
-        fille=address[address.rindex('/')+1:]
-        address=address.replace(fille,"")
-        fulladdress=address+fille
-        #print(address)
-        #print(fille)
-        #print(exists(address))
-        
-        os.system("cd; cd {}; test -e {} && echo {} , {} , {} >> {} || echo {} , {} , {} >> {} ".format(address, fulladdress, fulladdress, fille, schecksum, not_missing, fulladdress, fille, schecksum, missing))
+        for value in tqdm(range(len(files_to_search_for_as_list)-1)):
+            #print(files_to_search_for_as_list)
+            address=(files_to_search_for_as_list[value][5])
+            schecksum=(files_to_search_for_as_list[value][4])
+            #print(dataset)
+            address=address.replace("LUND: file://", "")
+            fille=address[address.rindex('/')+1:]
+            address=address.replace(fille,"")
+            fulladdress=address+fille
+            #print(address)
+            #print(fille)
+            #print(exists(address))
+            
+            os.system("cd; cd {}; test -e {} && echo {} , {} , {} >> {} || echo {} , {} , {} >> {} ".format(address, fulladdress, fulladdress, fille, schecksum, not_missing, fulladdress, fille, schecksum, missing))
 
-    return([not_missing, missing])
+    #return([not_missing, missing])
 
 def check_if_the_file_exist_python(files_to_search_for_as_list):
     now = datetime.now()
