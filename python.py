@@ -114,6 +114,15 @@ def get_info_from_all_data_storage(rse, directory):
 
 
 
+def get_info_from_all_data_storage2(rse, directory):
+    print("Get information about all files at a directory such as their name and their adler32 checksum")
+    if rse=="LUND":
+        os.system("cd {}; pwd; ls >> /home/pioyar/Desktop/project/files.txt".format(directory))
+            
+    else:
+        pass
+
+
 
 def get_info_from_some_data_storage(file, directory):
     f = open("/home/pioyar/Desktop/project/files.txt", "w")
@@ -132,8 +141,8 @@ def get_info_from_some_data_storage(file, directory):
 
 def check_if_the_file_exist_bash(files_to_search_for_as_list):
     now = datetime.now()
-    not_missing="/home/pioyar/Desktop/project/not_missing_{}.txt".format(now).replace(" ","_")
-    missing="/home/pioyar/Desktop/project/missing_{}.txt".format(now).replace(" ","_")
+    not_missing="/home/pioyar/Desktop/project/not_missing/not_missing_{}.txt".format(now).replace(" ","_")
+    missing="/home/pioyar/Desktop/project/missing/missing_{}.txt".format(now).replace(" ","_")
     print("For each file in datasets look for it in storage and put the files it matches in  not_missing_timestamp.txt and the dataset entry without a match in missing_timestamp.txt")
     for value in tqdm(range(len(files_to_search_for_as_list)-1)):
         address=(files_to_search_for_as_list[value][5])
@@ -154,8 +163,8 @@ def check_if_the_file_exist_bash(files_to_search_for_as_list):
 
 def check_if_the_file_exist_python(files_to_search_for_as_list):
     now = datetime.now()
-    not_missing="/home/pioyar/Desktop/project/not_missing_{}.txt".format(now).replace(" ","_")
-    missing="/home/pioyar/Desktop/project/missing_{}.txt".format(now).replace(" ","_")
+    not_missing="/home/pioyar/Desktop/project/not_missing/not_missing_{}.txt".format(now).replace(" ","_")
+    missing="/home/pioyar/Desktop/project/missing/missing_{}.txt".format(now).replace(" ","_")
     print("For each file in datasets look for it in storage and put the files it matches in  not_missing_timestamp.txt and the dataset entry without a match in missing_timestamp.txt")
     for value in tqdm(range(len(files_to_search_for_as_list)-1)):
         address=(files_to_search_for_as_list[value][5])
