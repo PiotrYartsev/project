@@ -1,4 +1,4 @@
-#Why not use python rse wrapper? its inconsistent so I have no idea what to write where becouse sometimes dids have to be scope=mc20 and sometimes {"scope":"mc20"}
+#Why not use python rse wrapper? it's inconsistent so I have no idea what to write where because sometimes dids have to be scope=mc20 and sometimes {"scope":"mc20"}
 import os
 from os.path import exists
 from zlib import adler32
@@ -9,7 +9,7 @@ from tqdm import *
 from os import path
 import os.path
 
-#the part below dont work yet, problem with the rucio cli commands. Will ahve study further
+#the part below doesn't work yet, problem with the rucio CLI commands. I will have study further
 """
 def get_scopes():
    scopes=list(os.popen("rucio list-scopes"))
@@ -26,7 +26,7 @@ def get_datasets_rse(rse):
 """
 
 
-#provided a dataset it will look at replicas in that dataset and output all of them in a list. It will only kkep the onle in the provided rse. To the list it appends what dataset this entries belong to. 
+#provided a dataset it will look at replicas in that dataset and output all of them in a list. It will only keep the only in the provided rse. To the list, it appends what dataset this entry belongs to.
 def files_from_datasets(datasets, rse):
     number_of_files=0
     L2=[]
@@ -39,6 +39,7 @@ def files_from_datasets(datasets, rse):
             os.makedirs('/home/pioyar/Desktop/project/output/{}'.format(dataset))
             os.makedirs('/home/pioyar/Desktop/project/output/{}/missing'.format(dataset))
             os.makedirs('/home/pioyar/Desktop/project/output/{}/not_missing'.format(dataset))
+            os.makedirs('/home/pioyar/Desktop/project/output/{}/not_missing/adler32check'.format(dataset))
         L=((os.popen("rucio list-file-replicas {} | grep {}".format(dataset, rse)).read()).split('\n'))
         #print(L)
         L1=[]
@@ -63,7 +64,7 @@ def get_adler32_checksum(file2):
                 asum += 2**32
     return(asum)
 
-#For every file in storage at location it creates a entry in files.txt wit hthe file name and its schecksum. Problably will not use later, just temporary solution. Will only check schecksum for files in requested datasets that it already know exist.
+#For every file in storage at the location it creates an entry in files.txt with the file name and its checksum. Probably will not use it later, just a temporary solution. Will only check checksum for files in requested datasets that it already know exist.
 def get_info_from_all_data_storage(rse, directory):
     f = open("/home/pioyar/Desktop/project/files.txt", "w")
     print("Get information about all files at a directory such as their name and their adler32 checksum")
@@ -84,7 +85,7 @@ def get_info_from_all_data_storage(rse, directory):
     else:
         pass
 
-#same as above but uses bash instead of python (much faster). does not calcualte adler32 schecksum
+#same as above but uses bash instead of python (much faster). does not calculate adler32 checksum
 def get_info_from_all_data_storage2(rse, directory):
     print("Get information about all files at a directory such as their name and their adler32 checksum")
     if rse=="LUND":
@@ -106,7 +107,7 @@ def get_info_from_some_data_storage(file, directory):
     return(adler32_checksum)
 
 
-#bash version of the function that find matches for files in daasets. For each dataset provided it will check if all each entry has a match ins torage. If it does it will move the absolute path, name of file and its checksum (provided by rucio) to /home/pioyar/Desktop/project/output/"dataset"/not_missing/not_missing_"timestamp".txt and it does not find a match it moves the same stuff to /home/pioyar/Desktop/project/output/"dataset"/missing/missing_"timestamp".txt
+#bash version of the function that finds matches for files in datasets. For each dataset provided it will check if each entry has a match ins storage. If it does it will move the absolute path, name of file and its checksum (provided by rucio) to /home/pioyar/Desktop/project/output/"dataset"/not_missing/not_missing_"timestamp".txt and it does not find a match it moves the same stuff to /home/pioyar/Desktop/project/output/"dataset"/missing/missing_"timestamp".txt
 def check_if_the_file_exist_bash(files_to_search_for_as_list_full):
     print("For each file in datasets look for it in storage and put the files it matches in  not_missing_timestamp.txt and the dataset entry without a match in missing_timestamp.txt")
     
@@ -131,12 +132,12 @@ def check_if_the_file_exist_bash(files_to_search_for_as_list_full):
             #print(fille)
             #print(exists(address))
             
-            os.system("cd; cd {}; test -e {} && echo {} , {} , {} >> {} || echo {} , {} , {} >> {} ".format(address, fulladdress, fulladdress, fille, schecksum, not_missing, fulladdress, fille, schecksum, missing))
+            os.system("cd; cd {}; test -e {} && echo {},{},{} >> {} || echo {},{},{} >> {} ".format(address, fulladdress, fulladdress, fille, schecksum, not_missing, fulladdress, fille, schecksum, missing))
 
     #return([not_missing, missing])
 
 
-#The python solution to the same problem above. Python has problems finding files in a large folder even when we know it does in fact exist there. Python would provide a number of advantages, but it is how it is. Perhaps a library will be found that actuall works for large folders.
+#The python solution to the same problem above. Python has problems finding files in a large folder even when we know it does in fact exist there. Python would provide a number of advantages, but it is how it is. Perhaps a library will be found that actually works for large folders.
 def check_if_the_file_exist_python(files_to_search_for_as_list_full):
     print("For each file in datasets look for it in storage and put the files it matches in  not_missing_timestamp.txt and the dataset entry without a match in missing_timestamp.txt")
     now = datetime.now()
@@ -169,14 +170,35 @@ def check_if_the_file_exist_python(files_to_search_for_as_list_full):
                 print("{}{}".format(address,fille))"""
     #return([not_missing, missing])
 
+def findfile(name, path):
+    for dirpath, dirname, filename in os.walk(path):
+        if name in filename:
+            return os.path.join(dirpath, name)
 
 
-
+#compares the adler34 checksum for the files we matched between storage and rucio. Outputs the rucio entries without a match, the checksum of the file in storage, the checksum as reported by rucio.
 def compere_checksum(not_missing_files):
     not_missing_files_file = open(not_missing_files, 'r')
     lines_not_missing_files_file = not_missing_files_file.readlines()
-    for line in lines_not_missing_files_file:
-        line.replace(' ','')
+    not_missing_files_file_name=not_missing_files[not_missing_files.rindex('/')+1:]
+    not_missing_files_file_address=not_missing_files.replace(not_missing_files_file_name,'')
+    new_error_file="adler32_fail" + not_missing_files_file_name
+    integ=0
+    for n in tqdm(range(len(lines_not_missing_files_file))):
+        line=lines_not_missing_files_file[n]
         line_list=line.split(",")
-        print(line_list[0])
-        get_adler32_checksum(line_list[0])
+        address=line_list[0].replace(' ','')
+        
+        checksum_dec=get_adler32_checksum(address)
+        checksum_hex=hex(checksum_dec)
+        checksum_hex=checksum_hex.lstrip("0x").rstrip("L")
+        
+        checksum_rucio=line_list[2].replace(' ','')
+        checksum_rucio=checksum_rucio.replace('\n','')
+        if str(checksum_hex)==checksum_rucio:
+            pass
+        else:
+            integ=integ+1
+            os.system("echo {},{},{} >> {}/adler32check/{}".format(line_list[1],checksum_rucio,str(checksum_hex),not_missing_files_file_address,new_error_file))
+            #print(new_error_file)
+    print("We found {} corrupted files out of {}".format(integ,len(lines_not_missing_files_file)))

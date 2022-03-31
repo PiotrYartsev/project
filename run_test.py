@@ -25,5 +25,6 @@ for n in range(1):
 
 #check_if_the_file_exist_bash(L2)
 
-a="/home/pioyar/Desktop/project/output/mc20:v2.2.1-3e/not_missing/not_missing_2022-03-3112:58:50.086583.txt"
+a="/home/pioyar/Desktop/project/output/mc20:v2.2.1-3e/not_missing/not_missing_2022-03-3115:29:41.306890.txt"
 compere_checksum(a)
+#print(get_adler32_checksum("/projects/hep/fs9/shared/ldmx/ldcs/output/ldmx/mc-data/mc20/v12/4.0GeV/v2.2.1-3e/mc_v12-4GeV-3e-inclusive_run1310171_t1601590919.root"))
