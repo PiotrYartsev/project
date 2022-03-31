@@ -1,1 +1,1 @@
-#print(
+/home/pioyar/Desktop/project/output/

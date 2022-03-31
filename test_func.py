@@ -50,19 +50,8 @@ def files_from_datasets(datasets, rse):
         L2.append([dataset,L1])
     return(L2)
 
-#For a provided file file2 and directory dir2 it will return the adler32 shecksum in hexadecimal
-def get_adler32_checksum(file2):
-    BLOCKSIZE=256*1024*1024
-    asum=1
-    with open("{}".format(file2),"rb") as f:
-        while True:
-            data = f.read(BLOCKSIZE)
-            if not data:
-                break
-            asum = adler32(data, asum)
-            if asum < 0:
-                asum += 2**32
-    return(asum)
+
+
 
 #For every file in storage at the location it creates an entry in files.txt with the file name and its checksum. Probably will not use it later, just a temporary solution. Will only check checksum for files in requested datasets that it already know exist.
 def get_info_from_all_data_storage(rse, directory):
@@ -85,6 +74,9 @@ def get_info_from_all_data_storage(rse, directory):
     else:
         pass
 
+
+
+
 #same as above but uses bash instead of python (much faster). does not calculate adler32 checksum
 def get_info_from_all_data_storage2(rse, directory):
     print("Get information about all files at a directory such as their name and their adler32 checksum")
@@ -93,6 +85,8 @@ def get_info_from_all_data_storage2(rse, directory):
             
     else:
         pass
+
+
 
 
 #same as the one above the one above, but not limited by rse and has nocomputational limiter
@@ -105,6 +99,8 @@ def get_info_from_some_data_storage(file, directory):
     #print(adler32_checksum)
     #info_from_data=(file+", "+str(adler32_checksum)+"\n")
     return(adler32_checksum)
+
+
 
 
 #bash version of the function that finds matches for files in datasets. For each dataset provided it will check if each entry has a match ins storage. If it does it will move the absolute path, name of file and its checksum (provided by rucio) to /home/pioyar/Desktop/project/output/"dataset"/not_missing/not_missing_"timestamp".txt and it does not find a match it moves the same stuff to /home/pioyar/Desktop/project/output/"dataset"/missing/missing_"timestamp".txt
@@ -135,9 +131,11 @@ def check_if_the_file_exist_bash(files_to_search_for_as_list_full):
             os.system("cd; cd {}; test -e {} && echo {},{},{} >> {} || echo {},{},{} >> {} ".format(address, fulladdress, fulladdress, fille, schecksum, not_missing, fulladdress, fille, schecksum, missing))
 
     #return([not_missing, missing])
+    
 
 
-#The python solution to the same problem above. Python has problems finding files in a large folder even when we know it does in fact exist there. Python would provide a number of advantages, but it is how it is. Perhaps a library will be found that actually works for large folders.
+
+#does not work, but it is how it is. Perhaps a library will be found that actually works for large folders.
 def check_if_the_file_exist_python(files_to_search_for_as_list_full):
     print("For each file in datasets look for it in storage and put the files it matches in  not_missing_timestamp.txt and the dataset entry without a match in missing_timestamp.txt")
     now = datetime.now()
@@ -170,10 +168,24 @@ def check_if_the_file_exist_python(files_to_search_for_as_list_full):
                 print("{}{}".format(address,fille))"""
     #return([not_missing, missing])
 
-def findfile(name, path):
-    for dirpath, dirname, filename in os.walk(path):
-        if name in filename:
-            return os.path.join(dirpath, name)
+
+
+
+#For a provided file file2 and directory dir2 it will return the adler32 shecksum in hexadecimal
+def get_adler32_checksum(file2):
+    BLOCKSIZE=256*1024*1024
+    asum=1
+    with open("{}".format(file2),"rb") as f:
+        while True:
+            data = f.read(BLOCKSIZE)
+            if not data:
+                break
+            asum = adler32(data, asum)
+            if asum < 0:
+                asum += 2**32
+    return(asum)
+
+
 
 
 #compares the adler34 checksum for the files we matched between storage and rucio. Outputs the rucio entries without a match, the checksum of the file in storage, the checksum as reported by rucio.
@@ -184,6 +196,9 @@ def compere_checksum(not_missing_files):
     not_missing_files_file_address=not_missing_files.replace(not_missing_files_file_name,'')
     new_error_file="adler32_fail" + not_missing_files_file_name
     integ=0
+    dataset=not_missing_files_file_address.replace('/home/pioyar/Desktop/project/output/','')
+    dataset=dataset.replace('/not_missing/','')
+    print("Comparing the adler32 checksum in rucio with checksum in storage for dataset {}.".format(dataset))
     for n in tqdm(range(len(lines_not_missing_files_file))):
         line=lines_not_missing_files_file[n]
         line_list=line.split(",")
