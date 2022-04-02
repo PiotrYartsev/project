@@ -8,20 +8,20 @@ from tqdm import *
 tqmdis=False
 
 #the part below doesn't work yet, problem with the rucio CLI commands. I will have study further
-"""
+
 def get_scopes():
    scopes=list(os.popen("rucio list-scopes"))
    return(scopes)
 def get_datasets_scopes(scopes):
     #currently broken, have to figure out why
-    datasets_scopes=list(os.popen("rucio list-dids --filter type=DATASET test:*"))
+    datasets_scopes=list(os.popen("rucio list-dids --filter type=DATASET {}:*".format(scopes)))
     
     return(datasets_scopes)
 def get_datasets_rse(rse):
     #currently broken
-    datasets_rse=list(os.popen("rucio list-datasets-rse {}".format(rse))
+    datasets_rse=list(os.popen("rucio list-datasets-rse {}".format(rse)))
     return(datasets_rse)
-"""
+
 
 
 #provided a dataset it will look at replicas in that dataset and output all of them in a list. It will only keep the only in the provided rse. To the list, it appends what dataset this entry belongs to.
