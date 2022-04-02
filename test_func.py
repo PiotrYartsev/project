@@ -10,7 +10,7 @@ tqmdis=False
 #the part below doesn't work yet, problem with the rucio CLI commands. I will have study further
 
 def get_scopes():
-   scopes=list(os.popen("rucio list-scopes"))
+   scopes=(os.popen("rucio list-scopes"))
    return(scopes)
 def get_datasets_scopes(scopes):
     #currently broken, have to figure out why
