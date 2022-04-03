@@ -1,7 +1,8 @@
 from test_func import *
 import sys
 
-
+if __name__ == '__main__':
+    
 
 #what do I want to run
 #current bypas for the problems with rucio list-scopes, rucio list-dids --filter type=DATASET, rucio list-datasets-rse
