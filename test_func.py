@@ -10,8 +10,10 @@ tqmdis=False
 #the part below doesn't work yet, problem with the rucio CLI commands. I will have study further
 
 def get_scopes():
-   scopes=(os.popen("rucio list-scopes"))
+   scopes=list(os.popen("rucio list-scopes"))
    return(scopes)
+
+
 def get_datasets_scopes(scopes):
     #currently broken, have to figure out why
     datasets_scopes=list(os.popen("rucio list-dids --filter type=DATASET {}:*".format(scopes)))
@@ -32,12 +34,14 @@ def files_from_datasets(datasets, rse):
     print("Get a list of all the files in a dataset")
     for n in tqdm(range(len(datasets)), disable=tqmdis):
         dataset=datasets[n]
-        if not os.path.exists('/home/pioyar/Desktop/project/output/{}'.format(dataset)):
+        if not os.path.exists('output/{}'.format(dataset)):
             print("Output folders missing, generating them for the dataset {}.".format(dataset))
-            os.makedirs('/home/pioyar/Desktop/project/output/{}'.format(dataset))
-            os.makedirs('/home/pioyar/Desktop/project/output/{}/missing'.format(dataset))
-            os.makedirs('/home/pioyar/Desktop/project/output/{}/not_missing'.format(dataset))
-            os.makedirs('/home/pioyar/Desktop/project/output/{}/not_missing/adler32check'.format(dataset))
+
+            os.makedirs('output/{}'.format(dataset))
+            os.makedirs('output/{}/missing'.format(dataset))
+            os.makedirs('output/{}/not_missing'.format(dataset))
+            os.makedirs('output/{}/not_missing/adler32check'.format(dataset))
+
         L=((os.popen("rucio list-file-replicas {} | grep {}".format(dataset, rse)).read()).split('\n'))
         #print(L)
         L1=[]
