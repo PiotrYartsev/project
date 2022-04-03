@@ -6,6 +6,8 @@ from tqdm import *
 
 tqmdis=False
 comments=False
+limit=0
+
 
 def list_scopes():
    scopes=list(os.popen("rucio list-scopes"))
@@ -15,9 +17,8 @@ def list_scopes():
 
 
 def get_datasets_from_scope(scope):
-    #currently broken, have to figure out why
     datasets_scope=list(os.popen("rucio list-dids --filter type=DATASET {}:*".format(scope)))
-    [ x for x in datasets_scope if "---------------------------------" not in x ]
+    [ x for x in datasets_scope if "|" in x ]
     for n in range(len(datasets_scope)):
         datasets_scope[n]=datasets_scope[n].replace("| DATASET      |\n'","")
         datasets_scope[n]=datasets_scope[n].replace("|","")
@@ -48,7 +49,7 @@ def files_from_datasets(datasets, rses):
     if comments==True:
         print("Get a list of all the files in a dataset.")
     list_of_files=[]
-    for n in tqdm(range(len(datasets)), disable=tqmdis):
+    for n in tqdm(range(len(datasets[:3])), disable=tqmdis):
         dataset=datasets[n]
         L=(os.popen("rucio list-file-replicas {}".format(dataset)).read()).split('\n')
         [file+dataset for file in L]
@@ -56,8 +57,10 @@ def files_from_datasets(datasets, rses):
     datasets_rse={}
 
     for rse in rses:
-       
-        newlist=[file for file in list_of_files if rse in file]
+        if "GRIDFTP" in rse:
+            newlist=[file for file in list_of_files if rse in file]
+        else:
+            newlist=[file for file in list_of_files if rse in file and "GRIDFTP" not in file]
         new_new_list=[file.replace(" ","").split('|') for file in newlist]
         new_new_list=[file[2:] for file in new_new_list]
         datasets_rse[rse]=new_new_list
@@ -128,9 +131,17 @@ def compere_checksum(datasets_rse):
 
             batch=file_data[-1]
             if checksum_dec==None:
-                files_not_found[batch]=[file,directory]
+                if batch in files_not_found:
+                    files_not_found[batch].append([file,directory]) 
+                else:   
+                    files_not_found[batch]=[]
+                    files_not_found[batch].append([file,directory]) 
             else:
-                files_found[batch]=[file,directory]
+                if batch in files_found:
+                    files_found[batch].append([file,directory]) 
+                else:   
+                    files_found[batch]=[]
+                    files_found[batch].append([file,directory])
                 checksum_hex=hex(checksum_dec)
                 checksum_hex=checksum_hex.lstrip("0x").rstrip("L")
                 
@@ -142,10 +153,17 @@ def compere_checksum(datasets_rse):
                     #os.system("echo {},{},{} >> adler32check/{}".format(file,checksum_rucio,str(checksum_hex),failed_adles32))
                     #print(new_error_file)
         number_failed_files=0
+        number_sucesfull_files=0
         for batch in files_not_found:
-            print(files_not_found[batch])
             number_failed_files=number_failed_files+len(files_not_found[batch])
+        
+        for batch in files_found:
+            number_sucesfull_files=number_sucesfull_files+len(files_found[batch])
+
         if comments==True:    
+            print(number_failed_files)
+            print(number_sucesfull_files)
+
             print("\nFor the rse {} we found that {} files were missing out of {}.".format(rse, number_failed_files, len(datasets)))
             print("We found {} corrupted files out of {}".format(integ,(len(datasets))))
 
