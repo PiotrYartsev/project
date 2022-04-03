@@ -1,26 +1,68 @@
 from test_func import *
+from test2 import *
 import sys
+import test2
 
 if __name__ == '__main__':
+    valid_rses=list_rse()
+    valid_scopes=list_scopes()
+
+    #defoult values
+    tqmdis=False
+    comments=False
+
+    for argument in sys.argv:
+        #argument 1:rse 
+        if "rse=" in argument:
+            argument=argument.replace("rse=","")
+            if "All" in argument:
+                rses=valid_rses
+            if len(argument)==0:
+                raise ValueError("rse= can not be empty")
+            if argument in valid_rses:
+                rses=argument
+                print(rses)
+            else:
+                raise ValueError("rse={} is not a valid rse. Choose from {}.".format(argument,valid_rses))
+    
+        if "scopes=" in argument:
+            argument=argument.replace("scopes=","")
+            #argument 2 scopes
+            if "All" in argument:
+                scopes=valid_scopes
+            else:
+                argument=(argument).split(",")
+                for n in argument:
+                    if n not in valid_scopes:
+                        raise ValueError("At least one of provided scopes is not valid. Choose from {}.".format(valid_scopes))
+                else:
+                    scopes=argument
+
+        if "output=" in argument:
+            argument=argument.replace("scopes=","")
+            if "True" in argument:
+                test2.tqmdis=True
+                test2.comments=True
+            else: 
+                test2.tqmdis=False
+                test2.comments=False
+    try:
+        rses
+    except:    
+        raise ValueError("No rses provided")
+    try:
+        scopes
+    except:    
+        raise ValueError("No rses provided")
+        
+
+    rses=rses.split(",")
+
+    print(rses, scopes,  [tqmdis, comments])
     
 
-#what do I want to run
-#current bypas for the problems with rucio list-scopes, rucio list-dids --filter type=DATASET, rucio list-datasets-rse
-datasets=["mc20:v2.2.1-3e","mc20:v2.2.1-3e","mc20:v9-8GeV-1e-inclusive"]
 
-#Get all the files in the dataset
-L2=files_from_datasets(datasets, "LUND")
-
-#get information about the files in storage, such as their name and 
-#get_info_from_all_data_storage2("LUND","/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/")
-
-#compare the files from rucio with the files in storage
-check_if_the_file_exist_bash(L2)
-
-#check_if_the_file_exist_python(L2)
-#python is just broken
-
-
-a="/home/pioyar/Desktop/project/output/mc20:v2.2.1-3e/not_missing/not_missing_2022-03-3115:29:41.306890.txt"
-compere_checksum(a)
-#print(get_adler32_checksum("/projects/hep/fs9/shared/ldmx/ldcs/output/ldmx/mc-data/mc20/v12/4.0GeV/v2.2.1-3e/mc_v12-4GeV-3e-inclusive_run1310171_t1601590919.root"))
+    All_datasets=get_all_datasets(scopes)
+    datasets_rse=files_from_datasets(All_datasets,rses)
+    datasets_rse=clean_up_datasets_rse(datasets_rse)
+    compere_checksum(datasets_rse)
