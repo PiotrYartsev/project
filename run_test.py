@@ -21,7 +21,6 @@ if __name__ == '__main__':
                 raise ValueError("rse= can not be empty")
             if argument in valid_rses:
                 rses=argument
-                print(rses)
             else:
                 raise ValueError("rse={} is not a valid rse. Choose from {}.".format(argument,valid_rses))
     
@@ -41,10 +40,10 @@ if __name__ == '__main__':
         if "output=" in argument:
             argument=argument.replace("scopes=","")
             if "True" in argument:
-                test2.tqmdis=True
+                test2.tqmdis=False
                 test2.comments=True
             else: 
-                test2.tqmdis=False
+                test2.tqmdis=True
                 test2.comments=False
     try:
         rses
@@ -55,14 +54,12 @@ if __name__ == '__main__':
     except:    
         raise ValueError("No rses provided")
         
-
     rses=rses.split(",")
 
-    print(rses, scopes,  [tqmdis, comments])
-    
-
-
     All_datasets=get_all_datasets(scopes)
+
     datasets_rse=files_from_datasets(All_datasets,rses)
+
     datasets_rse=clean_up_datasets_rse(datasets_rse)
+    
     compere_checksum(datasets_rse)
