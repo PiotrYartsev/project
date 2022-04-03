@@ -19,6 +19,34 @@ def get_datasets_scopes(scopes):
     datasets_scopes=list(os.popen("rucio list-dids --filter type=DATASET {}:*".format(scopes)))
     
     return(datasets_scopes)
+
+
+def files_from_datasets(datasets, rse):
+    number_of_files=0
+    L2=[]
+
+    print("Get a list of all the files in a dataset")
+    for n in tqdm(range(len(datasets)), disable=tqmdis):
+        dataset=datasets[n]
+        if not os.path.exists('output/{}'.format(dataset)):
+            print("Output folders missing, generating them for the dataset {}.".format(dataset))
+
+            os.makedirs('output/{}'.format(dataset))
+            os.makedirs('output/{}/missing'.format(dataset))
+            os.makedirs('output/{}/not_missing'.format(dataset))
+            os.makedirs('output/{}/not_missing/adler32check'.format(dataset))
+
+        L=((os.popen("rucio list-file-replicas {} | grep {}".format(dataset, rse)).read()).split('\n'))
+        #print(L)
+        L1=[]
+        for l in L:
+            l2=l.split('|')
+            L1.append(l2)
+            number_of_files=number_of_files+0
+        L2.append([dataset,L1])
+    return(L2)
+
+
 def get_datasets_rse(rse):
     #currently broken
     datasets_rse=list(os.popen("rucio list-datasets-rse {}".format(rse)))
