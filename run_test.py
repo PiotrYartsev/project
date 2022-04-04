@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
             for k in datasets_rse[n]:
                 
-                a=n+"," + str(k)
+                a=n+"," + str(k)+"\n"
                 f.write(a)                    
         f.close()
     #compere_checksum(datasets_rse)
