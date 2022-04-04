@@ -52,7 +52,7 @@ def files_from_datasets(datasets, rses):
     for n in tqdm(range(len(datasets[:4])), disable=tqmdis):
         dataset=datasets[n]
         L=(os.popen("rucio list-file-replicas {}".format(dataset)).read()).split('\n')
-        [file+dataset for file in L]
+        [file1+dataset for file1 in L]
         list_of_files.extend(L)
     datasets_rse={}
 
@@ -129,20 +129,20 @@ def compere_checksum(datasets_rse):
 
             checksum_dec=get_adler32_checksum(fullpath)
 
-            batch=file_data[-1]
-            print(batch)
+            #batch=file_data[-1]
+            #print(batch)
             if checksum_dec==None:
-                if batch in files_not_found:
-                    files_not_found[batch].append([file,directory]) 
+                if rse in files_not_found:
+                    files_not_found[rse].append([file,directory]) 
                 else:   
-                    files_not_found[batch]=[]
-                    files_not_found[batch].append([file,directory]) 
+                    files_not_found[rse]=[]
+                    files_not_found[rse].append([file,directory]) 
             else:
                 if batch in files_found:
-                    files_found[batch].append([file,directory]) 
+                    files_found[rse].append([file,directory]) 
                 else:   
-                    files_found[batch]=[]
-                    files_found[batch].append([file,directory])
+                    files_found[rse]=[]
+                    files_found[rse].append([file,directory])
                 checksum_hex=hex(checksum_dec)
                 checksum_hex=checksum_hex.lstrip("0x").rstrip("L")
                 
@@ -155,15 +155,15 @@ def compere_checksum(datasets_rse):
                     #print(new_error_file)
         number_failed_files=0
         number_sucesfull_files=0
-        for batch in files_not_found:
-            number_failed_files=number_failed_files+len(files_not_found[batch])
+        for rse in files_not_found:
+            number_failed_files=number_failed_files+len(files_not_found[rse])
         
-        for batch in files_found:
-            number_sucesfull_files=number_sucesfull_files+len(files_found[batch])
+        for rse in files_found:
+            number_sucesfull_files=number_sucesfull_files+len(files_found[rse])
 
         if comments==True:    
-            print(number_failed_files)
-            print(number_sucesfull_files)
+            #print(number_failed_files)
+            #print(number_sucesfull_files)
 
             print("\nFor the rse {} we found that {} files were missing out of {}.".format(rse, number_failed_files, len(datasets)))
             print("We found {} corrupted files out of {}".format(integ,(len(datasets))))
