@@ -64,10 +64,24 @@ if __name__ == '__main__':
     datasets_rse=clean_up_datasets_rse(datasets_rse)
     with open('datasets.txt', 'w') as f:
         for n in datasets_rse:
-
+            print("writing {} to datasets.txt".format(n))
             for k in datasets_rse[n]:
-                
-                a=n+"," + str(k)+"\n"
-                f.write(a)                    
+                k.append(n)
+                k=str(k)
+                f.write(k)                    
         f.close()
     #compere_checksum(datasets_rse)
+"""
+datasets_rse={}
+with open('datasets.txt','r') as f:
+    lines=f.readlines()
+    for line in lines:
+        list_all=line.split(",")
+        [a.replace("\n","") for a in list_all[1:]]
+        [a.replace("[","") for a in list_all[1:]]
+        [a.replace("]","") for a in list_all[1:]]
+
+        datasets_rse[list_all[0]]=list_all[1:]
+        print(datasets_rse)
+        break
+"""
