@@ -2,6 +2,7 @@ from test_func import *
 from test2 import *
 import sys
 import test2
+import os
 
 if __name__ == '__main__':
     valid_rses=list_rse()
@@ -61,5 +62,12 @@ if __name__ == '__main__':
     datasets_rse=files_from_datasets(All_datasets,rses)
 
     datasets_rse=clean_up_datasets_rse(datasets_rse)
-    
-    compere_checksum(datasets_rse)
+    with open('datasets.txt', 'w') as f:
+        for n in datasets_rse:
+
+            for k in datasets_rse[n]:
+                
+                a=n+"," + str(k)
+                f.write(a)                    
+        f.close()
+    #compere_checksum(datasets_rse)
