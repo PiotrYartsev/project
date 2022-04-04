@@ -49,10 +49,10 @@ def files_from_datasets(datasets, rses):
     if comments==True:
         print("Get a list of all the files in a dataset.")
     list_of_files=[]
-    for n in tqdm(range(len(datasets[:4])), disable=tqmdis):
+    for n in tqdm(range(len(datasets[:1])), disable=tqmdis):
         dataset=datasets[n]
         L=(os.popen("rucio list-file-replicas {}".format(dataset)).read()).split('\n')
-        [file+dataset for file in L]
+        [file1+dataset for file1 in L]
         list_of_files.extend(L)
     datasets_rse={}
 
@@ -130,7 +130,7 @@ def compere_checksum(datasets_rse):
             checksum_dec=get_adler32_checksum(fullpath)
 
             batch=file_data[-1]
-            print(batch)
+            #print(batch)
             if checksum_dec==None:
                 if batch in files_not_found:
                     files_not_found[batch].append([file,directory]) 
@@ -162,10 +162,12 @@ def compere_checksum(datasets_rse):
             number_sucesfull_files=number_sucesfull_files+len(files_found[batch])
 
         if comments==True:    
-            print(number_failed_files)
-            print(number_sucesfull_files)
+            #print(number_failed_files)
+            #print(number_sucesfull_files)
 
             print("\nFor the rse {} we found that {} files were missing out of {}.".format(rse, number_failed_files, len(datasets)))
             print("We found {} corrupted files out of {}".format(integ,(len(datasets))))
-        os.system("echo {} >> files_not_found.txt".format(files_not_found,files_found,))
-        os.system("echo {} >> files_found.txt".format(files_found,))
+        for n in files_not_found:
+            os.system("echo {} >> files_not_found.txt".format(files_not_found[n]))
+        for n in files_found:
+            os.system("echo {} >> files_found.txt".format(files_found[n]))
