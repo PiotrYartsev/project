@@ -30,9 +30,9 @@ if __name__ == '__main__':
             argument=argument.replace("rse=","")
             if "All" in argument:
                 test2.rses=valid_rses
-            if len(argument)==0:
+            elif len(argument)==0:
                 raise ValueError("rse= can not be empty")
-            if argument in valid_rses:
+            elif argument in valid_rses:
                 test2.rses=argument
             else:
                 raise ValueError("rse={} is not a valid rse. Choose from {}.".format(argument,valid_rses))
@@ -55,9 +55,11 @@ if __name__ == '__main__':
             if "True" in argument:
                 test2.tqmdis=False
                 test2.comments=True
-            else: 
+            elif "False" in argument: 
                 test2.tqmdis=True
                 test2.comments=False
+            else:
+                raise ValueError("{} is not a valid setting for the output. Choose between False and True.".format(argument))
         if "checksum=" in argument:
             argument=argument.replace("checksum=","")
             if "True" in argument:
@@ -65,7 +67,7 @@ if __name__ == '__main__':
             elif "False" in argument: 
                 test2.checksum=False
             else:
-                raise ValueError("{argument} is not a valid setting for adler32 checksum. Choose between False and True.".format())
+                raise ValueError("{} is not a valid setting for adler32 checksum. Choose between False and True.".format(argument))
         if "limit=" in argument:
             argument=argument.replace("limit=","")
             if isinstance(argument,str)==True:
