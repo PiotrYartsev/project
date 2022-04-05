@@ -112,27 +112,3 @@ if __name__ == '__main__':
     datasets_rse=clean_up_datasets_rse(datasets_rse)
 
     compere_checksum(datasets_rse)
-    """   
-    with open('datasets.txt', 'w') as f:
-        for n in datasets_rse:
-            print("writing {} to datasets.txt".format(n))
-            for k in datasets_rse[n]:
-                k.append(n)
-                k=str(k)+"\n"
-                f.write(k)                    
-        f.close()
-    #compere_checksum(datasets_rse)
-    datasets_rse={}
-    with open('datasets.txt','r') as f:
-        lines=f.readlines()
-        for line in lines:
-            list_all=line.split(",")
-            rse=list_all[-1].replace("]","")
-            rse.replace("\n","")
-            list_all[0]=list_all[0].replace("[","")
-            if rse in datasets_rse:
-                datasets_rse[rse].append(list_all[1:])
-            else:
-                datasets_rse[rse]=list_all[:-1]
-    print(datasets_rse)
-    """
