@@ -103,11 +103,16 @@ def clean_up_datasets_rse(datasets_rse):
 def get_adler32_checksum(file2):
     BLOCKSIZE=256*1024*1024
     asum=1
-    try:
-        with open("{}".format(file2),"rb") as f:
-            if checksum==False:
+    if checksum==False:
+        try:
+            with open("{}".format(file2),"rb") as f:
                 asum=0
-            else:
+            f.close()
+        except:
+            asum=None
+    else:
+        try:
+            with open("{}".format(file2),"rb") as f:
                 while True:
                     data = f.read(BLOCKSIZE)
                     if not data:
@@ -115,8 +120,8 @@ def get_adler32_checksum(file2):
                     asum = adler32(data, asum)
                     if asum < 0:
                         asum += 2**32
-    except:
-        asum=None
+        except:
+            asum=None
     return(asum)
 
 
@@ -125,7 +130,6 @@ def compere_checksum(datasets_rse):
     now = datetime.now()
     now=str(now)
     now=now.replace(" ","_")
-    print(now)
     if not os.path.exists('output'):
             #print("Output folders missing, generating them for the dataset {}.".format(dataset))
             os.makedirs('output')
@@ -134,7 +138,7 @@ def compere_checksum(datasets_rse):
             os.makedirs('output/{}'.format(now))
     save_dir='output/{}'.format(now)
     failed_adles32="/"+save_dir+"/"+"adler32_fail.txt"
-    not_found_addres="/"+save_dir+"/"+"files_not_found.txt"
+    not_found_addres=save_dir+"/"+"files_not_found.txt"
     found_addres="/"+save_dir+"/"+"files_found.txt"
 
     for rse in datasets_rse:
@@ -156,22 +160,28 @@ def compere_checksum(datasets_rse):
             checksum_rucio=file_data[2]
 
             checksum_dec=get_adler32_checksum(fullpath)
-
+            
+            found_not_found_str=str([file,directory])
+            found_not_found_str=found_not_found_str+"\n"
             #print(rse)
             if checksum_dec==0:
-                pass
-            elif checksum_dec==None:
-                if rse in files_not_found:
-                    files_not_found[rse].append([file,directory]) 
-                else:   
-                    files_not_found[rse]=[]
-                    files_not_found[rse].append([file,directory]) 
-            else:
                 if rse in files_found:
-                    files_found[rse].append([file,directory]) 
+                    files_found[rse].append(found_not_found_str) 
                 else:   
                     files_found[rse]=[]
-                    files_found[rse].append([file,directory])
+                    files_found[rse].append(found_not_found_str)
+            elif checksum_dec==None:
+                if rse in files_not_found:
+                    files_not_found[rse].append(found_not_found_str) 
+                else:   
+                    files_not_found[rse]=[]
+                    files_not_found[rse].append(found_not_found_str) 
+            else:
+                if rse in files_found:
+                    files_found[rse].append(found_not_found_str) 
+                else:   
+                    files_found[rse]=[]
+                    files_found[rse].append(found_not_found_str)
                 checksum_hex=hex(checksum_dec)
                 checksum_hex=checksum_hex.lstrip("0x").rstrip("L")
                 
@@ -180,8 +190,9 @@ def compere_checksum(datasets_rse):
                     pass
                 else:
                     integ=integ+1
-                    os.system("echo {},{},{} >> ".format(file,checksum_rucio,str(checksum_hex),failed_adles32))
+                    os.system("echo {},{},{} >> {}".format(file,checksum_rucio,str(checksum_hex),failed_adles32))
                     #print(new_error_file)
+        
         number_failed_files=0
         number_sucesfull_files=0
         for rse in files_not_found:
