@@ -93,7 +93,7 @@ def clean_up_datasets_rse(datasets_rse):
         if comments==True:
             print("\nCleaning up data about files at {}".format(rse))
         dataset_list=datasets_rse[rse]
-        for n in tqdm(range(len(dataset_list))):
+        for n in tqdm(range(len(dataset_list)), disable=tqmdis):
             dataset=dataset_list[n]
             dataset[3]=dataset[3].replace(dataset[0],"")
             dataset[3]=dataset[3].replace("{}:file://".format(rse),"")
