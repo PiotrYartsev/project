@@ -59,7 +59,8 @@ def files_from_datasets(datasets, rses):
                 [file1+dataset for file1 in L]
                 list_of_files.extend(L)
     else:
-        print("Limit set to {}\n".format(limit))
+        if comments==True:
+            print("Limit set to {}\n".format(limit))
         for n in tqdm(range(len(datasets[:limit])), disable=tqmdis):
             dataset=datasets[n]
             if "SCOPE:NAME[DIDTYPE]" in dataset or "-------------------------" in dataset:
