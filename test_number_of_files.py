@@ -48,7 +48,7 @@ def files_from_datasets(datasets, rses):
         print("\nGet a list of all the files in a dataset.")
     list_of_files=[]
 
-    for n in tqdm(range(len(datasets[:20])), disable=tqmdis):
+    for n in tqdm(range(len(datasets[:5])), disable=tqmdis):
         dataset=datasets[n]
         if "SCOPE:NAME[DIDTYPE]" in dataset or "-------------------------" in dataset:
             pass
@@ -70,14 +70,13 @@ def files_from_datasets(datasets, rses):
     #print(new_new_list)
 
     for addres in new_new_list:
-        if addres in filelocations_rse:
-            pass
-        else:
+        if addres not in filelocations_rse:
             filelocations_rse.append(addres)
-    print(filelocations_rse)
+            
+    #print(filelocations_rse)
     return(filelocations_rse)
 
-        
+
 
 
 #scopes=list_scopes()
