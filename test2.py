@@ -138,10 +138,10 @@ def compere_checksum(datasets_rse):
             #print("Output folders missing, generating them for the dataset {}.".format(dataset))
             os.makedirs('output/{}'.format(now))
     save_dir='output/{}'.format(now)
-    failed_adles32="/"+save_dir+"/"+"adler32_fail.txt"
-    not_found_addres=save_dir+"/"+"files_not_found.txt"
-    found_addres="/"+save_dir+"/"+"files_found.txt"
-
+    failed_adles32=save_dir+"/"+"adler32_fail.txt"
+    not_found_addres=save_dir+"/"+"files_missing_storage.txt"
+    found_addres=save_dir+"/"+"files_found_storage.txt"
+    directory_list=[]
     for rse in datasets_rse:
         files_found={}
         files_not_found={}
@@ -155,7 +155,8 @@ def compere_checksum(datasets_rse):
             file=file_data[0]
             
             directory=file_data[3]
-
+            if directory not in directory_list:
+                directory_list.append(directory)
             fullpath=directory+file
             
             checksum_rucio=file_data[2]
@@ -210,6 +211,11 @@ def compere_checksum(datasets_rse):
             if checksum==True:
                 print("We found {} corrupted files out of {}".format(integ,(len(datasets))))
         for n in files_not_found:
+            print("files not found")
+            print(len(files_not_found[n]))
             os.system("echo {} >> {}".format(files_not_found[n],not_found_addres))
         for n in files_found:
+            print("files found")
+            print(len(files_found[n]))
             os.system("echo {} >> {}".format(files_found[n],found_addres))
+        
