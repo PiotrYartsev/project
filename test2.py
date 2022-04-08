@@ -48,44 +48,44 @@ def list_rse():
 def files_from_datasets(datasets, rses):
     if comments==True:
         print("\nGet a list of all the files in a dataset.")
-    list_of_files=[]
-    if limit==0:
-        for n in tqdm(range(len(datasets)), disable=tqmdis):
-            dataset=datasets[n]
-            if "SCOPE:NAME[DIDTYPE]" in dataset or "-------------------------" in dataset:
-                pass
-            else:
-                L=(os.popen("rucio list-file-replicas {}".format(dataset)).read()).split('\n')
-                [file1+dataset for file1 in L]
-                list_of_files.extend(L)
-    else:
-        if comments==True:
-            print("Limit set to {}\n".format(limit))
-        for n in tqdm(range(len(datasets[:limit])), disable=tqmdis):
-            dataset=datasets[n]
-            if "SCOPE:NAME[DIDTYPE]" in dataset or "-------------------------" in dataset:
-                pass
-            else:
-                L=(os.popen("rucio list-file-replicas {}".format(dataset)).read()).split('\n')
-                [file1+dataset for file1 in L]
-                list_of_files.extend(L)
+    
     datasets_rse={}
-
     for rse in rses:
-        if "GRIDFTP" in rse:
-            newlist=[file for file in list_of_files if rse in file]
+        list_of_files=[]
+        if limit==0:
+            for n in tqdm(range(len(datasets)), disable=tqmdis):
+                dataset=datasets[n]
+                if "SCOPE:NAME[DIDTYPE]" in dataset or "-------------------------" in dataset:
+                    pass
+                else:
+                    L=(os.popen("rucio list-file-replicas --rses {} {}".format(rse,dataset)).read()).split('\n')
+                    [file1+dataset for file1 in L]
+                    #print(len(L))
+                    list_of_files.extend(L)
         else:
-            newlist=[file for file in list_of_files if rse in file and "GRIDFTP" not in file]
-        new_new_list=[file.replace(" ","").split('|') for file in newlist]
-        new_new_list=[file[2:] for file in new_new_list]
+            if comments==True:
+                print("Limit set to {}\n".format(limit))
+            for n in tqdm(range(len(datasets[:limit])), disable=tqmdis):
+                dataset=datasets[n]
+                if "SCOPE:NAME[DIDTYPE]" in dataset or "-------------------------" in dataset:
+                    pass
+                else:
+                    L=(os.popen("rucio list-file-replicas --rses {} {}".format(rse,dataset)).read()).split('\n')
+                    [file1+dataset for file1 in L]
+                    #print(len(L))
+                    list_of_files.extend(L)
+
+        new_new_list=[file.replace(" ","").split('|') for file in list_of_files]
+        new_new_list=[file for file in new_new_list]
         datasets_rse[rse]=new_new_list
+        
         if comments==True:
             print("\n")
             print("For the rse {} we have this many files:".format(rse))
-            print(len(newlist))
+            print(len(datasets_rse[rse]))
 
     datasets_rse = dict( [(k,v) for k,v in datasets_rse.items() if len(v)>0])
-
+    print(datasets_rse[rse][:10])
     return(datasets_rse)
         
 def clean_up_datasets_rse(datasets_rse):
@@ -95,6 +95,11 @@ def clean_up_datasets_rse(datasets_rse):
         dataset_list=datasets_rse[rse]
         for n in tqdm(range(len(dataset_list)), disable=tqmdis):
             dataset=dataset_list[n]
+            print(dataset)
+            print(dataset[0])
+            print(dataset[1])
+            print(dataset[4])
+            break
             dataset[3]=dataset[3].replace(dataset[0],"")
             dataset[3]=dataset[3].replace("{}:file://".format(rse),"")
     return(datasets_rse)
@@ -141,10 +146,12 @@ def compere_checksum(datasets_rse):
     failed_adles32=save_dir+"/"+"adler32_fail.txt"
     not_found_addres=save_dir+"/"+"files_missing_storage.txt"
     found_addres=save_dir+"/"+"files_found_storage.txt"
-    directory_list=[]
+    missig_in_rucio_addres=save_dir+"/"+"files_missing_rucio.txt"
     for rse in datasets_rse:
+        directory_list=[]
         files_found={}
         files_not_found={}
+
         integ=0
         if comments==True:
             print("\nComparing the adler32 checksum in rucio with checksum in storage for rse {}.".format(rse))
@@ -163,15 +170,14 @@ def compere_checksum(datasets_rse):
 
             checksum_dec=get_adler32_checksum(fullpath)
             
-            found_not_found_str=str([file,directory])
-            found_not_found_str=found_not_found_str+"\n"
-            #print(rse)
+            not_found_str=str([file,directory])
+            file=file+"\n"
             if checksum_dec==0:
                 if rse in files_found:
-                    files_found[rse].append(found_not_found_str) 
+                    files_found[rse].append(file)
                 else:   
                     files_found[rse]=[]
-                    files_found[rse].append(found_not_found_str)
+                    files_found[rse].append(file)
             elif checksum_dec==None:
                 if rse in files_not_found:
                     files_not_found[rse].append(found_not_found_str) 
@@ -180,10 +186,10 @@ def compere_checksum(datasets_rse):
                     files_not_found[rse].append(found_not_found_str) 
             else:
                 if rse in files_found:
-                    files_found[rse].append(found_not_found_str) 
+                    files_found[rse].append(file) 
                 else:   
                     files_found[rse]=[]
-                    files_found[rse].append(found_not_found_str)
+                    files_found[rse].append(file)
                 checksum_hex=hex(checksum_dec)
                 checksum_hex=checksum_hex.lstrip("0x").rstrip("L")
                 
@@ -210,12 +216,26 @@ def compere_checksum(datasets_rse):
             print("\nFor the rse {} we found that {} files were missing out of {}.".format(rse, number_failed_files, len(datasets)))
             if checksum==True:
                 print("We found {} corrupted files out of {}".format(integ,(len(datasets))))
+        not_found= open("{}".format(not_found_addres),"w+")
+        found= open("{}".format(found_addres),"w+")
+        files_not_in_rucio=[]
         for n in files_not_found:
-            print("files not found")
-            print(len(files_not_found[n]))
-            os.system("echo {} >> {}".format(files_not_found[n],not_found_addres))
+            not_found.write(str(files_not_found[n]))
         for n in files_found:
-            print("files found")
-            print(len(files_found[n]))
-            os.system("echo {} >> {}".format(files_found[n],found_addres))
+            found.write(str(files_found[n]))
+        for n in tqdm(range(len(directory_list)), disable=tqmdis):
+            directory=directory_list[n]
+            files_not_in_rucio.extend(list(os.popen("ls {}".format(directory))))
+            #[file.replace("\n","") for file in files_not_in_rucio]
+        not_found.close()
+        found.close()
+
+        not_in_rucio=open("{}".format(missig_in_rucio_addres),"w+")
+
+        missig_in_rucio=set(files_not_in_rucio)-set(files_found[rse])
+        missig_in_rucio=list(missig_in_rucio)
+
+        for file in missig_in_rucio:
+            not_in_rucio.write(file)
+        not_in_rucio.close()
         

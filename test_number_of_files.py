@@ -35,7 +35,7 @@ def get_datasets_from_scope(scope):
     return(datasets_scope)
 
 
-def list_rse():
+def list_rse():0
     rses=list(os.popen("rucio list-rses"))
     for n in range(len(rses)):
         rses[n]=rses[n].replace("\n","")
@@ -47,15 +47,16 @@ def files_from_datasets(datasets, rses):
     if comments==True:
         print("\nGet a list of all the files in a dataset.")
     list_of_files=[]
-
+    datasets_leangth={}
     for n in tqdm(range(len(datasets[:5])), disable=tqmdis):
         dataset=datasets[n]
         if "SCOPE:NAME[DIDTYPE]" in dataset or "-------------------------" in dataset:
             pass
         else:
             L=(os.popen("rucio list-file-replicas {}".format(dataset)).read()).split('\n')
-            [file1+dataset for file1 in L]
+            [file1 for file1 in L]
             list_of_files.extend(L)
+            datasets_leangth[dataset]=len(L)
 
     filelocations_rse=[]
     #print(list_of_files)
@@ -74,14 +75,15 @@ def files_from_datasets(datasets, rses):
             filelocations_rse.append(addres)
             
     #print(filelocations_rse)
-    return(filelocations_rse)
+    return([filelocations_rse,datasets_leangth])
 
 
 
 
 #scopes=list_scopes()
 scopes=["mc20"]
-All_datasets=get_all_datasets(scopes)
+All_datasets=get_all_datasets(scopes)[0]
+datasets_leangth_rse=get_all_datasets(scopes)[1]
 rses=["LUND"]
 datasets_rse=files_from_datasets(All_datasets,rses)
 
