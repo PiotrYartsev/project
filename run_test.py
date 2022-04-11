@@ -18,6 +18,7 @@ if __name__ == '__main__':
     global comments
     global limit
     global checksum
+    
     tqmdis=False
     comments=False
     limit=0
@@ -104,13 +105,13 @@ if __name__ == '__main__':
 
     else:
         raise ValueError("Can not search by scope and by dataset similtaniosly, please use only one.")
-    
+    number_of_files_in_dataset={}
     rses=test2.rses.split(",")
 
     All_datasets=get_all_datasets(test2.scopes)
     
-    datasets_rse=files_from_datasets(All_datasets,rses)
-
+    datasets_rse, number_of_files_in_dataset=files_from_datasets(All_datasets,rses)
+    
     datasets_rse=clean_up_datasets_rse(datasets_rse)
 
-    compere_checksum(datasets_rse)
+    compere_checksum(datasets_rse,number_of_files_in_dataset)
