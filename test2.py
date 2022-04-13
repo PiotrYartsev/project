@@ -204,8 +204,7 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
         number_failed_files=0
         number_sucesfull_files=0
         for rse in files_not_found:
-            for k in files_not_found[rse]:
-                number_failed_files=number_failed_files+len(files_not_found[rse])
+            number_failed_files=number_failed_files+len(files_not_found[rse])
         
         for rse in files_found:
             number_sucesfull_files=number_sucesfull_files+len(files_found[rse])
@@ -222,14 +221,14 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
 
        
 
-        #found= open("{}".format(found_addres),"w+")
+        found= open("{}".format(found_addres),"w+")
          
         files_not_in_rucio=[]
         for n in files_not_found:
             not_found.write(str(files_not_found[n]))
 
-        #for n in files_found:
-        #  found.write(str(files_found[n]))
+        for n in files_found:
+          found.write(str(files_found[n]))
         
         print("\nFor each storage location find what files in storage is not registered in Rucio.")
         for n in tqdm(range(len(directory_list)), disable=tqmdis):
@@ -237,7 +236,7 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
             files_not_in_rucio.extend(list(os.popen("ls {}".format(directory))))
             #[file.replace("\n","") for file in files_not_in_rucio]
         not_found.close()
-        #found.close()
+        found.close()
 
         not_in_rucio=open("{}".format(missig_in_rucio_addres),"w+")
 
