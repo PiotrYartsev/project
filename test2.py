@@ -74,6 +74,7 @@ def files_from_datasets(datasets, rses):
                 else:
                     L=(os.popen("rucio list-file-replicas --rses {} {}".format(rse,dataset)).read()).split('\n')
                     L=[file for file in L if rse in file]
+                    L=[file+str(dataset) for file in L]
                     number_of_files_in_dataset[dataset]=len(L)
                     list_of_files.extend(L)
         number_of_files_in_dataset = dict( [(k,v) for k,v in number_of_files_in_dataset.items() if not v==0])
@@ -161,6 +162,8 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
 
             file=file_data[0]
             
+            dataset_file=file_data[-1]
+
             directory=file_data[3]
             if directory not in directory_list:
                 directory_list.append(directory)
@@ -170,7 +173,7 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
 
             checksum_dec=get_adler32_checksum(fullpath)
             
-            not_found_str=str([file,directory])
+            not_found_str=str(file)+","+directory+","+dataset_file+"\n"
             file=file+"\n"
             if checksum_dec==0:
                 if rse in files_found:
@@ -223,31 +226,59 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
 
         found= open("{}".format(found_addres),"w+")
          
-        files_not_in_rucio=[]
+        
         for n in files_not_found:
-            not_found.write(str(files_not_found[n]))
+            for k in files_not_found[n]:
+                not_found.write(k)
 
         for n in files_found:
-          found.write(str(files_found[n]))
+            found.write(str(files_found[n]))
         
         print("\nFor each storage location find what files in storage is not registered in Rucio.")
+        directory_of_files_not_in_rucio=[]
+        files_not_in_rucio=[]
         for n in tqdm(range(len(directory_list)), disable=tqmdis):
             directory=directory_list[n]
-            files_not_in_rucio.extend(list(os.popen("ls {}".format(directory))))
+            stuff_to_add=list(os.popen("ls {}".format(directory)))
+            files_not_in_rucio.extend(stuff_to_add)
+            
+            stuff_to_add2=[]
+            for n in range(len(stuff_to_add)):
+                stuff_to_add2.append(directory)
+
+            directory_of_files_not_in_rucio.extend(stuff_to_add2)
             #[file.replace("\n","") for file in files_not_in_rucio]
         not_found.close()
         found.close()
 
         not_in_rucio=open("{}".format(missig_in_rucio_addres),"w+")
+        #missig_in_rucio=set(files_not_in_rucio)-set(files_found[rse])
 
-        missig_in_rucio=set(files_not_in_rucio)-set(files_found[rse])
+        b=set(files_found[rse])
+
+        missig_in_rucio=[i for i, item in enumerate(files_not_in_rucio) if item not in b]
         missig_in_rucio=list(missig_in_rucio)
+
+        missig_in_rucio2=[]
+        for n in missig_in_rucio:
+            string=str(files_not_in_rucio[n]).replace("\n","")+","+str(directory_of_files_not_in_rucio[n])+"\n"
+            missig_in_rucio2.append(string)
+        
+        print(len(files_found[rse]))
+        print(len(files_not_in_rucio))
+        print(abs(len(files_not_in_rucio)-len(files_found[rse])))
+
         print("\nWe found {} missing files in storage that are registered in rucio. PS: Unless you searched all scopes this does not mean much.".format(len(missig_in_rucio)))
-        for file in missig_in_rucio:
+
+
+        
+        for file in missig_in_rucio2:
             not_in_rucio.write(file)
         not_in_rucio.close()
-    datasets= open("{}".format(datasets_addres),"w+")       
     
-    datasets.write(str(number_of_files_in_dataset))
+    datasets= open("{}".format(datasets_addres),"w+")       
+    for dataset in number_of_files_in_dataset:
+        output=str(dataset) +","+str(number_of_files_in_dataset[dataset])+"\n"
+        datasets.write(output)
 
     datasets.close()
