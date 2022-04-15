@@ -53,26 +53,47 @@ def list_rse():
     return(rses)
 
 
-
+#For every dataset provided it gets all file replicas that are located at a perticular rse
 def files_from_datasets(datasets, rses):
+
+    #remove duplicate datasets
     datasets=list(set(datasets))
+
+    #print if output is turned on
     if comments==True:
         print("\nGet a list of all the files in a dataset.")
     
+    #library storing all the files found at a rse where keys are rse and items are a list of files
     datasets_rse={}
+
+
     for rse in rses:
+        #list of fils found for the rse
         list_of_files=[]
+
+        #lsit to keep track of how many files are located at a rse for a perticular dataset. This info can be used in the future to classify problematic files  
         number_of_files_in_dataset={}
+
+        #"if limit==0" is to check if you want to run the version for all the datasets of only for some of them. 
         if limit==0:
             for n in tqdm(range(len(datasets)), disable=tqmdis):
                 dataset=datasets[n]
+                #Clean the datasets by removing the first ad last line that contains junk
                 if "SCOPE:NAME[DIDTYPE]" in dataset or "-------------------------" in dataset:
                     pass
                 else:
+                    #Get all the files in a dataset at a rse and save it as a list by spliting at each line
                     L=(os.popen("rucio list-file-replicas --rses {} {}".format(rse,dataset)).read()).split('\n')
+
+                    #Clean the data a bit by removing any line not containing the name of the rse, which is present in every file location. 
                     L=[file for file in L if rse in file]
+
+                    #add the number of files with a perticular rse to the dictionary
                     number_of_files_in_dataset[dataset]=len(L)
+
+                    #files to file list
                     list_of_files.extend(L)
+        #Same as above
         else:
             if comments==True:
                 print("Limit set to {}\n".format(limit))
@@ -86,22 +107,31 @@ def files_from_datasets(datasets, rses):
                     L=[file+str(dataset) for file in L]
                     number_of_files_in_dataset[dataset]=len(L)
                     list_of_files.extend(L)
+        #Remove any empty datasets from the dataset number dictionery            
         number_of_files_in_dataset = dict( [(k,v) for k,v in number_of_files_in_dataset.items() if not v==0])
-        print(len(list_of_files))
+
+        #Remove duplicate files from the file list
         list_of_files=list(set(list_of_files))
-        print(len(list_of_files))
+        
+        #Turn each file entry into a list by splitting on | 
         new_new_list=[file.replace(" ","").split("|") for file in list_of_files]
+        #Removing the first two entries that dont contain important inforamtion
         new_new_list=[file[2:] for file in new_new_list]
+        
+        #for the rse add all file list to the dictionary
         datasets_rse[rse]=new_new_list
         
+        #Print statistics for a rse
         if comments==True:
             print("\n")
             print("For the rse {} we have this many files:".format(rse))
             print(len(datasets_rse[rse]))
 
+    #If no files were found for rse remove it from dictionary
     datasets_rse = dict( [(k,v) for k,v in datasets_rse.items() if len(v)>0])
     return(datasets_rse, number_of_files_in_dataset)
-        
+
+#clean the data by removing useless infortmation and remove the filename from the storage path 
 def clean_up_datasets_rse(datasets_rse):
     for rse in datasets_rse:
         if comments==True:
@@ -120,6 +150,7 @@ def clean_up_datasets_rse(datasets_rse):
 def get_adler32_checksum(file2):
     BLOCKSIZE=256*1024*1024
     asum=1
+    #If we dont want to comapre the checksum and only see if the file exist we try to open the file. If we are able to open the file we set asum=0 and if we fail we set it to None
     if checksum==False:
         try:
             with open("{}".format(file2),"rb") as f:
@@ -127,6 +158,7 @@ def get_adler32_checksum(file2):
             f.close()
         except:
             asum=None
+    #if we want to do a checksum, we try to open the file. If we fail we set t to None, else we calculate the adfler32 checksum for the file. 
     else:
         try:
             with open("{}".format(file2),"rb") as f:
@@ -144,21 +176,32 @@ def get_adler32_checksum(file2):
 
 #compares the adler34 checksum for the files we matched between storage and rucio. Outputs the rucio entries without a match, the checksum of the file in storage, the checksum as reported by rucio.
 def compere_checksum(datasets_rse, number_of_files_in_dataset):
+    #Get the current time. Used to name the folders
     now = datetime.now()
     now=str(now)
     now=now.replace(" ","_")
+
+    #Check if the Output folder exist, if not create it
     if not os.path.exists('output'):
-            #print("Output folders missing, generating them for the dataset {}.".format(dataset))
+            print("Output folders missing, generating them for the dataset {}.".format(dataset))
             os.makedirs('output')
     if not os.path.exists('output/{}'.format(now)):
-            #print("Output folders missing, generating them for the dataset {}.".format(dataset))
             os.makedirs('output/{}'.format(now))
+
+    #The location for saving the output files
     save_dir='output/{}'.format(now)
+    #Addres to save the output for the files that failed the adler32 comparison
     failed_adles32=save_dir+"/"+"adler32_fail.txt"
+    #Addres to save the output for the files that exist in Rucio but are not found in storage
     not_found_addres=save_dir+"/"+"files_missing_storage.txt"
+    #Addres to save the output for the files that exist in Rucio and are also in storage
     found_addres=save_dir+"/"+"files_found_storage.txt"
+    #Addres to save the output for the files that exist in storage but not in Rucio
     missig_in_rucio_addres=save_dir+"/"+"files_missing_rucio.txt"
+    #Addres to save the output for the datasets and the number of files at a rse that exist in that dataset
     datasets_addres=save_dir+"/"+"datasets_and_numbers.txt"
+
+    
     for rse in datasets_rse:
         directory_list=[]
         files_found={}
@@ -170,9 +213,6 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
         datasets=datasets_rse[rse]
         for n in tqdm(range(len(datasets)), disable=tqmdis):
             file_data=datasets[n]
-            print(file_data)
-            print(file_data[-1])
-            print(file_data[4])
 
             file=file_data[0]
             
