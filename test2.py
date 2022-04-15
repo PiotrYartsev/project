@@ -4,30 +4,39 @@ from datetime import datetime
 from tqdm import *
 from run_test import *
 
+
+#initialize defoult values 
 tqmdis=False
 comments=False
 limit=0
 checksum=True
 
 
+#gets all the valid scopes registered in Rucio
 def list_scopes():
    scopes=list(os.popen("rucio list-scopes"))
    for n in range(len(scopes)):
        scopes[n]=scopes[n].replace("\n","")
    return(scopes)
 
+
+#For a scope get all datasets registered in rucio for that scope 1.
 def get_all_datasets(scopes):
     All_datasets=[]
+    #Iterate over all scopes, run function get_datasets_from_scope fro scope
     for scope in scopes:
         datasets_scope=get_datasets_from_scope(scope)
         All_datasets=list(set(All_datasets+datasets_scope))
     return(All_datasets)
 
 
-
+#For a scope get all datasets registered in rucio for that scope 2.
 def get_datasets_from_scope(scope):
+    #Rucio CLI command returns the datasets as a str
     datasets_scope=list(os.popen("rucio list-dids --filter type=DATASET {}:*".format(scope)))
+    #Removes rows not containing data
     [ x for x in datasets_scope if "|" in x ]
+    #Clean the data a bit
     for n in range(len(datasets_scope)):
         datasets_scope[n]=datasets_scope[n].replace("| DATASET      |\n'","")
         datasets_scope[n]=datasets_scope[n].replace("|","")
@@ -36,7 +45,7 @@ def get_datasets_from_scope(scope):
         datasets_scope[n]=datasets_scope[n].replace("DATASET","")
     return(datasets_scope)
 
-
+#List all registered rse in Rucio
 def list_rse():
     rses=list(os.popen("rucio list-rses"))
     for n in range(len(rses)):
@@ -78,7 +87,9 @@ def files_from_datasets(datasets, rses):
                     number_of_files_in_dataset[dataset]=len(L)
                     list_of_files.extend(L)
         number_of_files_in_dataset = dict( [(k,v) for k,v in number_of_files_in_dataset.items() if not v==0])
-
+        print(len(list_of_files))
+        list_of_files=list(set(list_of_files))
+        print(len(list_of_files))
         new_new_list=[file.replace(" ","").split("|") for file in list_of_files]
         new_new_list=[file[2:] for file in new_new_list]
         datasets_rse[rse]=new_new_list
@@ -159,6 +170,9 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
         datasets=datasets_rse[rse]
         for n in tqdm(range(len(datasets)), disable=tqmdis):
             file_data=datasets[n]
+            print(file_data)
+            print(file_data[-1])
+            print(file_data[4])
 
             file=file_data[0]
             
@@ -253,7 +267,7 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
 
         not_in_rucio=open("{}".format(missig_in_rucio_addres),"w+")
         #missig_in_rucio=set(files_not_in_rucio)-set(files_found[rse])
-
+        
         b=set(files_found[rse])
 
         missig_in_rucio=[i for i, item in enumerate(files_not_in_rucio) if item not in b]
@@ -275,7 +289,8 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
         for file in missig_in_rucio2:
             not_in_rucio.write(file)
         not_in_rucio.close()
-    
+        
+
     datasets= open("{}".format(datasets_addres),"w+")       
     for dataset in number_of_files_in_dataset:
         output=str(dataset) +","+str(number_of_files_in_dataset[dataset])+"\n"

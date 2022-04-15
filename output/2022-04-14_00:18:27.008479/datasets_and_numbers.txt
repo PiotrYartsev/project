@@ -1,5 +1,0 @@
-mc20:8GeV_targetPN_sim_subrun6-batch3,5506
-mc20:8GeV_targetPN_sim-batch7,11127
-mc20:v2.3.0-batch30,1675
-mc20:v2.3.0-batch18,1192
-mc20:v2.3.0-batch42,1190
