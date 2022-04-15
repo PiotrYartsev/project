@@ -1,4 +1,0 @@
-mc20:v2.3.0-batch30,1675
-mc20:v2.2.1-batch25,1327
-mc20:8GeV_targetPN_sim_subrun3-batch2,8174
-mc20:8GeV_targetPN_sim_subrun4-batch2,5653
