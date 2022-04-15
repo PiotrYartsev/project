@@ -88,6 +88,7 @@ def files_from_datasets(datasets, rses):
 
                     #Clean the data a bit by removing any line not containing the name of the rse, which is present in every file location.
                     L=[file for file in L if rse in file]
+                    L=[file+str(dataset) for file in L]
 
                     #add the number of files with a particular rse to the dictionary
                     number_of_files_in_dataset[dataset]=len(L)

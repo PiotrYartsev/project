@@ -1,1 +1,0 @@
-['mc_v12-4GeV-1e-ecal_photonuclear_run282542_t1608758037.root', '/projects/hep/fs9/shared/ldmx/ldcs/output/ldmx/mc-data/mc20/v12/4.0GeV/v2.3.0-batch29/']
