@@ -1,0 +1,17 @@
+mc20:8GeV_targetPN_sim_subrun9-batch2,6026
+mc20:8GeV_targetPN_sim_subrun2-batch9,6928
+mc20:8GeV_targetPN_sim_subrun8-batch6,3566
+mc20:v2.3.0-batch11,1296
+mc20:v2.2.1-batch28,1221
+mc20:8GeV_targetPN_sim_subrun10-batch8,8072
+mc20:8GeV_targetPN_sim_subrun8-batch2,5800
+mc20:v2.2.1-batch17,913
+mc20:v2.3.0-batch43,1337
+mc20:v2.3.0-batch9,1423
+mc20:v2.3.0-batch23,1257
+validation:v2.3.0-testPN,10
+mc20:8GeV_targetPN_sim-batch5,35102
+mc20:8GeV_targetPN_sim_subrun5-batch7,10235
+mc20:8GeV_targetPN_sim_subrun1-batch7,6131
+validation:v2.2.1-batch1,1409
+mc20:v2.3.0-batch45,1348

@@ -1,1 +1,0 @@
-{'mc20:v2.3.0-batch20': 1200, 'mc20:8GeV_targetPN_sim_subrun7-batch7': 2248, 'mc20:8GeV_targetPN_sim_subrun1-batch1': 6597, 'mc20:v2.3.0-batch6': 1363}
