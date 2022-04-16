@@ -329,8 +329,12 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
         #For each directory get all the files there for comparison with the files we found
         for n in range(len(directory_list)):
             directory=directory_list[n]
-            try:
-                stuff_to_add=list(os.popen("ls {}".format(directory)))
+            
+            stuff_to_add=list(os.popen("ls {} || echo false".format(directory)))
+            if stuff_to_add==["false"]:
+                #If directory is not found/not available add to problem list
+                problem_dir.append(directory)
+            else:
                 #clean the output
                 stuff_to_add=[f.replace("\n","") for f in stuff_to_add]
                 #add the directory so it's easier for comparison program and tur each element into a list
@@ -338,9 +342,8 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
                 stuff_to_add=[f.split(",") for f in stuff_to_add]
 
                 files_in_storage.extend(stuff_to_add)
-            except:
-                #If directory is not found/not available add to problem list
-                problem_dir.append(directory)
+            
+                
 
 
         if comments==True:
