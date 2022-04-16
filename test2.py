@@ -298,7 +298,7 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
 
         #print out some information about the comparison
         if comments==True:    
-            print("\nFor the rse {} we found that {} files were missing out of {}.".format(rse, number_failed_files, len(datasets)))
+            print("\nFor the rse {} we found that {} files were missing in storage out of {}.".format(rse, number_failed_files, len(datasets)))
             if checksum==True:
                 print("We found {} corrupted files out of {}".format(integ,(len(datasets))))
 
@@ -329,8 +329,12 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
         #For each directory get all the files there for comparison with the files we found
         for n in range(len(directory_list)):
             directory=directory_list[n]
-            try:
-                stuff_to_add=list(os.popen("ls {}".format(directory)))
+            
+            stuff_to_add=list(os.popen("ls {} || echo false".format(directory)))
+            if stuff_to_add==["false"]:
+                #If directory is not found/not available add to problem list
+                problem_dir.append(directory)
+            else:
                 #clean the output
                 stuff_to_add=[f.replace("\n","") for f in stuff_to_add]
                 #add the directory so it's easier for comparison program and tur each element into a list
@@ -338,9 +342,8 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
                 stuff_to_add=[f.split(",") for f in stuff_to_add]
 
                 files_in_storage.extend(stuff_to_add)
-            except:
-                #If directory is not found/not available add to problem list
-                problem_dir.append(directory)
+            
+                
 
 
         if comments==True:
@@ -355,14 +358,12 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
         #Write the files ot in Rucio to a txt file
         not_in_rucio=open("{}".format(missig_in_rucio_addres),"w+")
         for file in files_not_in_Rucio:
-            not_in_rucio.write(str(file))
+            output=str(file[0])+","+str(file[1])+"\n"
+            not_in_rucio.write(str(output))
         not_in_rucio.close()
         
-        print(len(files_found[rse]))
-        print(len(files_in_storage))
-        print(abs(len(files_in_storage)-len(files_found[rse])))
-
-        print("\nWe found {} files in storage that are not registered in Rucio. PS: Unless you searched all scopes this does not mean much.".format(len(files_not_in_Rucio)))
+        if comments==True:
+            print("\nWe found {} files in storage that are not registered in Rucio. PS: Unless you searched all scopes this does not mean much.".format(len(files_not_in_Rucio)))
 
     #Write the datasets and the number of files in them to a txt file
     datasets= open("{}".format(datasets_addres),"w+")       
