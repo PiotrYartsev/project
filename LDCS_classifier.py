@@ -23,89 +23,197 @@ checked_file.close()
 
 output_list_to_check=[file for file in output_list if file not in checked]
 #print(output_list_to_check)
-    
 
-for output in output_list_to_check:
-    files_in_output=next(os.walk('output/{}'.format(output)))[2]
+
+
+for n in tqdm(range(len(output_list_to_check))):
+    output_file=output_list_to_check[n]
+    summery_problems=[]  
+    files_batch_not_a_problem=[]
+    files_really_problem_batch=[]
+    files_missing_batch=[]
+    files_missing_rucio_list=[]
+
+    files_in_output=next(os.walk('output/{}'.format(output_file)))[2]
     #print(files_in_output)
     if "files_missing_storage.txt" in files_in_output:
-        #print("yes")
-        files_missing_storage=open("output/{}/files_missing_storage.txt".format(output),"r")
+
+        files_missing_storage=open("output/{}/files_missing_storage.txt".format(output_file),"r")
 
         files_missing_storage_lines=files_missing_storage.readlines()
-        #print(files_missing_storage_lines)
         files_missing_storage_list=[]
 
-        for line in files_missing_storage:
-            #print(line)
-            files_missing_storage_list.append(line.split(","))
-        files_missing_storage.close()
 
-        datasets_and_numbers=open("output/{}/datasets_and_numbers.txt".format(output),"r")
+        datasets_and_numbers=open("output/{}/datasets_and_numbers.txt".format(output_file),"r")
         datasets_and_numbers_list=[]
 
         for line in datasets_and_numbers:
-            #print(line)
             datasets_and_numbers_list.append(line.split(","))
         datasets_and_numbers.close()
 
-        files_problem_batch=[]
-        files_really_problem_batch=[]
-        files_missing_batch=[]
 
         for file in datasets_and_numbers_list:
             batch=file[0]
+            #print(file)
             number=int(file[1])
             n=0
             for stuff in files_missing_storage_lines:
                 if batch in stuff:
                     n=n+1
             if n/number>0:
-                if n/number>0.1 and n/number<0.2:
-                    files_problem_batch.append(batch)
-                elif n/number>0.2 and not n/number==1:
-                    files_really_problem_batch.append(batch)
+                if n/number>0.2 and not n/number==1:
+                    files_really_problem_batch.append([batch,n/number])
                 elif n/number==1:
-                    files_missing_batch.append(batch)    
+                    files_missing_batch.append([batch,n/number])
+                else:
+                    files_batch_not_a_problem.append([batch,n/number])
+            else:
+                files_batch_not_a_problem.append([batch,n/number])
 
-        files_problem_batch_list=[]
-        for file in files_problem_batch:
-            for stuff in files_missing_storage_lines:
-                if file in stuff:
-                    files_problem_batch_list.append(stuff)
 
         files_really_problem_batch_list=[]
         for file in files_really_problem_batch:
+            file=file[0]
             for stuff in files_missing_storage_lines:
                 if file in stuff:
-                    files_really_problem_batch_list.append(stuff)
+                    output=stuff.replace("\n","").split(",")
+                    
+                    files_really_problem_batch_list.append(output)
 
         files_missing_batch_list=[]
         for file in files_missing_batch:
+            file=file[0]
+
             for stuff in files_missing_storage_lines:
                 if file in stuff:
-                    files_missing_batch_list.append(stuff)
+                    output=stuff.replace("\n","").split(",")
+                    files_missing_batch_list.append(output)
 
-        if len(files_problem_batch_list)>0:
-            for file_info in files_problem_batch_list:
-                file=file_info.split(",")
-                files_problem_batch_txt=open("output/{}/files_problem_batch.txt".format(output),"w+")
-                files_problem_batch_txt.write()
+        files_batch_not_a_problem_list=[]
+        for file in files_batch_not_a_problem:
+            file=file[0]
+            for stuff in files_missing_storage_lines:
+                if file in stuff:
+                    output=stuff.replace("\n","").split(",")
+                    files_batch_not_a_problem_list.append(output)
+
+        if not os.path.exists('classifier/{}'.format(output_file)):
+            os.makedirs('classifier/{}'.format(output_file))
+
+        if not os.path.exists('classifier/{}/files_missing_storage'.format(output_file)):
+            os.makedirs('classifier/{}/files_missing_storage'.format(output_file))
+
+        files_really_problem_file=open('classifier/{}/files_missing_storage/batch_problem.txt'.format(output_file),"w+")
+        for file in files_really_problem_batch_list:
+            output=file[0]+","+file[1]+","+file[2]+"\n"
+            files_really_problem_file.write(output)
+        files_really_problem_file.close()
+
+        files_missing_batch_file=open('classifier/{}/files_missing_storage/batch_missing.txt'.format(output_file),"w+")
+        for file in files_missing_batch_list:
+            output=file[0]+","+file[1]+","+file[2]+"\n"
+            files_missing_batch_file.write(output)
+        files_missing_batch_file.close()
+
+        files_other_problem_file=open('classifier/{}/files_missing_storage/other_problem.txt'.format(output_file),"w+")
+        for file in files_batch_not_a_problem_list:
+            output=file[0]+","+file[1]+","+file[2]+"\n"
+            files_other_problem_file.write(output)
+        files_other_problem_file.close()
+
+        #make the messages
+        for stuff in files_missing_batch:
+            file=stuff[0]
+            procentage=stuff[1]
+            output=("The batch {} is present in Rucio but is missing from storage.".format(file))
+            summery_problems.append(output)
+
+        for stuff in files_really_problem_batch:
+            file=stuff[0]
+            procentage=stuff[1]*100
+            output=("The batch {} in Rucio migh have some problem, becouse {} % of it is missing in storage.".format(file,procentage))
+            summery_problems.append(output)
+         
+    if "files_missing_rucio.txt" in files_in_output:
+            
+            #get all the files tat exist in storage but not in Rucio
+            files_missing_rucio=open("output/{}/files_missing_rucio.txt".format(output_file),"r")
+
+            files_missing_rucio_lines=files_missing_rucio.readlines()
+
+            #print(len(files_missing_rucio_lines))
+
+            
+            files_missing_rucio_files=[] 
+            for line in files_missing_rucio_lines:
+                line=line.replace("[","")
+                line=line.replace("'","")
+                line=line.split("]")
+                line=[file.split(",") for file in line]
+                line=[file for file in line if len(file)==2]
+                
+                files_missing_rucio_files.extend(line)
+
+            files_missing_rucio_list={} 
+            for file in files_missing_rucio_files:
+
+                file_with_no_time=file[0][:file[0].rindex("_")]
+
+                if file[1] in files_missing_rucio_list:
+                    files_missing_rucio_list[file[1]].append(file[0])
+                else:
+                    files_missing_rucio_list[file[1]]=[file[0]]
+            
+
+            files_with_copy={}
+            for directory in files_missing_rucio_list:
+
+                list_of_files_in_storage=list(os.popen("ls {}".format(directory)))
+
+                for n in range(len(files_missing_rucio_list[directory])):
+                    
+                    file=files_missing_rucio_list[directory][n]
+
+                    file_with_no_time=file[:file.rindex("_")]
+
+
+                    files_with_pattern=[]
+                    for subfile in list_of_files_in_storage:
+                        if (file_with_no_time+"_") in subfile:
+                            files_with_pattern.append(subfile)
+                    if len(files_with_pattern)>1:
+                        files_with_copy[file]=files_with_pattern
+            #print(files_with_copy)
+            #files_to_sheck=[]
                 
 
+    
 
-        print(len(files_problem_batch_list))
-        print(len(files_really_problem_batch_list))
-        print(len(files_missing_batch_list))
-
-        
-           
-
-
+    
+    if len(summery_problems)>0:
+        summery_problems_file=open('classifier/{}/summery_problems.txt'.format(output_file),"w+")
+        for file in summery_problems:
+            output=file+"\n"
+            summery_problems_file.write(output)
+        summery_problems_file.close()
+        #print(summery_problems)
 
         
 
 """
+
+for directory in files_missing_rucio_list:
+                for n in tqdm(range(len(files_missing_rucio_list[directory]))):
+                    file=files_missing_rucio_list[directory][n]
+                    #print(directory)
+                    #print(file)
+                    list_of_files_in_storage=list(os.popen("ls {} | grep {}_*".format(directory,file)))
+                    if len(list_of_files_in_storage)>1:
+                        print(len(list_of_files_in_storage))
+                        print(file)
+
+
+
 while open("missing") as f:
     for line in f:
         listOfLine=line.split(",")
@@ -142,11 +250,6 @@ def problem_with_batch():
     if integer/batchnumber>0.2:
         print("problem with batch {}".format(batchname))
 
-for corrupted_file in list_of_corrupted_files:
-    if size(rucio_file)/size(corrupted_file)<0.8:
-        print("File is very corrupted {}/data is missing".format(corrupted_file))
-    else:
-        print("File is not very corrupted {}".format(corrupted_file))
 
 def corruption_of_storage():
     #find out what harddrive the storage was located on 
