@@ -331,7 +331,7 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
             directory=directory_list[n]
             
             stuff_to_add=list(os.popen("ls {} || echo false".format(directory)))
-            if stuff_to_add==["false"]:
+            if ['false\n'}==stuff_to_add:
                 #If directory is not found/not available add to problem list
                 problem_dir.append(directory)
             else:
