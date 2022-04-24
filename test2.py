@@ -331,7 +331,7 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
             directory=directory_list[n]
             
             stuff_to_add=list(os.popen("ls {} || echo false".format(directory)))
-            if ['false\n'}==stuff_to_add:
+            if ['false\n']==stuff_to_add:
                 #If directory is not found/not available add to problem list
                 problem_dir.append(directory)
             else:
@@ -363,7 +363,7 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
         not_in_rucio.close()
         
         if comments==True:
-            print("\nWe found {} files in storage that are not registered in Rucio. PS: Unless you searched all scopes this does not mean much.".format(len(files_not_in_Rucio)))
+            print("\nWe found {} files in storage that are not registered in Rucio. PS: Unless you runned a full search for all scopes and datasets this output does not mean much.".format(len(files_not_in_Rucio)))
 
     #Write the datasets and the number of files in them to a txt file
     datasets= open("{}".format(datasets_addres),"w+")       
