@@ -1051,4 +1051,3 @@ mc_v12-4GeV-1e-ecal_photonuclear-test_t1594763716.root,/projects/hep/fs9/shared/
 mc_v12-4GeV-2e-inclusive_run1310005_t1601523217.root,/projects/hep/fs9/shared/ldmx/ldcs/output/ldmx/mc-data/validation/v12/4.0GeV/v2.2.1-2e/
 mc_v12-4GeV-2e-inclusive_run1310006_t1601523226.root,/projects/hep/fs9/shared/ldmx/ldcs/output/ldmx/mc-data/validation/v12/4.0GeV/v2.2.1-2e/
 mc_v12-4GeV-2e-inclusive_run1310007_t1601523253.root,/projects/hep/fs9/shared/ldmx/ldcs/output/ldmx/mc-data/validation/v12/4.0GeV/v2.2.1-2e/
-false,/nfs/ldmx/ldmxstore/ldmx/mc-data/mc20/v12/4.0GeV/v2.2.1-batch22/
