@@ -1,1 +1,0 @@
-mc_v12-4GeV-1e-ecal_photonuclear_run1211253_t1601121385.root,/nfs/ldmx/ldmxstore/ldmx/mc-data/mc20/v12/4.0GeV/v2.2.1-batch22/,mc20:v2.2.1-batch22

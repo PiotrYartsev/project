@@ -1,6 +1,0 @@
-mc_v9-8GeV-1e-inclusive_7_t1588067522.root,/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/,test:v9-8GeV-1e-inclusive
-mc_v9-8GeV-1e-inclusive_17_t1588064632.root,/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/,test:v9-8GeV-1e-inclusive
-mc_v9-8GeV-1e-inclusive_2_t1588064301.root,/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/,test:v9-8GeV-1e-inclusive
-mc_v9-8GeV-1e-inclusive_1_t1588064274.root,/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/,test:v9-8GeV-1e-inclusive
-mc_v9-8GeV-1e-inclusive_6_t1588067517.root,/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/,test:v9-8GeV-1e-inclusive
-mc_v9-8GeV-1e-inclusive_16_t1588064582.root,/projects/hep/fs7/scratch/pflorido/ldmx-pilot/pilotoutput/ldmx/mc-data/v9/8.0GeV/,test:v9-8GeV-1e-inclusive

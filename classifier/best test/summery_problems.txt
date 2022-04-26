@@ -1,3 +1,0 @@
-The batch mc-test20:v9-8GeV-1e-inclusive is present in Rucio but is missing from storage.
-The batch mc20:v9-8GeV-1e-inclusive is present in Rucio but is missing from storage.
-The batch test:v9-8GeV-1e-inclusive in Rucio migh have some problem, becouse 75.0 % of it is missing in storage.
