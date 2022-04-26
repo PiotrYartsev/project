@@ -22,7 +22,7 @@ def get_runs():
     checked_file_lines=checked_file.readlines()
     for line in checked_file_lines:
         checked.append(line)
-        break
+        
     checked_file.close()
     output_list_to_check=[file for file in output_list if file not in checked]
     return(output_list_to_check,checked)
@@ -212,7 +212,20 @@ def files_missing_rucio(output_file):
     files_found_storage_list=[file.replace("]","") for file in files_found_storage_list]
     files_found_storage_list=list(set(files_found_storage_list))
     
-    
+
+
+    runs={}
+    for file in files_found_storage_list:
+        
+        filename_list=file[:file.rindex("_")]
+        
+        filename=filename_list[:filename_list.rindex("_")]
+        filename=filename.replace(" ","")
+        if not filename in runs:
+            runs[filename]=1
+        else:
+            runs[filename]=runs[filename]+1
+
     files_missing_rucio_files=[] 
     print('Cleaning the missing from Rucio data')
     for n in tqdm(range(len(files_missing_rucio_lines))):
@@ -232,7 +245,7 @@ def files_missing_rucio(output_file):
         filename=file[0]
         address=file[1]
 
-        filename_list=filename[:filename.rindex("_")+5]
+        filename_list=filename[:filename.rindex("_")+1]
         
         if filename_list in files_missing_rucio_files_dict:
             files_missing_rucio_files_dict[filename_list].append(filename)
@@ -245,8 +258,8 @@ def files_missing_rucio(output_file):
     files_missing_rucio_files_dict2={}
     many=[]
     few=[]
-
-    for n in files_missing_rucio_files_dict:
+    print("Search for duplicates among the files in Rucio and in storage")
+    for n in tqdm(files_missing_rucio_files_dict):
         
         k=[file for file in files_found_storage_list if n in file]
         
@@ -258,22 +271,111 @@ def files_missing_rucio(output_file):
         else:
             few.append(files_missing_rucio)
 
-    print(many[:3])
-    print(len(many))
-    
 
-    for file in many:
-        addres=file[0]
+    
+    adler_problem=[]
+    adler_no_problem=[]
+    print("Calculate checksum for duplicates to se if they are corrupted or just a copy.")
+    for n in tqdm(range(len(many))):
+        file=many[n]
+        addres=file[0].replace(" ","")
         adler32=[]
         for filename in file[1:]:
+            filename.replace(" ","")
             fulladress=addres+filename
-            adler32.append(get_adler32_checksum(fulladress))
+            fulladress=fulladress.replace(" ","")
+            adler32output=get_adler32_checksum(fulladress)
+            adler32.append(adler32output)
+
         adler32=list(set(adler32))
         if len(adler32)>1:
-            print(adler32)
-        
-
+            adler_problem.append(file[1:])
+        else:
+            adler_no_problem.append(file[1:])
+    print("Number of currupted files")
+    print(len(adler_problem))
+    print(len(adler_no_problem))
     
+    problem_runs={}
+    for file in adler_problem:
+        for filename in file:
+            filename=filename[:filename.rindex("_")]
+            filename_name=filename[:filename.rindex("_")]
+            filename_name=filename_name.replace(" ","")
+            if filename_name not in problem_runs:
+                problem_runs[filename_name]=0
+            else:
+                problem_runs[filename_name]=problem_runs[filename_name]+1
+
+    print("Problem runs name")
+    print(problem_runs)
+
+    problem_runs_2=[]
+    missing_runs_2=[]
+    no_problem_runs_2=[]
+    for filename in problem_runs:
+        number_problem_files=problem_runs[filename]
+
+        number_all=runs[filename]
+
+        frac=number_problem_files/number_all
+
+        if frac>0.2 and not frac==1:
+            print(frac)
+            problem_runs_2.append(filename)
+        elif frac==1:
+            print(frac)
+            missing_runs_2.append(filename)
+        else:
+            no_problem_runs_2.append(filename)
+    print("runs with problem")
+    print(len(problem_runs_2))
+    print("runs missing problem")
+    print(len(missing_runs_2))
+    print("runs no problem")
+    print(len(no_problem_runs_2))
+
+
+    if not os.path.exists('classifier/{}'.format(output_file)):
+        os.makedirs('classifier/{}'.format(output_file))
+
+    if not os.path.exists('classifier/{}/files_missing_rucio'.format(output_file)):
+        os.makedirs('classifier/{}/files_missing_rucio'.format(output_file))
+
+    if len(adler_problem)>0:
+        currupted_files=open('classifier/{}/files_missing_rucio/currupted_duplicate.txt'.format(output_file),"w+")
+        for file in adler_problem:
+            output=""
+            for name in file:
+                output=output+","+name
+            output=output+"\n"
+            currupted_files.write(output)
+        currupted_files.close()
+    
+    if len(adler_no_problem)>0:
+        regular_files=open('classifier/{}/files_missing_rucio/regular_duplicate.txt'.format(output_file),"w+")
+        for file in adler_no_problem:
+            output=""
+            for name in file:
+                output=output+","+name
+            output=output+"\n"
+            regular_files.write(output)
+        regular_files.close()
+
+    if len(problem_runs_2)>0:
+        runs_with_problem_file=open('classifier/{}/files_missing_rucio/runs_with_problem.txt'.format(output_file),"w+")
+        for file in problem_runs_2:
+            output=file+"\n"
+            runs_with_problem_file.write(output)
+        runs_with_problem_file.close()
+    
+    if len(missing_runs_2)>0:
+        missing_runs_files=open('classifier/{}/files_missing_rucio/missing_runs_2.txt'.format(output_file),"w+")
+        for file in missing_runs_2:
+            output=file+"\n"
+            missing_runs_files.write(output)
+        missing_runs_files.close()
+
 
 
 
@@ -295,3 +397,4 @@ for k in range(len(output_list_to_check)):
     #print(output_file)
 
     runner(output_list_to_check[k],output_file)
+    break

@@ -1,0 +1,5 @@
+/gpfs/slac/staas/fs1/g/ldmx/mc-data/validation/v12/4.0GeV/v2.2.1test-2020-09-15/
+/gpfs/slac/staas/fs1/g/ldmx/mc-data/v12/4.0GeV/v2.2.1-batch1/
+/gpfs/slac/staas/fs1/g/ldmx/mc-data/v12/4.0GeV/v2.2.1test-2020-09-15/
+/gpfs/slac/staas/fs1/g/ldmx/mc-data/v12/4.0GeV/v2.2.1test-2020-09-09/
+/gpfs/slac/staas/fs1/g/ldmx/mc-data/validation/v12/4.0GeV/v2.3.0-testRTE3/
