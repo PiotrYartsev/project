@@ -205,7 +205,8 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
 
 
     problem_dir_addres=save_dir+"/"+"problem_locations.txt"
-
+    #A list of directories that are problematic
+    problem_dir=[]
     
     for rse in datasets_rse:
         #list of all the directories that we found. Used to get all the files in storage.
@@ -323,15 +324,14 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
         #A list of the files that exist in storage but not in Rucio
         files_not_in_Rucio=[]
 
-        #A list of directories that are problematic
-        problem_dir=[]
+        
 
         #For each directory get all the files there for comparison with the files we found
         for n in range(len(directory_list)):
             directory=directory_list[n]
             
             stuff_to_add=list(os.popen("ls {} || echo false".format(directory)))
-            if stuff_to_add==["false"]:
+            if ['false\n']==stuff_to_add:
                 #If directory is not found/not available add to problem list
                 problem_dir.append(directory)
             else:
@@ -363,7 +363,7 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
         not_in_rucio.close()
         
         if comments==True:
-            print("\nWe found {} files in storage that are not registered in Rucio. PS: Unless you searched all scopes this does not mean much.".format(len(files_not_in_Rucio)))
+            print("\nWe found {} files in storage that are not registered in Rucio. PS: Unless you runned a full search for all scopes and datasets this output does not mean much.".format(len(files_not_in_Rucio)))
 
     #Write the datasets and the number of files in them to a txt file
     datasets= open("{}".format(datasets_addres),"w+")       
