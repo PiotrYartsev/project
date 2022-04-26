@@ -205,7 +205,8 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
 
 
     problem_dir_addres=save_dir+"/"+"problem_locations.txt"
-
+    #A list of directories that are problematic
+    problem_dir=[]
     
     for rse in datasets_rse:
         #list of all the directories that we found. Used to get all the files in storage.
@@ -323,8 +324,7 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
         #A list of the files that exist in storage but not in Rucio
         files_not_in_Rucio=[]
 
-        #A list of directories that are problematic
-        problem_dir=[]
+        
 
         #For each directory get all the files there for comparison with the files we found
         for n in range(len(directory_list)):
