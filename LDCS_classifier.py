@@ -4,6 +4,9 @@ from datetime import datetime
 from tqdm import *
 from run_test import *
 from numpy import size
+import test2
+
+
 
 if not os.path.exists('classifier'):
         os.makedirs('classifier')
@@ -19,6 +22,7 @@ def get_runs():
     checked_file_lines=checked_file.readlines()
     for line in checked_file_lines:
         checked.append(line)
+        break
     checked_file.close()
     output_list_to_check=[file for file in output_list if file not in checked]
     return(output_list_to_check,checked)
@@ -204,10 +208,15 @@ def files_missing_rucio(output_file):
     files_found_storage=open("output/{}/files_found_storage.txt".format(output_file),"r")
     files_found_storage_list=files_found_storage.readlines()
     files_found_storage_list=files_found_storage_list[0].replace("'","").split(",")
+    files_found_storage_list=[file.replace("[","") for file in files_found_storage_list]
+    files_found_storage_list=[file.replace("]","") for file in files_found_storage_list]
+    files_found_storage_list=list(set(files_found_storage_list))
     
-    print(files_found_storage_list[:8])
+    
     files_missing_rucio_files=[] 
-    for line in files_missing_rucio_lines:
+    print('Cleaning the missing from Rucio data')
+    for n in tqdm(range(len(files_missing_rucio_lines))):
+        line=files_missing_rucio_lines[n]
         line=line.replace("[","")
         line=line.replace("'","")
         line=line.split("\n")
@@ -216,23 +225,53 @@ def files_missing_rucio(output_file):
         files_missing_rucio_files.extend(line)
     
     files_missing_rucio_files_dict={}
-    #print(len(files_missing_rucio_files))
-    for file in files_missing_rucio_files:
+    
+    print('Looking for duplicates among missing files and extraxting file name')
+    for n in tqdm(range(len(files_missing_rucio_files))):
+        file=files_missing_rucio_files[n]
         filename=file[0]
+        address=file[1]
 
-        filename_list=filename[:filename.rindex("_")]
-        #print(filename_list)
+        filename_list=filename[:filename.rindex("_")+5]
+        
         if filename_list in files_missing_rucio_files_dict:
-            files_missing_rucio_files_dict[filename].append(file)
+            files_missing_rucio_files_dict[filename_list].append(filename)
         else:
-            files_missing_rucio_files_dict[filename]=[]
-            files_missing_rucio_files_dict[filename].append(file)
-    #print(len(files_missing_rucio_files_dict))
+            files_missing_rucio_files_dict[filename_list]=[]
+            files_missing_rucio_files_dict[filename_list].append(address)
+            files_missing_rucio_files_dict[filename_list].append(filename)
+    
 
     files_missing_rucio_files_dict2={}
+    many=[]
+    few=[]
 
-#    for n in files_missing_rucio_files_dict:
+    for n in files_missing_rucio_files_dict:
+        
+        k=[file for file in files_found_storage_list if n in file]
+        
+        files_missing_rucio=files_missing_rucio_files_dict[n]
 
+        files_missing_rucio.extend(k)
+        if len(k)>0:
+            many.append(files_missing_rucio)
+        else:
+            few.append(files_missing_rucio)
+
+    print(many[:3])
+    print(len(many))
+    
+
+    for file in many:
+        addres=file[0]
+        adler32=[]
+        for filename in file[1:]:
+            fulladress=addres+filename
+            adler32.append(get_adler32_checksum(fulladress))
+        adler32=list(set(adler32))
+        if len(adler32)>1:
+            print(adler32)
+        
 
     
 
@@ -256,30 +295,3 @@ for k in range(len(output_list_to_check)):
     #print(output_file)
 
     runner(output_list_to_check[k],output_file)
-
- 
-
-def pointless():
-    for n in tqdm(range(len(output_list_to_check))):
-        
-
-        
-        #print(files_in_output)
-        
-        
-                
-                
-                    
-
-        
-
-        
-        if len(summery_problems)>0:
-            summery_problems_file=open('classifier/{}/summery_problems.txt'.format(output_file),"w+")
-            for file in summery_problems:
-                output=file+"\n"
-                summery_problems_file.write(output)
-            summery_problems_file.close()
-            #print(summery_problems)
-
-            
