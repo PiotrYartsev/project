@@ -18,13 +18,20 @@ def get_runs():
 
     checked=[]
 
-    checked_file=open("{}".format('classifier/checked.txt'),"r")
+    checked_file=open("{}".format('classifier/checked.txt'),"r+")
     checked_file_lines=checked_file.readlines()
+    print(checked_file_lines)
     for line in checked_file_lines:
         checked.append(line)
-        
+    output_list_to_check=[]
+    for file in output_list:
+        if file not in checked:
+            output_list_to_check.append(file)
+    #output_list_to_check=[file for file in output_list if file not in checked]
+    for file in output_list:
+        output=file+"\n"
+        checked_file.write(output)
     checked_file.close()
-    output_list_to_check=[file for file in output_list if file not in checked]
     return(output_list_to_check,checked)
 
 def get_files_in_runs(output_list_file):
@@ -37,7 +44,7 @@ def files_missing_storage_with_datasets(output_file):
     files_really_problem_batch=[]
     files_missing_batch=[]
     files_missing_rucio_list=[]
-    summery_problems=[] 
+    
     
     
 
@@ -49,13 +56,15 @@ def files_missing_storage_with_datasets(output_file):
 
     datasets_and_numbers=open("output/{}/datasets_and_numbers.txt".format(output_file),"r")
     datasets_and_numbers_list=[]
-
-    for line in datasets_and_numbers:
+    print("Extracting information about datasets.")
+    for line in tqdm(datasets_and_numbers):
+        
         datasets_and_numbers_list.append(line.split(","))
     datasets_and_numbers.close()
 
-
-    for file in datasets_and_numbers_list:
+    print("Counting and comparing the number of files missing in storage and files registered to dataset.")
+    for file in tqdm(datasets_and_numbers_list):
+        
         batch=file[0]
         number=int(file[1])
         n=0
@@ -72,7 +81,7 @@ def files_missing_storage_with_datasets(output_file):
         else:
             files_batch_not_a_problem.append([batch,n/number])
 
-    
+    print("Cleaning the output.")
     files_really_problem_batch_dict={}
     for file in files_really_problem_batch:
 
@@ -115,6 +124,7 @@ def files_missing_storage_with_datasets(output_file):
                 files_batch_not_a_problem_list1.append(output)
     files_batch_not_a_problem_list=[]
     problem_locations_list_files={}
+
     if os.path.exists(("output/{}/problem_locations.txt".format(output_file))):
         problem_locations=open("output/{}/problem_locations.txt".format(output_file),"r")
         problem_locations_lines=problem_locations.readlines()
@@ -149,7 +159,9 @@ def files_missing_storage_with_datasets(output_file):
     if len(problem_locations_list_files)>0:
         if not os.path.exists('classifier/{}/files_missing_storage/problem_locations_files//'.format(output_file)):
             os.makedirs('classifier/{}/files_missing_storage/problem_locations_files//'.format(output_file))
-    
+            
+    print("Writing output to files.")
+
     if len(files_really_problem_batch_dict)>0:
         for batch in files_really_problem_batch_dict:
             files_really_problem_file=open('classifier/{}/files_missing_storage/batch_problem/{}.txt'.format(output_file,batch),"w+")
@@ -270,7 +282,9 @@ def files_missing_rucio(output_file):
             many.append(files_missing_rucio)
         else:
             few.append(files_missing_rucio)
+    print("Among the files missing from Rucio {} were duplicates {} are regular missing files".format(len(many),len(few)))
 
+    
 
     
     adler_problem=[]
@@ -307,8 +321,6 @@ def files_missing_rucio(output_file):
             else:
                 problem_runs[filename_name]=problem_runs[filename_name]+1
 
-    print("Problem runs name")
-    print(problem_runs)
 
     problem_runs_2=[]
     missing_runs_2=[]
@@ -321,13 +333,11 @@ def files_missing_rucio(output_file):
         frac=number_problem_files/number_all
 
         if frac>0.2 and not frac==1:
-            print(frac)
-            problem_runs_2.append(filename)
+            problem_runs_2.append(filename+","+str(frac))
         elif frac==1:
-            print(frac)
-            missing_runs_2.append(filename)
+            missing_runs_2.append(filename+","+str(frac))
         else:
-            no_problem_runs_2.append(filename)
+            no_problem_runs_2.append(filename+","+str(frac))
     print("runs with problem")
     print(len(problem_runs_2))
     print("runs missing problem")
@@ -376,25 +386,69 @@ def files_missing_rucio(output_file):
             missing_runs_files.write(output)
         missing_runs_files.close()
 
+    if len(few)>0:
+        missing_files=open('classifier/{}/files_missing_rucio/missing.txt'.format(output_file),"w+")
+        #print((few))
+        for file_out in few:
+            output=str(file_out)+"\n"
+            missing_files.write(output)
+        missing_files.close()
 
+    for stuff in problem_runs_2:
+        file=stuff[0]
+        procentage=stuff[1]*100
+        output=("The run {} in Rucio migh have some problem, becouse {} % of the files missing in Rucio are duplicates.".format(file,procentage))
+        summery_problems.append(output)
 
+    for stuff in missing_runs_2:
+        file=stuff[0]
+        procentage=stuff[1]*100
+        output=("The run {} in Rucio probably has some problem, becouse {} % of the files missing in Rucio are duplicates.".format(file,procentage))
+        summery_problems.append(output)
 
+def adler32fail(output_list_to_check):
+    adler32failfile=open("output/{}/adler32_fail.txt".format(output_file),"r")
+    adler32failfile_lines=adler32failfile.readlines()
+    for line in adler32failfile_lines:
+        lines=line.split(",")
+        filename=lines[0]
+        rucio=lines[1]
+        storage=lines[2]
+        output=("The file {} has been corrupted. The value for the Adler32 checksum in Rucio is {} but the checksum in storage is {}.".format(filename,rucio,storage))
+        summery_problems.append(output)
 
 def runner(output_list_to_check,files_in_output):
     if "files_missing_storage.txt" in files_in_output:
         if "datasets_and_numbers.txt" in files_in_output:
+            print("\nClassifying files present in Rucio but missing from storage.\n")
             files_missing_storage_with_datasets(output_list_to_check)
     if "files_missing_rucio.txt" in files_in_output:
+        print("\nClassifying files present in storage but missing from Rucio.\n")
         files_missing_rucio(output_list_to_check)
+    if "adler32_fail.txt" in files_in_output:
+        adler32fail(output_list_to_check)
+    if len(summery_problems)>0:
+        print("\nA summery of the problems found\n")
+        summery_problems_file=open('classifier/{}/summery_problems.txt'.format(output_file),"w+")
+        for p in summery_problems:
+            output=str(p)+"\n"
+            summery_problems_file.write(output)
+        summery_problems_file.close()
+    
+    
     
 
 
 output_list_to_check=get_runs()[0]
 for k in range(len(output_list_to_check)):
-    output_file=get_files_in_runs(output_list_to_check[k])
+    summery_problems=[] 
+    if "All" not in output_list_to_check[k]:
+        pass
+    else:
+        output_file=get_files_in_runs(output_list_to_check[k])
 
-    #output_file=get_files_in_runs("2022-04-21_21:52:37.144536")
-    #print(output_file)
+        #output_file=get_files_in_runs("2022-04-21_21:52:37.144536")
+        #print(output_file)
 
-    runner(output_list_to_check[k],output_file)
-    break
+        runner(output_list_to_check[k],output_file)
+    

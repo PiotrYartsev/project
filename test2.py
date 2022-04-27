@@ -217,7 +217,6 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
         break
     if All==True:
         now="All"+"_"+now
-    print(now)
 
     #Check if the Output folder exist, if not create it
     if not os.path.exists('output'):
