@@ -136,15 +136,32 @@ def files_from_datasets(datasets, rses):
 #clean the data by removing useless information and remove the filename from the storage path
 def clean_up_datasets_rse(datasets_rse):
     for rse in datasets_rse:
-        if comments==True:
-            print("\nCleaning up data about files at {}".format(rse))
+        if "GRIDFTP" in rse:
+            if comments==True:
+                print("\nCleaning up data about files at {}".format(rse))
 
-        dataset_list=datasets_rse[rse]
-        #print(dataset_list[10:])
-        for n in tqdm(range(len(dataset_list)), disable=tqmdis):
-            dataset=dataset_list[n]
-            dataset[3]=dataset[3].replace(dataset[0],"")
-            dataset[3]=dataset[3].replace("{}:file://".format(rse),"")
+            dataset_list=datasets_rse[rse]
+            #print(dataset_list[10:])
+            for n in tqdm(range(len(dataset_list)), disable=tqmdis):
+                dataset=dataset_list[n]
+                dataset[3]=dataset[3].replace(dataset[0],"")
+                print(dataset[3])
+                dataset[3]= dataset[3][dataset[3].index("//")+2:]
+                
+                dataset[3]= dataset[3][dataset[3].index("/")+1:]
+                print(dataset[3])
+                dataset[3]=dataset[3].replace("{}:file://".format(rse),"")
+        else:
+            if comments==True:
+                print("\nCleaning up data about files at {}".format(rse))
+
+            dataset_list=datasets_rse[rse]
+            #print(dataset_list[10:])
+            for n in tqdm(range(len(dataset_list)), disable=tqmdis):
+                dataset=dataset_list[n]
+                dataset[3]=dataset[3].replace(dataset[0],"")
+                dataset[3]=dataset[3].replace("{}:file://".format(rse),"")
+                print(dataset[3])
     return (datasets_rse)
     
 
