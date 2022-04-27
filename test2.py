@@ -220,7 +220,7 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
 
     #Check if the Output folder exist, if not create it
     if not os.path.exists('output'):
-            print("Output folders missing, generating them for the dataset {}.".format(dataset))
+            print("Output folders missing, creating a new one.")
             os.makedirs('output')
     if not os.path.exists('output/{}'.format(now)):
             os.makedirs('output/{}'.format(now))
