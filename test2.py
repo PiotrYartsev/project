@@ -10,6 +10,7 @@ tqmdis=False
 comments=False
 limit=0
 checksum=True
+All=False
 
 
 #gets all the valid scopes registered in Rucio
@@ -211,6 +212,12 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
     now = datetime.now()
     now=str(now)
     now=now.replace(" ","_")
+    for rse in datasets_rse:
+        now=rse+"_"+now
+        break
+    if All==True:
+        now="All"+"_"+now
+    print(now)
 
     #Check if the Output folder exist, if not create it
     if not os.path.exists('output'):
