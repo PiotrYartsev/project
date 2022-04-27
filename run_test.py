@@ -105,6 +105,9 @@ if __name__ == '__main__':
 
     else:
         raise ValueError("Can not search by scope and by dataset similtaniosly, please use only one.")
+
+    if test2.scopes==valid_scopes and test2.limit==0:
+        print("good")
     number_of_files_in_dataset={}
     rses=test2.rses.split(",")
 
