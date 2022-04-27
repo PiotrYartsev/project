@@ -1,0 +1,2 @@
+LUND_GRIDFTP,/projects/hep/fs9/shared/ldmx/ldcs/gridftp/
+SLAC_GRIDFTP,/gpfs/slac/staas/fs1/g/ldmx/data/

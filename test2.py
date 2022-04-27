@@ -10,6 +10,7 @@ tqmdis=False
 comments=False
 limit=0
 checksum=True
+All=False
 
 
 #gets all the valid scopes registered in Rucio
@@ -137,20 +138,33 @@ def files_from_datasets(datasets, rses):
 def clean_up_datasets_rse(datasets_rse):
     for rse in datasets_rse:
         if "GRIDFTP" in rse:
+            grid_settings=open("config.txt","r")
+            grid_settings_list=grid_settings.readlines()
+            for line in grid_settings_list:
+                if rse in line:
+                    
+                    address=line.split(",")[1]
+                    address.replace('\n',"")
             if comments==True:
                 print("\nCleaning up data about files at {}".format(rse))
 
             dataset_list=datasets_rse[rse]
-            #print(dataset_list[10:])
+            #print(dataset_list[:2])
             for n in tqdm(range(len(dataset_list)), disable=tqmdis):
                 dataset=dataset_list[n]
                 dataset[3]=dataset[3].replace(dataset[0],"")
-                print(dataset[3])
+                
                 dataset[3]= dataset[3][dataset[3].index("//")+2:]
                 
                 dataset[3]= dataset[3][dataset[3].index("/")+1:]
-                print(dataset[3])
-                dataset[3]=dataset[3].replace("{}:file://".format(rse),"")
+                #print(dataset[3])
+                
+                dataset[3]=dataset[3].replace("ldcs/",str(address))
+                dataset[3]=dataset[3].replace("\n","")
+                #print(dataset[3])
+                
+                
+                
         else:
             if comments==True:
                 print("\nCleaning up data about files at {}".format(rse))
@@ -161,7 +175,6 @@ def clean_up_datasets_rse(datasets_rse):
                 dataset=dataset_list[n]
                 dataset[3]=dataset[3].replace(dataset[0],"")
                 dataset[3]=dataset[3].replace("{}:file://".format(rse),"")
-                print(dataset[3])
     return (datasets_rse)
     
 
@@ -199,6 +212,12 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
     now = datetime.now()
     now=str(now)
     now=now.replace(" ","_")
+    for rse in datasets_rse:
+        now=rse+"_"+now
+        break
+    if All==True:
+        now="All"+"_"+now
+    print(now)
 
     #Check if the Output folder exist, if not create it
     if not os.path.exists('output'):
@@ -330,7 +349,9 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
         #Write information about the files we found in storage to a txt file
         found= open("{}".format(found_addres),"w+")
         for n in files_found:
-            found.write(str(files_found[n]))
+            for k in files_found[n]:
+                output=k+"\n"
+                found.write(output)
         found.close()
         
 
