@@ -308,7 +308,6 @@ def files_missing_rucio(output_file):
             adler_no_problem.append(file[1:])
     print("Number of currupted files")
     print(len(adler_problem))
-    print(len(adler_no_problem))
     
     problem_runs={}
     for file in adler_problem:
@@ -429,10 +428,10 @@ def runner(output_list_to_check,files_in_output):
         adler32fail(output_list_to_check)
     if len(summery_problems)>0:
         print("\nA summery of the problems found\n")
-        summery_problems_file=open('classifier/{}/summery_problems.txt'.format(output_file),"w+")
+        summery_problems_file=open('classifier/{}/summery_problems.txt'.format(output_list_to_check),"w+")
         for p in summery_problems:
             output=str(p)+"\n"
-            summery_problems_file.write(output)
+            summery_problems_file.write(output_list_to_check)
         summery_problems_file.close()
     
     
