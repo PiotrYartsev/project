@@ -63,13 +63,11 @@ def files_missing_storage_with_datasets(output_file):
 
     print("Counting and comparing the number of files missing in storage and files registered to dataset.")
     for file in tqdm(datasets_and_numbers_list):
-        
         batch=file[0]
         number=int(file[1])
         n=0
         for stuff in files_missing_storage_lines:
             if batch in stuff:
-                number=number+1
                 n=n+1
         if n/number>0:
             if n/number>0.2 and not n/number==1:
