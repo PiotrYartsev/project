@@ -20,7 +20,6 @@ def get_runs():
 
     checked_file=open("{}".format('classifier/checked.txt'),"r+")
     checked_file_lines=checked_file.readlines()
-    print(checked_file_lines)
     for line in checked_file_lines:
         checked.append(line)
     output_list_to_check=[]
@@ -219,15 +218,14 @@ def files_missing_rucio(output_file):
     
     files_found_storage=open("output/{}/files_found_storage.txt".format(output_file),"r")
     files_found_storage_list=files_found_storage.readlines()
-    files_found_storage_list=files_found_storage_list[0].replace("'","").split(",")
-    files_found_storage_list=[file.replace("[","") for file in files_found_storage_list]
-    files_found_storage_list=[file.replace("]","") for file in files_found_storage_list]
-    files_found_storage_list=list(set(files_found_storage_list))
+    
     
 
 
     runs={}
-    for file in files_found_storage_list:
+    for files in files_found_storage_list:
+        file=files.replace("\n","")
+        #file=files.split(",")
         
         filename_list=file[:file.rindex("_")]
         
@@ -326,17 +324,19 @@ def files_missing_rucio(output_file):
     no_problem_runs_2=[]
     for filename in problem_runs:
         number_problem_files=problem_runs[filename]
-
-        number_all=runs[filename]
-
-        frac=number_problem_files/number_all
-
-        if frac>0.2 and not frac==1:
-            problem_runs_2.append(filename+","+str(frac))
-        elif frac==1:
-            missing_runs_2.append(filename+","+str(frac))
+        if number_problem_files==0:
+            no_problem_runs_2.append(filename+","+str(0))
         else:
-            no_problem_runs_2.append(filename+","+str(frac))
+            number_all=runs[filename]
+
+            frac=number_problem_files/number_all
+
+            if frac>0.2 and not frac==1:
+                problem_runs_2.append(filename+","+str(frac))
+            elif frac==1:
+                missing_runs_2.append(filename+","+str(frac))
+            else:
+                no_problem_runs_2.append(filename+","+str(frac))
     print("runs with problem")
     print(len(problem_runs_2))
     print("runs missing problem")
@@ -394,27 +394,32 @@ def files_missing_rucio(output_file):
         missing_files.close()
 
     for stuff in problem_runs_2:
-        file=stuff[0]
-        procentage=stuff[1]*100
+        stuufer=stuff.split(",")
+        file=stuufer[0]
+        procentage=str((float(stuufer[1])*100))
         output=("The run {} in Rucio migh have some problem, becouse {} % of the files missing in Rucio are duplicates.".format(file,procentage))
         summery_problems.append(output)
 
     for stuff in missing_runs_2:
-        file=stuff[0]
-        procentage=stuff[1]*100
+        stuufer=stuff.split(",")
+        file=stuufer[0]
+        procentage=str((float(stuufer[1])*100))
         output=("The run {} in Rucio probably has some problem, becouse {} % of the files missing in Rucio are duplicates.".format(file,procentage))
         summery_problems.append(output)
 
-def adler32fail(output_list_to_check):
+def adler32fail(output_file):
     adler32failfile=open("output/{}/adler32_fail.txt".format(output_file),"r")
     adler32failfile_lines=adler32failfile.readlines()
     for line in adler32failfile_lines:
         lines=line.split(",")
-        filename=lines[0]
-        rucio=lines[1]
-        storage=lines[2]
-        output=("The file {} has been corrupted. The value for the Adler32 checksum in Rucio is {} but the checksum in storage is {}.".format(filename,rucio,storage))
-        summery_problems.append(output)
+        if ['\n']==lines:
+            pass
+        else:
+            filename=lines[0]
+            rucio=lines[1]
+            storage=lines[2].replace("\n","")
+            output=("The file {} has been corrupted. The value for the Adler32 checksum in Rucio is {} but the checksum in storage is {}.".format(filename,rucio,storage))
+            summery_problems.append(output)
 
 def runner(output_list_to_check,files_in_output):
     if "files_missing_storage.txt" in files_in_output:
@@ -430,8 +435,9 @@ def runner(output_list_to_check,files_in_output):
         print("\nA summery of the problems found\n")
         summery_problems_file=open('classifier/{}/summery_problems.txt'.format(output_list_to_check),"w+")
         for p in summery_problems:
+            print(p)
             output=str(p)+"\n"
-            summery_problems_file.write(output_list_to_check)
+            summery_problems_file.write(output)
         summery_problems_file.close()
     
     
