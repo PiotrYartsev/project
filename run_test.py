@@ -24,7 +24,6 @@ if __name__ == '__main__':
     limit=0
     checksum=True
 
-
     for argument in sys.argv:
         #argument 1:rse 
         if "rse=" in argument:
@@ -106,15 +105,28 @@ if __name__ == '__main__':
     else:
         raise ValueError("Can not search by scope and by dataset similtaniosly, please use only one.")
 
-    if test2.scopes==valid_scopes and test2.limit==0:
-        test2.All=True
-    number_of_files_in_dataset={}
-    rses=test2.rses.split(",")
-
-    All_datasets=get_all_datasets(test2.scopes)
     
-    datasets_rse, number_of_files_in_dataset=files_from_datasets(All_datasets,rses)
-    
-    datasets_rse=clean_up_datasets_rse(datasets_rse)
+    try:
+        
+        number_of_files_in_dataset={}
+        rses=test2.rses.split(",")
+        All_datasets=test2.datasets2
+        
+        datasets_rse, number_of_files_in_dataset=files_from_datasets(All_datasets,rses)
+        
+        datasets_rse=clean_up_datasets_rse(datasets_rse)
 
-    compere_checksum(datasets_rse,number_of_files_in_dataset)
+        compere_checksum(datasets_rse,number_of_files_in_dataset)
+    except:
+        if test2.scopes==valid_scopes and test2.limit==0:
+            test2.All=True
+        number_of_files_in_dataset={}
+        rses=test2.rses.split(",")
+
+        All_datasets=get_all_datasets(test2.scopes)
+        
+        datasets_rse, number_of_files_in_dataset=files_from_datasets(All_datasets,rses)
+        
+        datasets_rse=clean_up_datasets_rse(datasets_rse)
+
+        compere_checksum(datasets_rse,number_of_files_in_dataset)
