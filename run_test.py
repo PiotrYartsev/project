@@ -23,7 +23,7 @@ if __name__ == '__main__':
     comments=False
     limit=0
     checksum=True
-
+    test2.datasets2=None
     for argument in sys.argv:
         #argument 1:rse 
         if "rse=" in argument:
@@ -90,23 +90,27 @@ if __name__ == '__main__':
         test2.limit
     except:
         test2.limit=0
-    try:
-        test2.scopes
-        test2.datasets2
-    except:
+    
+    if test2.datasets2==None:
+        pass
+    else:
         try:
             test2.scopes
+            test2.datasets2
         except:
             try:
-                test2.datasets2
+                test2.scopes
             except:
-                raise ValueError("You have to provide at least a scope or a dataset.")
+                try:
+                    test2.datasets2
+                except:
+                    raise ValueError("You have to provide at least a scope or a dataset.")
 
-    else:
-        raise ValueError("Can not search by scope and by dataset similtaniosly, please use only one.")
+        else:
+            raise ValueError("Can not search by scope and by dataset similtaniosly, please use only one.")
 
-    
-    try:
+    print(test2.datasets2)
+    if not test2.datasets2==None:
         
         number_of_files_in_dataset={}
         rses=test2.rses.split(",")
@@ -117,7 +121,7 @@ if __name__ == '__main__':
         datasets_rse=clean_up_datasets_rse(datasets_rse)
 
         compere_checksum(datasets_rse,number_of_files_in_dataset)
-    except:
+    else:
         if test2.scopes==valid_scopes and test2.limit==0:
             test2.All=True
         number_of_files_in_dataset={}
