@@ -284,8 +284,12 @@ def files_missing_rucio(output_file):
 
     
 
-    
+    adler_no_problem=[]
     adler_problem=[]
+    for n in range(len(many)):
+        file=many[n]
+        adler_problem.append(file[1:])
+    """
     adler_no_problem=[]
     print("Calculate checksum for duplicates to se if they are corrupted or just a copy.")
     for n in tqdm(range(len(many))):
@@ -306,7 +310,10 @@ def files_missing_rucio(output_file):
             adler_no_problem.append(file[1:])
     print("Number of currupted files")
     print(len(adler_problem))
+    """
+
     
+
     problem_runs={}
     for file in adler_problem:
         for filename in file:
@@ -447,13 +454,11 @@ def runner(output_list_to_check,files_in_output):
 output_list_to_check=get_runs()[0]
 for k in range(len(output_list_to_check)):
     summery_problems=[] 
-    if "All" not in output_list_to_check[k]:
-        pass
-    else:
-        output_file=get_files_in_runs(output_list_to_check[k])
+    
+    output_file=get_files_in_runs(output_list_to_check[k])
 
-        #output_file=get_files_in_runs("2022-04-21_21:52:37.144536")
-        #print(output_file)
+    #output_file=get_files_in_runs("2022-04-21_21:52:37.144536")
+    #print(output_file)
 
-        runner(output_list_to_check[k],output_file)
+    runner(output_list_to_check[k],output_file)
     
