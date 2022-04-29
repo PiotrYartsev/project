@@ -399,6 +399,15 @@ def files_missing_rucio(output_file):
             missing_files.write(output)
         missing_files.close()
 
+
+    if len(many)>0:
+        missing_files=open('classifier/{}/files_missing_rucio/many_missing.txt'.format(output_file),"w+")
+        #print((few))
+        for file_out in many:
+            output=str(file_out)+"\n"
+            missing_files.write(output)
+        missing_files.close()
+
     for stuff in problem_runs_2:
         stuufer=stuff.split(",")
         file=stuufer[0]
