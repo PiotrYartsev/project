@@ -109,7 +109,6 @@ if __name__ == '__main__':
         else:
             raise ValueError("Can not search by scope and by dataset similtaniosly, please use only one.")
 
-    print(test2.datasets2)
     if not test2.datasets2==None:
         
         number_of_files_in_dataset={}
