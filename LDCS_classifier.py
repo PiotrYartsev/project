@@ -63,13 +63,11 @@ def files_missing_storage_with_datasets(output_file):
 
     print("Counting and comparing the number of files missing in storage and files registered to dataset.")
     for file in tqdm(datasets_and_numbers_list):
-        
         batch=file[0]
         number=int(file[1])
         n=0
         for stuff in files_missing_storage_lines:
             if batch in stuff:
-                number=number+1
                 n=n+1
         if n/number>0:
             if n/number>0.2 and not n/number==1:
@@ -401,6 +399,15 @@ def files_missing_rucio(output_file):
             missing_files.write(output)
         missing_files.close()
 
+
+    if len(many)>0:
+        missing_files=open('classifier/{}/files_missing_rucio/many_missing.txt'.format(output_file),"w+")
+        #print((few))
+        for file_out in many:
+            output=str(file_out)+"\n"
+            missing_files.write(output)
+        missing_files.close()
+
     for stuff in problem_runs_2:
         stuufer=stuff.split(",")
         file=stuufer[0]
@@ -454,12 +461,14 @@ def runner(output_list_to_check,files_in_output):
 
 output_list_to_check=get_runs()[0]
 for k in range(len(output_list_to_check)):
-    summery_problems=[] 
-    
-    output_file=get_files_in_runs(output_list_to_check[k])
+    if "All" not in output_list_to_check[k]:
+        pass
+    else:
+        summery_problems=[]
+        output_file=get_files_in_runs(output_list_to_check[k])
 
-    #output_file=get_files_in_runs("2022-04-21_21:52:37.144536")
-    #print(output_file)
+        #output_file=get_files_in_runs("2022-04-21_21:52:37.144536")
+        #print(output_file)
 
-    runner(output_list_to_check[k],output_file)
+        runner(output_list_to_check[k],output_file)
     
