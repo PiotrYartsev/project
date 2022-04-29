@@ -2,9 +2,13 @@ import os
 from zlib import adler32
 from datetime import datetime
 
-from run_test import *
 
-a=list(os.popen("ls /home/pioyar/alkfmnsl || echo false"))
-print(a)
-if ['false\n']==a:
-    print(a)
+a=open("output/All_LUND_2022-04-28_20:59:54.348727/files_found_storage.txt", "r")
+
+lines=a.readlines()
+
+print(len(lines))
+
+lines=list(set(lines))
+
+print(len(lines))

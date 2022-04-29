@@ -452,12 +452,14 @@ def runner(output_list_to_check,files_in_output):
 
 output_list_to_check=get_runs()[0]
 for k in range(len(output_list_to_check)):
-    summery_problems=[] 
-    
-    output_file=get_files_in_runs(output_list_to_check[k])
+    if "All" not in output_list_to_check[k]:
+        pass
+    else:
+        summery_problems=[]
+        output_file=get_files_in_runs(output_list_to_check[k])
 
-    #output_file=get_files_in_runs("2022-04-21_21:52:37.144536")
-    #print(output_file)
+        #output_file=get_files_in_runs("2022-04-21_21:52:37.144536")
+        #print(output_file)
 
-    runner(output_list_to_check[k],output_file)
+        runner(output_list_to_check[k],output_file)
     
