@@ -145,6 +145,7 @@ def clean_up_datasets_rse(datasets_rse):
                     
                     address=line.split(",")[1]
                     address.replace('\n',"")
+                    print(address)
             if comments==True:
                 print("\nCleaning up data about files at {}".format(rse))
 
@@ -272,7 +273,7 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
 
             #The storage location for where the file is
             directory=file_data[3]
-
+            #print(directory)
             #If the directory has not yet been encountered, add it to the list directory_list
             if directory not in directory_list:
                 directory_list.append(directory)
