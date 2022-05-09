@@ -2,7 +2,7 @@ import os
 from zlib import adler32
 from datetime import datetime
 from tqdm import *
-from run_test import *
+from DDS_comparison import *
 from numpy import size
 import test2
 
