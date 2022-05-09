@@ -158,13 +158,16 @@ def clean_up_datasets_rse(datasets_rse):
                 dataset[3]= dataset[3][dataset[3].index("//")+2:]
                 
                 dataset[3]= dataset[3][dataset[3].index("/")+1:]
-                #print(dataset[3])
+                print(dataset[3])
+                dataset[3]= dataset[3][dataset[3].index("/")+1:]
+                print(dataset[3])
                 
-                dataset[3]=dataset[3].replace("ldcs/",str(address))
+                dataset[3]=address+dataset[3]
                 dataset[3]=dataset[3].replace("\n","")
-                #print(dataset[3])
+                print(dataset[3])
+                break
                 
-                
+"""                
                 
         else:
             if comments==True:
@@ -416,4 +419,4 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
         for direct in problem_dir:
             output=str(direct)+"\n"
             prob_loc.write(output)
-        prob_loc.close()
+        prob_loc.close()"""
