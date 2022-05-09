@@ -143,9 +143,10 @@ def clean_up_datasets_rse(datasets_rse):
             for line in grid_settings_list:
                 if rse in line:
                     
-                    address=line.split(",")[1]
-                    address.replace('\n',"")
-                    print(address)
+                    address_to_change=line.split(",")[1]
+                    change_with=line.split(',')[2]
+                    change_with=change_with.replace('\n',"")
+                   
             if comments==True:
                 print("\nCleaning up data about files at {}".format(rse))
 
@@ -153,21 +154,12 @@ def clean_up_datasets_rse(datasets_rse):
             #print(dataset_list[:2])
             for n in tqdm(range(len(dataset_list)), disable=tqmdis):
                 dataset=dataset_list[n]
+                print(dataset[3])
                 dataset[3]=dataset[3].replace(dataset[0],"")
                 
-                dataset[3]= dataset[3][dataset[3].index("//")+2:]
-                
-                dataset[3]= dataset[3][dataset[3].index("/")+1:]
-                print(dataset[3])
-                dataset[3]= dataset[3][dataset[3].index("/")+1:]
+                dataset[3]=dataset[3].replace(address_to_change,change_with)
                 print(dataset[3])
                 
-                dataset[3]=address+dataset[3]
-                dataset[3]=dataset[3].replace("\n","")
-                print(dataset[3])
-                break
-                
-"""                
                 
         else:
             if comments==True:
@@ -419,4 +411,4 @@ def compere_checksum(datasets_rse, number_of_files_in_dataset):
         for direct in problem_dir:
             output=str(direct)+"\n"
             prob_loc.write(output)
-        prob_loc.close()"""
+        prob_loc.close()
