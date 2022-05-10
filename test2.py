@@ -154,11 +154,11 @@ def clean_up_datasets_rse(datasets_rse):
             #print(dataset_list[:2])
             for n in tqdm(range(len(dataset_list)), disable=tqmdis):
                 dataset=dataset_list[n]
-                print(dataset[3])
+                
                 dataset[3]=dataset[3].replace(dataset[0],"")
                 
                 dataset[3]=dataset[3].replace(address_to_change,change_with)
-                print(dataset[3])
+                
                 
                 
         else:
