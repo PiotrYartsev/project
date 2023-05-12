@@ -6,8 +6,6 @@ import os
 
 
 
-#add search by dataset's
-
 #add a timestamp to dump all the output files to for easier tracking and no overwrite
 if __name__ == '__main__':
     valid_rses=list_rse()
