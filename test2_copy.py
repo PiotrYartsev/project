@@ -1,7 +1,4 @@
-import os
-from zlib import adler32
-from datetime import datetime
-from tqdm import *
+
 from DDS_comparison_tool import *
 from rucio.client import Client
 rucioclient = Client()
