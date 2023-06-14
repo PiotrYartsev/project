@@ -11,32 +11,36 @@ def list_scopes():
 
 def list_rses():
     rses=rucioclient.list_rses()
-    rses = json.loads(rses)
     return(rses)
 
 #using the rucio API to get all the files in a rse
-def list_files_rse(rse_name):
-    try:
-        files=rucioclient.list_replicas([rse_name])
-        return(files)
-    except Exception as e:
-        print(f"Error: {e}")
-        return []
-
+def list_files_dataset(scope, name):
+    files = rucioclient.list_files(scope, name)
+    return(files)
 scopes=list_scopes()
 #print(scopes)
 
 rses=list_rses()
-print(rses)
-
 rses=list(rses)
+rses_list=[]
+for eachItem in rses:
+    for key in eachItem:
+        if key == "rse":
+            #print(eachItem[key])
+            rses_list.append(eachItem[key])
 
-# prompt the user to enter the RSE name
-rse_name = input("Enter the RSE name: ")
+#read a txt line by line
+with open('datasets_and_numbers.txt') as f:
+    lines = f.readlines()
+    
+dataset=[]
+for line in lines:
+    #split str on ,
+    line=line.split(",")
+    line=line[0]
+    dataset.append(line)
 
-files=list_files_rse(rse_name)
-
-if files:
-    print(files)
-else:
-    print(f"No files found in RSE {rse_name}")
+for dataset_name in dataset:
+    scope, name = dataset_name.split(":")
+    print(list(list_files_dataset(scope, name)))
+    break
