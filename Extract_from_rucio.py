@@ -5,6 +5,9 @@ import re
 from tqdm import tqdm
 from Rucio_functions import list_files_dataset, list_replicas
 
+# Connect to the database
+con = sl.connect('Rucio_data_LUND_GRIDFTP.db')
+
 # Flag to indicate if the script should exit
 should_exit = False
 
@@ -90,8 +93,7 @@ def main():
     # Read dataset names from a file
     dataset=reading_data_from_file("datasets_and_numbers.txt")
 
-    # Connect to the database
-    con = sl.connect('Rucio_data_LUND_GRIDFTP.db')
+
 
     # If table does not already exist, create it
     if not con.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='dataset';").fetchall():
