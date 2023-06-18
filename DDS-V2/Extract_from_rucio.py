@@ -121,7 +121,7 @@ def main():
 
                 # If dataset_name is already in the table named dataset, skip it
                 if con.execute("SELECT name FROM dataset WHERE name='{}'".format(name)).fetchall():
-                    print("The dataset "+name+"is already in the table")
+                    print("                 The dataset "+name+"is already in the table")
                     # Compare count to length of dataset in the table and the number of files in the dataset in rucio
                     number_in_table=con.execute("SELECT length FROM dataset WHERE name='{}'".format(name)).fetchone()
                     number_in_table=number_in_table[0]
@@ -132,7 +132,7 @@ def main():
                         print(number_in_table)
                         raise Exception("Error: number of files in table does not match number of files in rucio")
                 else:
-                    print("The dataset "+dataset_name+"is not in the table")
+                    print("                 The dataset "+dataset_name+"is not in the table")
                     scope, name = dataset_name.split(":")
                     output=(list(list_files_dataset(scope, name)))
                     data=[]
