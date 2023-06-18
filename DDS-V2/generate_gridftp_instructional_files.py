@@ -3,9 +3,7 @@
 
 # Import libraries
 import sqlite3 as sl
-import os
-import sys
-import argparse
+
 import subprocess
 
 # Initialize the databases
