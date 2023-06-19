@@ -47,4 +47,4 @@ def count_files_func(scope,dataset_name):
 
 
 
-#print(count_files_func("validation","v1.7.1_ecal_gammamumu-batch4"))
+#print(count_files_func("mc20","v1.7.1_ecal_gammamumu-batch4"))

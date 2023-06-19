@@ -1,4 +1,5 @@
 /classifier
-
+*.db
 /__pycache__
 /*.pyc
+*.db
