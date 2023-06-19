@@ -3,13 +3,15 @@
 
 # Import libraries
 import sqlite3 as sl
-
-import subprocess
+import os
 
 # Initialize the databases
 rucio_database = sl.connect('Rucio_data_LUND_GRIDFTP.db')
-#delete the old directories_database
-subprocess.run(["rm", "directories_and_dataset_for_RSE.db"])
+
+#Delete the old directories_database if it exists
+if os.path.exists('directories_and_dataset_for_RSE.db'):
+    os.remove('directories_and_dataset_for_RSE.db')
+
 directories_database = sl.connect('directories_and_dataset_for_RSE.db')
 
 # Next, for each RSE, generate a list of directories and files that Rucio believes exist at that RSE
