@@ -1,6 +1,0 @@
-gsiftp://griddev01.slac.stanford.edu:2811/sdf/group/ldmx/data/validation/v12/4.0GeV/Ap1000-sim-test
-gsiftp://griddev01.slac.stanford.edu:2811/sdf/group/ldmx/data/vaidation/v12/4.0GeV/testPermissionsFromUMN
-gsiftp://griddev01.slac.stanford.edu:2811/sdf/group/ldmx/data/validation/4.0GeV/Ap1000-test
-gsiftp://griddev01.slac.stanford.edu:2811/sdf/group/ldmx/data/validation/v12/4.0GeV/v2.3.0-1e-pileup-test
-gsiftp://griddev01.slac.stanford.edu:2811/sdf/group/ldmx/data/validation/v12/4.0GeV/Ap1GeV
-gsiftp://griddev01.slac.stanford.edu:2811/sdf/group/ldmx/data/validation/v12/4.0GeV/v2.3.0-testInput
