@@ -124,7 +124,7 @@ def main():
                 if con.execute("SELECT name FROM dataset WHERE name='{}' AND scope='{}'".format(name,scope)).fetchall():
                     print("                 The dataset "+name+" is already in the table")
                     # Compare count to length of dataset in the table and the number of files in the dataset in rucio
-                    number_in_table=con.execute("SELECT length FROM dataset WHERE name='{}'".format(name)).fetchone()
+                    number_in_table=con.execute("SELECT length FROM dataset WHERE name='{}' AND scope='{}'".format(name,scope)).fetchone()
                     number_in_table=number_in_table[0]
                     number_in_rucio=count_files_func(scope, name)
                     if number_in_table != number_in_rucio[0]:

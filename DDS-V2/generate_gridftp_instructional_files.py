@@ -4,6 +4,7 @@
 # Import libraries
 import sqlite3 as sl
 import os
+from tqdm import tqdm
 
 # Initialize the databases
 rucio_database = sl.connect('Rucio_data_LUND_GRIDFTP.db')
@@ -15,8 +16,16 @@ if os.path.exists('directories_and_dataset_for_RSE.db'):
 directories_database = sl.connect('directories_and_dataset_for_RSE.db')
 
 # Next, for each RSE, generate a list of directories and files that Rucio believes exist at that RSE
+
+#get the number of tables in the database
+number_of_tables = rucio_database.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'datasets'").fetchall()[0][0]
+#set the tqdm progress bar
+pbar = tqdm(total=number_of_tables)
+
 # For each RSE in the table
-for table in rucio_database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'datasets'"):
+
+for table in (rucio_database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'datasets'")):
+    pbar.update(1)
     table = table[0]
     if table not in ["dataset","sqlite_sequence"]:
         data = rucio_database.execute("SELECT location, rse FROM {}".format(table)).fetchall()
