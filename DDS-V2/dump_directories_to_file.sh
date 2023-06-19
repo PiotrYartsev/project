@@ -13,6 +13,8 @@
 #start the loop
 while read line
 do
+    #replace "gsiftp://hep-fs.lunarc.lu.se:2811/ldcs/" with "/projects/hep/fs9/shared/ldmx/ldcs/gridftp/"
+    line=${line//gsiftp:\/\/hep-fs.lunarc.lu.se:2811\/ldcs\//\/projects\/hep\/fs9\/shared\/ldmx\/ldcs\/gridftp\/}
     #ls the directory
     ls $line > $line.txt
 done < $1
