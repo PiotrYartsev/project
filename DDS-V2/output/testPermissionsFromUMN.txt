@@ -1,4 +1,0 @@
-mc_v12-4GeV-2e-ecal_photonuclear_run1_t1645112247.root
-mc_v12-4GeV-2e-ecal_photonuclear_run1_t1645112276.root
-mc_v12-4GeV-2e-ecal_photonuclear_run2_t1645113240.root
-mc_v12-4GeV-2e-ecal_photonuclear_run2_t1645113246.root

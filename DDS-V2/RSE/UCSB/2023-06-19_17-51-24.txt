@@ -1,3 +1,2 @@
 file:///home/ldmx/LDCS/storage/ldmx/mc-data/validation/v12/4.0GeV/v2.3.0-batch1
 file:///home/ldmx/LDCS/storage/ldmx/mc-data/validation/v12/4.0GeV/v2.3.0-testRecoLund
-file:///home/ldmx/LDCS/storage/ldmx/mc-data/validation/v12/4.0GeV/v2.3.0-testInput
