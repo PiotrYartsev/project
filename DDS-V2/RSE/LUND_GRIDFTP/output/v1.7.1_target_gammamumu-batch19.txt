@@ -1,4 +1,4 @@
-/projects/hep/fs9/shared/ldmx/ldcs/gridftp/mc20/v9/8.0GeV/v1.7.1_target_gammamumu-batch19
+gsiftp://hep-fs.lunarc.lu.se:2811/ldcs/mc20/v9/8.0GeV/v1.7.1_target_gammamumu-batch19
 mc_v9-8GeV-1e-target_gammamumu_run180001_t1646241251.root
 mc_v9-8GeV-1e-target_gammamumu_run180002_t1646241446.root
 mc_v9-8GeV-1e-target_gammamumu_run180003_t1646241533.root

@@ -1,4 +1,4 @@
-/projects/hep/fs9/shared/ldmx/ldcs/gridftp/mc20/v9/4.0GeV/v1.7.1_ecal_photonuclear-batch3
+gsiftp://hep-fs.lunarc.lu.se:2811/ldcs/mc20/v9/4.0GeV/v1.7.1_ecal_photonuclear-batch3
 mc_v9-4.0GeV-1e-ecal_photonuclear_run5201_t1651695478.root
 mc_v9-4.0GeV-1e-ecal_photonuclear_run5202_t1651695511.root
 mc_v9-4.0GeV-1e-ecal_photonuclear_run5203_t1651695481.root

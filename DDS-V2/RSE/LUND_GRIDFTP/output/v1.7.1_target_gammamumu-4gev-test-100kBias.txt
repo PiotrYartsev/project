@@ -1,4 +1,4 @@
-/projects/hep/fs9/shared/ldmx/ldcs/gridftp/validation/v9/4.0GeV/v1.7.1_target_gammamumu-4gev-test-100kBias
+gsiftp://hep-fs.lunarc.lu.se:2811/ldcs/validation/v9/4.0GeV/v1.7.1_target_gammamumu-4gev-test-100kBias
 mc_v9-4GeV-1e-target_gammamumu_run12_t1645813940.root
 mc_v9-4GeV-1e-target_gammamumu_run13_t1645813975.root
 mc_v9-4GeV-1e-target_gammamumu_run14_t1645813919.root

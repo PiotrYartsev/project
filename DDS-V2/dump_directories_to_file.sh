@@ -30,11 +30,14 @@ while read line
 do
 
     # Replace the string in the line with the specified replacement
-    line=${line//$where_am_i/$replace_with}
+    line2=${line//$where_am_i/$replace_with}
     # Save the output to a file in the "output" subdirectory of the directory where the script is run
-    echo "Listing directory: $line"
-    output_file="$(basename "$line").txt"
+    echo "Listing directory: $line2"
+    output_file="$(basename "$line2").txt"
+
     mkdir -p "$script_dir/output"
-    ls "$line" > "$script_dir/output/$output_file"
+    #put the file directory as a first line
+    echo $line >  "$script_dir/output/$output_file"
+    ls "$line2" >> "$script_dir/output/$output_file"
     echo "Saved output to file: $script_dir/output/$output_file"
 done < "$1"

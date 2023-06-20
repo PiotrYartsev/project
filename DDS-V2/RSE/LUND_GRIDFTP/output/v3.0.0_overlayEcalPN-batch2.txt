@@ -1,4 +1,4 @@
-/projects/hep/fs9/shared/ldmx/ldcs/gridftp/mc21/v12/4.0GeV/v3.0.0_overlayEcalPN-batch2
+gsiftp://hep-fs.lunarc.lu.se:2811/ldcs/mc21/v12/4.0GeV/v3.0.0_overlayEcalPN-batch2
 mc_v12-4GeV-2e-ecal_photonuclear_run1000_t1636995136.root
 mc_v12-4GeV-2e-ecal_photonuclear_run1000_t1636997896.root
 mc_v12-4GeV-2e-ecal_photonuclear_run1000_t1637031238.root

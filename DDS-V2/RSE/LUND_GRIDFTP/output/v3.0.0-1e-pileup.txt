@@ -1,4 +1,4 @@
-/projects/hep/fs9/shared/ldmx/ldcs/gridftp/validation/v12/4.0GeV/v3.0.0-1e-pileup
+gsiftp://hep-fs.lunarc.lu.se:2811/ldcs/validation/v12/4.0GeV/v3.0.0-1e-pileup
 mc_v12-4GeV-1e-inclusive_pileup_run1_t1629844184.root
 mc_v12-4GeV-1e-inclusive_pileup_run1_t1629845314.root
 mc_v12-4GeV-1e-inclusive_pileup_run1_t1629922814.root
