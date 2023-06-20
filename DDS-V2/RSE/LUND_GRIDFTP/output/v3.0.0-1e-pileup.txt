@@ -1,0 +1,17 @@
+/projects/hep/fs9/shared/ldmx/ldcs/gridftp/validation/v12/4.0GeV/v3.0.0-1e-pileup
+mc_v12-4GeV-1e-inclusive_pileup_run1_t1629844184.root
+mc_v12-4GeV-1e-inclusive_pileup_run1_t1629845314.root
+mc_v12-4GeV-1e-inclusive_pileup_run1_t1629922814.root
+mc_v12-4GeV-1e-inclusive_pileup_run1_t1629990695.root
+mc_v12-4GeV-1e-inclusive_pileup_run1_t1629991331.root
+mc_v12-4GeV-1e-inclusive_pileup_run1_t1629993976.root
+mc_v12-4GeV-1e-inclusive_pileup_run1_t1630355517.root
+mc_v12-4GeV-1e-inclusive_pileup_run1_t1630694799.root
+mc_v12-4GeV-1e-inclusive_pileup_run2_t1629844211.root
+mc_v12-4GeV-1e-inclusive_pileup_run2_t1629845314.root
+mc_v12-4GeV-1e-inclusive_pileup_run2_t1629922816.root
+mc_v12-4GeV-1e-inclusive_pileup_run2_t1629991307.root
+mc_v12-4GeV-1e-inclusive_pileup_run2_t1629991315.root
+mc_v12-4GeV-1e-inclusive_pileup_run2_t1629993974.root
+mc_v12-4GeV-1e-inclusive_pileup_run2_t1630355518.root
+mc_v12-4GeV-1e-inclusive_pileup_run2_t1630694817.root
