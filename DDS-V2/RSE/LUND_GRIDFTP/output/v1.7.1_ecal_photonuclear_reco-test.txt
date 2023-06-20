@@ -1,4 +1,4 @@
-/projects/hep/fs9/shared/ldmx/ldcs/gridftp/validation/v9/4.0GeV/v1.7.1_ecal_photonuclear_reco-test
+gsiftp://hep-fs.lunarc.lu.se:2811/ldcs/validation/v9/4.0GeV/v1.7.1_ecal_photonuclear_reco-test
 mc_v9-4GeV-1e-ecal_photonuclear_run10_t1651527856.root
 mc_v9-4GeV-1e-ecal_photonuclear_run10_t1651527858.root
 mc_v9-4GeV-1e-ecal_photonuclear_run11_t1651527858.root

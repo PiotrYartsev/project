@@ -1,4 +1,4 @@
-/projects/hep/fs9/shared/ldmx/ldcs/gridftp/validation/v9/8.0GeV/v1.7.1-testManyInputFiles_targetPN_tskim
+gsiftp://hep-fs.lunarc.lu.se:2811/ldcs/validation/v9/8.0GeV/v1.7.1-testManyInputFiles_targetPN_tskim
 mc_v9-8GeV-1e-target_photonuclear_run100_t1631726877.root
 mc_v9-8GeV-1e-target_photonuclear_run100_t1631728994.root
 mc_v9-8GeV-1e-target_photonuclear_run100_t1631738194.root

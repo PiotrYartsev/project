@@ -1,4 +1,4 @@
-/projects/hep/fs9/shared/ldmx/ldcs/gridftp/validation/v9/8.0GeV/v1.7.1_ecal_gammamumu_reco-batch4
+gsiftp://hep-fs.lunarc.lu.se:2811/ldcs/validation/v9/8.0GeV/v1.7.1_ecal_gammamumu_reco-batch4
 mc_v9-8GeV-1e-ecal_gammamumu_run1000_t1626173678.root
 mc_v9-8GeV-1e-ecal_gammamumu_run1001_t1626173657.root
 mc_v9-8GeV-1e-ecal_gammamumu_run1002_t1626171052.root

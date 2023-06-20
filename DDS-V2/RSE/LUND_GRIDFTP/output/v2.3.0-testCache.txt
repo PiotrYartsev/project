@@ -1,4 +1,4 @@
-/projects/hep/fs9/shared/ldmx/ldcs/gridftp/validation/v12/4.0GeV/v2.3.0-testCache
+gsiftp://hep-fs.lunarc.lu.se:2811/ldcs/validation/v12/4.0GeV/v2.3.0-testCache
 mc_v12-4GeV-2e-ecal_photonuclear_run10_t1616197042.root
 mc_v12-4GeV-2e-ecal_photonuclear_run11_t1616086544.root
 mc_v12-4GeV-2e-ecal_photonuclear_run12_t1616197057.root

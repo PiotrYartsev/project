@@ -1,4 +1,4 @@
-/projects/hep/fs9/shared/ldmx/ldcs/gridftp/mc20/v9/8.0GeV/v1.7.1_targetPN_reco_tskim_subrun6-batch2
+gsiftp://hep-fs.lunarc.lu.se:2811/ldcs/mc20/v9/8.0GeV/v1.7.1_targetPN_reco_tskim_subrun6-batch2
 mc_v9-8GeV-1e-target_photonuclear_run1000_t1639045788.root
 mc_v9-8GeV-1e-target_photonuclear_run1000_t1639046660.root
 mc_v9-8GeV-1e-target_photonuclear_run1001_t1639045808.root

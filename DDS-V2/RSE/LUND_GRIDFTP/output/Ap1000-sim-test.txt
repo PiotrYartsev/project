@@ -1,4 +1,4 @@
-/projects/hep/fs9/shared/ldmx/ldcs/gridftp/validation/v12/4.0GeV/Ap1000-sim-test
+gsiftp://hep-fs.lunarc.lu.se:2811/ldcs/validation/v12/4.0GeV/Ap1000-sim-test
 mc_4GeV_W-noDecay-Ap1000_sim_run10000000010_t1624433017.root
 mc_4GeV_W-noDecay-Ap1000_sim_run10000000010_t1624469804.root
 mc_4GeV_W-noDecay-Ap1000_sim_run10000000010_t1624475447.root
