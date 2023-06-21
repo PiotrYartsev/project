@@ -38,9 +38,13 @@ def read_rucio_dataset_files_and_extract_metadata(file_data_from_dataset_output,
     file_info["adler32"]=[]
     file_info["rse"]=[]
     file_info["location"]=[]
+    file_info["has_replicas"]=[]
     metadata=list_replicas(scope, file_data_from_dataset_output["name"])
     metadata=list(metadata)
     metadata=metadata[0]
+    replicas=len(metadata["rses"])-1
+    if len(metadata["rses"])!=0:
+        print("stop")
     for i in range(len((metadata["rses"]))):
         file_info["name"].append(file_data_from_dataset_output["name"])
         file_info["scope"].append(file_data_from_dataset_output["scope"])
@@ -48,11 +52,12 @@ def read_rucio_dataset_files_and_extract_metadata(file_data_from_dataset_output,
         # For key number i, so first key for i=0, second key for i=1, etc
         file_info["rse"].append(list(metadata["rses"].keys())[i])
         file_info["location"].append(metadata["rses"][list(metadata["rses"].keys())[i]][0])
+        file_info["has_replicas"].append(replicas)
     return file_info
 
 # Function to create a table in the database
 def create_table(dataset_table_name):
-    con.execute("CREATE TABLE {} (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, scope TEXT NOT NULL, rse TEXT NOT NULL, adler32 TEXT NOT NULL, timestamp INTEGER NOT NULL, filenumber INTEGER NOT NULL, location TEXT NOT NULL );".format(dataset_table_name))
+    con.execute("CREATE TABLE {} (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, scope TEXT NOT NULL, rse TEXT NOT NULL, adler32 TEXT NOT NULL, timestamp INTEGER NOT NULL, filenumber INTEGER NOT NULL, location TEXT NOT NULL, has_replicas INTEGER NOT NULL);".format(dataset_table_name))
 
 # Function to append data to the database table
 def append_to_table(data):
@@ -63,23 +68,25 @@ def append_to_table(data):
         adler32_all=key["adler32"]
         rse_all=key["rse"]
         location_all=key["location"]
+        has_replicas_all=key["has_replicas"]
         for i in range(len(name_all)):
             name=name_all[i]
             scope=scope_all[i]
             adler32=adler32_all[i]
             rse=rse_all[i]
             location=location_all[i]
+            has_replicas=has_replicas_all[i]
             namesplit=name.split("_")
             timestamp=namesplit[-1].replace(".root","").replace("t","")
             filenumber=namesplit[-2].replace("run","")
-            append_to_table_output.append((name, scope, rse, adler32, timestamp, filenumber, location))
+            append_to_table_output.append((name, scope, rse, adler32, timestamp, filenumber, location,has_replicas))
             
     return append_to_table_output
 
 # Function to write data to the database table
 def write_to_table(dataset_table_name,append_to_table_input,length):
 
-    sql="INSERT INTO {} (name, scope, rse, adler32, timestamp, filenumber, location) VALUES (?, ?, ?, ?, ?, ?, ?)".format(dataset_table_name)
+    sql="INSERT INTO {} (name, scope, rse, adler32, timestamp, filenumber, location, has_replicas) VALUES (?, ?, ?, ?, ?, ?, ?, ?)".format(dataset_table_name)
     with con:
         con.executemany(sql, append_to_table_input)
     count=con.execute("SELECT COUNT(*) FROM {}".format(dataset_table_name)).fetchone()
@@ -121,42 +128,31 @@ def main():
                 print(dataset_table_name)
 
                 # If dataset_name and scope is already in the table named dataset, skip it
-                if con.execute("SELECT name FROM dataset WHERE name='{}' AND scope='{}'".format(name,scope)).fetchall():
-                    print("                 The dataset "+name+" is already in the table")
-                    # Compare count to length of dataset in the table and the number of files in the dataset in rucio
-                    number_in_table=con.execute("SELECT length FROM dataset WHERE name='{}' AND scope='{}'".format(name,scope)).fetchone()
-                    number_in_table=number_in_table[0]
-                    number_in_rucio=count_files_func(scope, name)
-                    if number_in_table != number_in_rucio[0]:
-                        print(scope,name)
-                        print(number_in_rucio[0])
-                        print(number_in_table)
-                        print(number_in_rucio)
-                        raise Exception("Error: number of files in table does not match number of files in rucio")
-                        
-                else:
-                    print("                 The dataset "+dataset_name+" is not in the table")
-                    scope, name = dataset_name.split(":")
-                    output=(list(list_files_dataset(scope, name)))
-                    data=[]
-                    for file_data_from_dataset_output in tqdm(output):
-                        file_info=read_rucio_dataset_files_and_extract_metadata(file_data_from_dataset_output,scope)
-                        data.append(file_info)
-                    
-                    length=0
-                    for i in range(len(data)):
-                        length+=len(data[i]["name"])
+            
+                print("                 The dataset "+dataset_name+" is not in the table")
+                scope, name = dataset_name.split(":")
+                output=(list(list_files_dataset(scope, name)))
+                data=[]
+                for file_data_from_dataset_output in tqdm(output):
+                    #print(file_data_from_dataset_output)
+                    file_info=read_rucio_dataset_files_and_extract_metadata(file_data_from_dataset_output,scope)
+                    data.append(file_info)
+                
+                length=0
+                for i in range(len(data)):
+                    length+=len(data[i]["name"])
 
-                    # If dataset is not already in the table, add it
-                    con.execute("INSERT INTO dataset (scope,name, length) VALUES (?,?, ?)", (scope,name, length))
+                # If dataset is not already in the table, add it
+                con.execute("INSERT INTO dataset (scope,name,length) VALUES (?,?, ?)", (scope,name, length))
 
-                    append_to_table_input=[]
-                    append_to_table_output=(append_to_table(data))
-                    append_to_table_input.extend(append_to_table_output)
-                    create_table(dataset_table_name)
-                    write_to_table(dataset_table_name,append_to_table_input,length)
+                append_to_table_input=[]
+                append_to_table_output=(append_to_table(data))
+                append_to_table_input.extend(append_to_table_output)
+                create_table(dataset_table_name)
+                write_to_table(dataset_table_name,append_to_table_input,length)
             except Exception as e:
                 raise Exception("An error occurred:", str(e))
+        break
 
     # Cleanup code or any final actions before exiting
     print("Exiting the script...")
