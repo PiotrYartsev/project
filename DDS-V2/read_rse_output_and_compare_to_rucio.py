@@ -80,8 +80,6 @@ for rse in os.listdir(os.getcwd()+"/RSE"):
     if os.path.isdir(os.getcwd()+"/RSE/"+rse+"/output"):
 
 
-
-
         #connect to the SQLite directory-dataset database
         directories_database,rucio_database=connect_to_rucio_and_storage_database()
 
@@ -90,16 +88,20 @@ for rse in os.listdir(os.getcwd()+"/RSE"):
         missing_from_rucio_database,missing_from_storage_database=move_and_create_dark_data_databases(rse)
 
         
-
         #for file in output directory
         for file in os.listdir(os.getcwd()+"/RSE/"+rse+"/output"):
             #in each file, read the content
             with open(os.getcwd()+"/RSE/"+rse+"/output/"+file) as f:
                 file_content = f.readlines()
+
+
             #remove whitespace characters like `\n` at the end of each line
             file_content = [x.strip() for x in file_content]
             files=file_content[1:]
             directory_storage=file_content[0]
+
+
+
             #check if in table rse, there is a row with the same content as the first line of the file
             datasets_and_directories=directories_database.execute("SELECT datasets,exist_at_rses FROM "+rse+" WHERE directory = '"+directory_storage+"'").fetchall()
             dataset=datasets_and_directories[0][0]
@@ -108,21 +110,26 @@ for rse in os.listdir(os.getcwd()+"/RSE"):
             #in the table rucio_database named the same as the dataset, get the file names
             files_in_rucio = rucio_database.execute("SELECT name FROM {} WHERE rse = '{}'".format(dataset, rse)).fetchall()
             files_in_rucio = [x[0] for x in files_in_rucio]
+
+
             #compare the file names in the file and the file names in the table
             files_missing_storage_but_exist_in_rucio = [x for x in files_in_rucio if x not in files]
             files_missing_rucio_but_exist_in_storage = [x for x in files if x not in files_in_rucio]
+
+
             print("\n\n")
             print("dataset: ",dataset)
             if len(files_missing_storage_but_exist_in_rucio)>0:
-                scope=rucio_database.execute("SELECT scope FROM {} WHERE rse = '{}'".format(dataset, rse)).fetchone()[0]
-                print("files_missing_storage_but_exist_in_rucio: ",len(files_missing_storage_but_exist_in_rucio))
-                #create a table in the database
+                #check if the value for has_replicas is >0
+                
+
+
+
                 create_table(dataset,missing_from_storage_database)
                 #insert the file names into the table
 
             
-            if len(files_missing_rucio_but_exist_in_storage)>0:
-                print("files_missing_rucio_but_exist_in_storage: ",len(files_missing_rucio_but_exist_in_storage))
+            
 
             
             
