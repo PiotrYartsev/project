@@ -2,6 +2,7 @@
 import os
 import sqlite3 as sl
 import datetime
+import json
 
 def transforming_to_database_from_txt():
     #connect to the directories_database to get the directory to dataset mapping
@@ -38,11 +39,11 @@ def transforming_to_database_from_txt():
             #create new database called storage_output.db
             storage_output_database = sl.connect("RSE/"+rse+"/output/"+'storage_output.db')
             #create table with the name of the dataset
-            storage_output_database.execute("CREATE TABLE IF NOT EXISTS "+dataset+" (name TEXT not null)")
+            storage_output_database.execute("CREATE TABLE IF NOT EXISTS "+dataset+" (name TEXT not null, directory TEXT not null)")
             storage_output_database.commit()
             #insert the files in the table
             for file in file_content:
-                storage_output_database.execute("INSERT INTO "+dataset+" (name) VALUES ('"+file+"')")
+                storage_output_database.execute("INSERT INTO "+dataset+" (name,directory) VALUES ('"+file+"','"+directory+"')")
             storage_output_database.commit()
             #close the database
             storage_output_database.close()
@@ -54,12 +55,68 @@ def transforming_to_database_from_txt():
     
 def comparison(table,rucio_database,storage_output_database):
     #get the files in rucio
-    rucio_files = rucio_database.execute("SELECT name FROM "+table).fetchall()
-    rucio_files = [x[0] for x in rucio_files]
+    rucio_files = rucio_database.execute("SELECT name, location FROM "+table).fetchall()
+    #print(rucio_files[0])
     #get the files in the output database
-    output_files = storage_output_database.execute("SELECT name FROM "+table).fetchall()
-    output_files = [x[0] for x in output_files]
+    #print the columns in the table
+    #print(storage_output_database.execute("PRAGMA table_info("+table+")").fetchall())
+    output_files = storage_output_database.execute("SELECT name, directory FROM "+table).fetchall()
+    output_files=[(x[0],x[1]+"/"+x[0]) for x in output_files]
+    #print(output_files[0])
     #compare the two lists
     files_in_storage_missing_from_rucio = list(set(output_files) - set(rucio_files))
     files_in_rucio_missing_from_storage = list(set(rucio_files) - set(output_files))
-    return files_in_storage_missing_from_rucio,files_in_rucio_missing_from_storage
+    files_in_rucio_and_storage = list(set(rucio_files) & set(output_files))
+
+    return files_in_storage_missing_from_rucio,files_in_rucio_missing_from_storage,files_in_rucio_and_storage
+
+
+def missing_from_storage(table,files_missing_from_storage,rucio_database):
+    replicas_add_to_table=[]
+    scope = rucio_database.execute(f"SELECT scope FROM {table}").fetchall()[0][0]
+
+    for file_data in files_missing_from_storage:
+        file=file_data[0]
+        
+
+        directory=file_data[1]
+
+        #chack if that file has replicas in rucio
+        replicas = rucio_database.execute(f"SELECT has_replicas FROM {table} WHERE name = '"+file+"' and location='"+directory+"'").fetchall()[0][0]
+        #get the scopes in that tabel
+        
+        
+        #print(replicas)
+        if replicas!=0:
+            #find all the replicas of that file
+            replicas_of_that_file_add = rucio_database.execute(f"SELECT scope,name,location FROM {table} WHERE name = '"+file+"' and location is not '"+directory+"'").fetchall()
+            replicas_add_to_table.append(replicas_of_that_file_add)
+        else:
+            #if there are no replicas then add the file to the table
+            replicas_add_to_table.append([])
+    return replicas_add_to_table,scope
+
+def create_table_missing_from_storage(table,database_missing_from_storage, files_missing_from_storage, replicas_add_to_table, scope):
+    # Create the table
+    database_missing_from_storage.execute(f"CREATE TABLE IF NOT EXISTS {table} (name TEXT not null, directory TEXT not null, scope TEXT not null, has_replicas TEXT not null)")
+    
+
+    # Insert the data into the table
+    for n in range(len(files_missing_from_storage)):
+        file=files_missing_from_storage[n][0]
+        directory=files_missing_from_storage[n][1]
+        #print(file)
+        
+        #print(directory)
+        #print(scope)
+        replicas=replicas_add_to_table[n]
+        replicas=json.dumps(replicas)
+        database_missing_from_storage.execute(f"""INSERT INTO {table} (name, directory, scope, has_replicas) VALUES ('{file}', '{directory}', '{scope}', '{replicas}')""")
+
+    # Commit the changes to the database
+    database_missing_from_storage.commit()
+
+
+def missing_from_rucio(files_missing_from_rucio,table,rucio_database):
+    #find if there are files with similar name in rucio
+    #get the files from rucio
