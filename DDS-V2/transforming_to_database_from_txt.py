@@ -30,12 +30,10 @@ def transforming_to_database_from_txt():
             file_content = [x.strip() for x in file_content]
             directory=file_content[0]
             file_content = file_content[1:]
-            #print(directory)
             #remove whitespace characters like `\n` at the end of each line
             
             #check what the dataset is for the directoryu in teh directories_database 
             dataset=directories_database.execute("SELECT datasets FROM "+rse+" WHERE directory = '"+directory+"'").fetchall()[0][0]
-            #print(dataset)
             #create new database called storage_output.db
             storage_output_database = sl.connect("RSE/"+rse+"/output/"+'storage_output.db')
             #create table with the name of the dataset
@@ -56,13 +54,9 @@ def transforming_to_database_from_txt():
 def comparison(table,rucio_database,storage_output_database):
     #get the files in rucio
     rucio_files = rucio_database.execute("SELECT name, location FROM "+table).fetchall()
-    #print(rucio_files[0])
     #get the files in the output database
-    #print the columns in the table
-    #print(storage_output_database.execute("PRAGMA table_info("+table+")").fetchall())
     output_files = storage_output_database.execute("SELECT name, directory FROM "+table).fetchall()
     output_files=[(x[0],x[1]+"/"+x[0]) for x in output_files]
-    #print(output_files[0])
     #compare the two lists
     files_in_storage_missing_from_rucio = list(set(output_files) - set(rucio_files))
     files_in_rucio_missing_from_storage = list(set(rucio_files) - set(output_files))
@@ -86,7 +80,6 @@ def missing_from_storage(table,files_missing_from_storage,rucio_database):
         #get the scopes in that tabel
         
         
-        #print(replicas)
         if replicas!=0:
             #find all the replicas of that file
             replicas_of_that_file_add = rucio_database.execute(f"SELECT scope,name,location FROM {table} WHERE name = '"+file+"' and location is not '"+directory+"'").fetchall()
@@ -105,10 +98,7 @@ def create_table_missing_from_storage(table,database_missing_from_storage, files
     for n in range(len(files_missing_from_storage)):
         file=files_missing_from_storage[n][0]
         directory=files_missing_from_storage[n][1]
-        #print(file)
         
-        #print(directory)
-        #print(scope)
         replicas=replicas_add_to_table[n]
         replicas=json.dumps(replicas)
         database_missing_from_storage.execute(f"""INSERT INTO {table} (name, directory, scope, has_replicas) VALUES ('{file}', '{directory}', '{scope}', '{replicas}')""")
@@ -120,3 +110,4 @@ def create_table_missing_from_storage(table,database_missing_from_storage, files
 def missing_from_rucio(files_missing_from_rucio,table,rucio_database):
     #find if there are files with similar name in rucio
     #get the files from rucio
+    pass
