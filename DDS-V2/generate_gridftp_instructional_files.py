@@ -26,8 +26,7 @@ for table in (rucio_database.execute("SELECT name FROM sqlite_master WHERE type=
         rses = [i[0] for i in data]
         #from the data location whcih is i[1] for i in data, i want to remove everything ater the last /
         data = [(i[0], os.path.dirname(i[1]).rstrip("\\")) for i in data]
-        
-        print(list(set(data)))
 
         #add this to teh table called dataset where the $table 
-        break
+        rucio_database.execute("UPDATE dataset SET exist_at_rses = ?, directory = ? WHERE table_name = ?", (str(list(set(rses))), str(list(set(data))), table))
+        rucio_database.commit()
