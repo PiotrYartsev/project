@@ -12,6 +12,8 @@ rucio_database = sl.connect('Rucio_data_LUND_GRIDFTP.db')
 
 #get the datasets
 datasets = rucio_database.execute("SELECT * FROM dataset").fetchall()
+
+time=datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 for dataset in datasets:
     #print(dataset)
     directory = dataset[3]
@@ -24,26 +26,11 @@ for dataset in datasets:
         if not os.path.exists("RSE/"+rse):
             # Create directory
             os.mkdir("RSE/"+rse)
-
-
-
-    break
-    
-
-"""
-# If directory with name rse does not already exist, create it
-table = table[0]
-if table not in ["dataset","sqlite_sequence"]:
-if not os.path.exists("RSE/"+table):
-    # Create directory
-    os.mkdir("RSE/"+table)
-# Create file in the rse directory and name it the date and time
-file_name = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".txt"
-# Create file
-file = open("RSE/"+table + "/" + file_name,"w")
-# Write the directories from the SQLite database to the file
-for row in rucio_database.execute("SELECT directory FROM " + table).fetchall():
-    row = row[0]
-    file.write(row + "\n")
-# Close file
-file.close()"""
+        #open the file without deleting the content
+        file = open("RSE/"+rse+"/"+time+".txt","a")
+        #write the directory to the file
+        file.write(directory + "\n")    
+        #close the file
+        file.close()
+        
+        
