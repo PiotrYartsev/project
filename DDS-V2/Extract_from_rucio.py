@@ -98,14 +98,15 @@ def main():
     # Read dataset names from a file
     dataset=reading_data_from_file("datasets_and_numbers.txt")
 
-
-
     # If table does not already exist, create it
     if not con.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='dataset';").fetchall():
         con.execute("""
             CREATE TABLE dataset (
                 name TEXT NOT NULL,
                 scope TEXT NOT NULL,
+                table_name TEXT NOT NULL,
+                directory TEXT,
+                exist_at_rses TEXT,
                 length INTEGER NOT NULL
             );""")
 
@@ -154,7 +155,7 @@ def main():
                         length+=len(data[i]["name"])
 
                     # If dataset is not already in the table, add it
-                    con.execute("INSERT INTO dataset (scope,name,length) VALUES (?,?, ?)", (scope,name, length))
+                    con.execute("INSERT INTO dataset (scope,name,table_name,length) VALUES (?,?, ?,?)", (scope,name,dataset_table_name, length))
 
                     append_to_table_input=[]
                     append_to_table_output=(append_to_table(data))
