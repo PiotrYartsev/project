@@ -4,6 +4,14 @@ import sqlite3 as sl
 import re
 from tqdm import tqdm
 from Rucio_functions import list_files_dataset, list_replicas, count_files_func
+import sys
+import traceback
+
+def exception_handler(exception_type, exception, traceback):
+    with open('Extract_from_rucio_error.log', 'a') as f:
+        f.write(''.join(traceback))
+
+sys.excepthook = exception_handler
 
 # Connect to the database
 con = sl.connect('Rucio_data_LUND_GRIDFTP.db')
