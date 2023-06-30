@@ -47,4 +47,9 @@ def count_files_func(scope,dataset_name):
 
 
 
-#print(count_files_func("mc20","v1.7.1_ecal_gammamumu-batch4"))
+def check_file_exists(scope, name):
+    replicas = rucioclient.list_replicas(dids=[{'scope': scope, 'name': name}])
+    if not replicas:
+        return False
+    else:
+        return True

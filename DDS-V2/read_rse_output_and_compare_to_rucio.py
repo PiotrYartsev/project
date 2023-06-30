@@ -16,10 +16,10 @@ def main():
             storage_output_database = sl.connect("RSE/"+rse+"/output/"+'storage_output.db')
 
             #missing from storage
-            database_missing_from_storage = sl.connect("RSE/"+rse+"/Dark_data/this_cycle/"+'missing_from_storage.db')
+            database_missing_from_storage = sl.connect("RSE/"+rse+"/Dark_data/"+'missing_from_storage.db')
             
             #missing from rucio
-            database_missing_from_rucio = sl.connect("RSE/"+rse+"/Dark_data/this_cycle/"+'missing_from_rucio.db')
+            database_missing_from_rucio = sl.connect("RSE/"+rse+"/Dark_data/"+'missing_from_rucio.db')
             
             #get the list of tables
             tables = storage_output_database.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
