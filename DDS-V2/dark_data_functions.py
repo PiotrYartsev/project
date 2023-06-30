@@ -107,7 +107,50 @@ def create_table_missing_from_storage(table,database_missing_from_storage, files
     database_missing_from_storage.commit()
 
 
+def create_table_missing_from_rucio(table,output,database_missing_from_rucio):
+    # Create the table
+    database_missing_from_rucio.execute(f"CREATE TABLE IF NOT EXISTS {table} (name TEXT not null, directory TEXT not null, duplciates INTEGER, duplciate_locations TEXT not null)")
+    for key in output:
+        files_in_storage_with_duplicates=output[key][0]
+        files_in_ruciowith_duplicates=output[key][1]
+
+        for file_data in files_in_storage_with_duplicates:
+            file=file_data.split("/")[-1]
+
+            directory=file_data
+            if len(files_in_ruciowith_duplicates)>0:
+                duplicates=len(files_in_ruciowith_duplicates)
+                duplciate_locations=json.dumps(files_in_ruciowith_duplicates)
+            else:
+                duplicates=0
+                duplciate_locations="[]"
+            database_missing_from_rucio.execute(f"""INSERT INTO {table} (name, directory, duplciates, duplciate_locations) VALUES ( '{file}', '{directory}', '{duplicates}', '{duplciate_locations}')""")
+    # Commit the changes to the database
+    database_missing_from_rucio.commit()
+
 def missing_from_rucio(files_missing_from_rucio,table,rucio_database):
-    #find if there are files with similar name in rucio
-    #get the files from rucio
-    pass
+    
+    full_name=[i[1] for i in files_missing_from_rucio]
+    location=full_name[0].rsplit("_", 2)[0]
+    file_numbers_storage={}
+    for directories in full_name:
+        file_number=directories.split("_")[-2].replace("run","") 
+        if file_number in file_numbers_storage:
+            file_numbers_storage[file_number].append(directories)
+        else:
+            file_numbers_storage[file_number]=[directories]
+    output={}
+    #print the keys in file_numbers_storage
+    for key in file_numbers_storage:
+        #print(file_numbers_storage[key])
+        #find the files in Rucio that have the same file number and where the location contains the location
+        files_in_rucio = rucio_database.execute(f"SELECT scope ,name, location FROM {table} WHERE filenumber={key} and location LIKE '%{location}%'").fetchall()
+        if len(files_in_rucio)!=0:
+            output[key]=[file_numbers_storage[key],files_in_rucio]
+        else:
+            output[key]=[file_numbers_storage[key],[]]
+    return output
+        
+            
+        
+    
