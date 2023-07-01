@@ -13,7 +13,13 @@ rucio_database = sl.connect('Rucio_data_LUND_GRIDFTP.db')
 #get the datasets
 datasets = rucio_database.execute("SELECT * FROM dataset").fetchall()
 
-time=datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+for rse in os.listdir("RSE"):
+    if os.path.isdir("RSE/"+rse):
+        #move all files there to the archive folder
+        os.system("mv RSE/"+rse+"/* archives")
+
+
+date=datetime.datetime.now()
 for dataset in datasets:
     #print(dataset)
     directory = dataset[3]
@@ -27,7 +33,7 @@ for dataset in datasets:
             # Create directory
             os.mkdir("RSE/"+rse)
         #open the file without deleting the content
-        file = open("RSE/"+rse+"/"+time+".txt","a")
+        file = open("RSE/"+rse+f"/{rse}_rucio_dump_{date}.txt","a")
         #write the directory to the file
         file.write(directory + "\n")    
         #close the file
