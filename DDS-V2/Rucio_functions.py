@@ -1,11 +1,19 @@
 from rucio.client import Client
-
+from urllib.parse import quote_plus
 rucioclient = Client()
 
 #using the rucio API to get the list of scopes
 def list_scopes():
     scopes=rucioclient.list_scopes()
     return(scopes)
+
+
+
+
+
+datasets = rucioclient.list_dids(scope="mc20",did_type= "dataset", long=True,filters={'datatype':'dataset'})
+print(list(datasets))
+
 
 #using the rucio API to get the list of rses
 def list_rses():
@@ -17,10 +25,6 @@ def list_files_dataset(scope, name):
     files=rucioclient.list_files(scope=scope, name=name, long=True)
     return(files)
 
-#use the rucio API to get the list of replicas for a file
-def list_replicas_func(scope, name):
-    replicas=rucioclient.list_replicas(scope=scope, name=name)
-    return(replicas)
 
 #use the rucio API to get the statistics of rse usage
 def get_rse_usage(rse):
@@ -53,3 +57,5 @@ def check_file_exists(scope, name):
         return False
     else:
         return True
+    
+

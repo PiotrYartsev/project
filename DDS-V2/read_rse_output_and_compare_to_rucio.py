@@ -40,8 +40,8 @@ def main():
                     print("No files missing from storage")
 
                 if len(files_in_storage_missing_from_rucio)>0:
-                    outouut=missing_from_rucio(files_missing_from_rucio=files_in_storage_missing_from_rucio,table=table,rucio_database=rucio_database)
-                    create_table_missing_from_rucio(table,outouut,database_missing_from_rucio)
+                    missing_from_rucio_output=missing_from_rucio(files_missing_from_rucio=files_in_storage_missing_from_rucio,table=table,rucio_database=rucio_database)
+                    create_table_missing_from_rucio(table,missing_from_rucio_output,database_missing_from_rucio)
                 
                 
 
