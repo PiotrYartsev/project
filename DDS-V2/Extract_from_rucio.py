@@ -6,6 +6,9 @@ from tqdm import tqdm
 from Rucio_functions import list_files_dataset, list_replicas, count_files_func,list_scopes,list_dataset
 import sys
 import traceback
+import os
+
+
 
 def exception_handler(exception_type, exception, traceback):
     with open('Extract_from_rucio_error.log', 'a') as f:
