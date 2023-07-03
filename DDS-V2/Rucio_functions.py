@@ -2,6 +2,10 @@ from rucio.client import Client
 from urllib.parse import quote_plus
 #run Cli from python
 import subprocess as subprocess
+import os 
+
+os.environ['RUCIO_CFG_PATH'] = '/home/piotr/rucio-client-venv/etc/rucio.cfg'
+
 rucioclient = Client()
 
 #using the rucio API to get the list of scopes
