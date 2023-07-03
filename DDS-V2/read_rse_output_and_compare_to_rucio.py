@@ -38,11 +38,11 @@ def main():
                     create_table_missing_from_storage(table=table,database_missing_from_storage=database_missing_from_storage,scope=scope,replicas_add_to_table=replicas_add_to_table,files_missing_from_storage=files_in_rucio_missing_from_storage)
                 else:
                     print("No files missing from storage")
-
+                
                 if len(files_in_storage_missing_from_rucio)>0:
                     missing_from_rucio_output=missing_from_rucio(files_missing_from_rucio=files_in_storage_missing_from_rucio,table=table,rucio_database=rucio_database)
                     create_table_missing_from_rucio(table,missing_from_rucio_output,database_missing_from_rucio)
-                
+                break
                 
 
 if __name__ == "__main__":
