@@ -3,7 +3,7 @@ import signal
 import sqlite3 as sl
 import re
 from tqdm import tqdm
-from Rucio_functions import list_files_dataset, list_replicas, count_files_func
+from Rucio_functions import list_files_dataset, list_replicas, count_files_func,list_scopes,list_dataset
 import sys
 import traceback
 
@@ -103,20 +103,22 @@ def write_to_table(dataset_table_name,append_to_table_input,length):
 
 # Main function
 def main():
-    # Read dataset names from a file
-    dataset=reading_data_from_file("datasets_and_numbers.txt")
-
+    #get scopes
+    scopes=list_scopes()
+    dataset=[]
+    # Loop through each scope
+    for scope in scopes:
+        #if test of validation not part or subpart of scope
+        if "test" not in scope and "vaidation" not in scope and "." not in scope and "validation" not in scope:
+            print(scope)
+            output=list_dataset(scope)
+            output=[scope+":"+name for name in output]
+            #get datasets
+            dataset.extend(output)
+    
     # If table does not already exist, create it
     if not con.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='dataset';").fetchall():
-        con.execute("""
-            CREATE TABLE dataset (
-                name TEXT NOT NULL,
-                scope TEXT NOT NULL,
-                table_name TEXT NOT NULL,
-                directory TEXT,
-                exist_at_rses TEXT,
-                length INTEGER NOT NULL
-            );""")
+        con.execute("CREATE TABLE dataset ( TEXT NOT NULL,scope TEXT NOT NULL, table_name TEXT NOT NULL, directory TEXT, exist_at_rses TEXT,length INTEGER NOT NULL);")
 
     # Loop through each dataset
     for dataset_name in (dataset):

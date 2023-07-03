@@ -1,18 +1,13 @@
 from rucio.client import Client
 from urllib.parse import quote_plus
+#run Cli from python
+import subprocess as subprocess
 rucioclient = Client()
 
 #using the rucio API to get the list of scopes
 def list_scopes():
     scopes=rucioclient.list_scopes()
     return(scopes)
-
-
-
-
-
-datasets = rucioclient.list_dids(scope="mc20",did_type= "dataset", long=True,filters={'datatype':'dataset'})
-print(list(datasets))
 
 
 #using the rucio API to get the list of rses
@@ -58,4 +53,12 @@ def check_file_exists(scope, name):
     else:
         return True
     
+
+def list_dataset(scope):
+    # run the CLI command rucio list-dids --filter type=DATASET scope:*
+    command = f"rucio list-dids --filter type=DATASET {scope}:*"
+    result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, text=True)
+    dataset = result.stdout.strip().split("\n")[3:-2]
+    dataset = [x.strip().replace("DATASET", "").replace(scope+":", "").replace("|", "").replace(" ", "") for x in dataset]
+    return dataset
 
