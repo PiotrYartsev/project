@@ -18,8 +18,9 @@ for rse in os.listdir("RSE"):
         #move all files there to the archive folder
         os.system("mv RSE/"+rse+"/* archives")
 
+#date day-month-year
+date=datetime.datetime.now().strftime("%d-%m-%Y")
 
-date=datetime.datetime.now()
 for dataset in datasets:
     #print(dataset)
     directory = dataset[3]
