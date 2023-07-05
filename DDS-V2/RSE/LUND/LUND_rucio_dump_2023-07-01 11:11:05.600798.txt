@@ -1,3 +1,0 @@
-file:///projects/hep/fs9/shared/ldmx/ldcs/output/ldmx/mc-data/validation/v12/4.0GeV/v2.3.0-batch1
-file:///projects/hep/fs9/shared/ldmx/ldcs/output/ldmx/mc-data/validation/v12/4.0GeV/v2.3.0-testRecoLund
-file:///projects/hep/fs9/shared/ldmx/ldcs/output/ldmx/mc-data/validation/v12/4.0GeV/v2.3.0-testInput

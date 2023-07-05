@@ -4,7 +4,7 @@ from urllib.parse import quote_plus
 import subprocess as subprocess
 import os 
 
-os.environ['RUCIO_CFG_PATH'] = '/home/piotr/rucio-client-venv/etc/rucio.cfg'
+#os.environ['RUCIO_CFG_PATH'] = '/home/piotr/rucio-client-venv/etc/rucio.cfg'
 
 rucioclient = Client()
 
@@ -50,12 +50,14 @@ def count_files_func(scope,dataset_name):
 
 
 
-def check_file_exists(scope, name):
+def check_file_exists(list):
+
+    scope=list[0]
+    name=list[1]
+    print(scope)
+    print(name)
     replicas = rucioclient.list_replicas(dids=[{'scope': scope, 'name': name}])
-    if not replicas:
-        return False
-    else:
-        return True
+    return replicas
     
 
 def list_dataset(scope):
@@ -66,3 +68,5 @@ def list_dataset(scope):
     dataset = [x.strip().replace("DATASET", "").replace(scope+":", "").replace("|", "").replace(" ", "") for x in dataset]
     return dataset
 
+
+print(list(check_file_exists(["mc20","mc_v9-4GeV-1e-ecal_photonuclear_run10_t1651534776.root"])))

@@ -62,7 +62,6 @@ def comparison(table,rucio_database,storage_output_database):
     #compare the two lists
     files_in_storage_missing_from_rucio = list(set(output_files) - set(rucio_files))
     files_in_storage_missing_from_rucio=[(scope,x[0],x[1]) for x in files_in_storage_missing_from_rucio]
-    print(files_in_storage_missing_from_rucio[0])
     
     files_in_rucio_missing_from_storage = list(set(rucio_files) - set(output_files))
     files_in_rucio_and_storage = list(set(rucio_files) & set(output_files))
@@ -115,37 +114,45 @@ def create_table_missing_from_storage(table,database_missing_from_storage, files
 
 def create_table_missing_from_rucio(table,output,database_missing_from_rucio):
     # Create the table
-    database_missing_from_rucio.execute(f"CREATE TABLE IF NOT EXISTS {table} (name TEXT not null, directory TEXT not null, duplciates INTEGER, duplciate_locations TEXT not null)")
-    for key in output:
-        print(output[key])
-        files_in_storage_with_duplicates=output[key][0]
-        files_in_ruciowith_duplicates=output[key][1]
-        break
-        for file_data in files_in_storage_with_duplicates:
-            #print(file_data)
-            break
-            """
-            file=file_data.split("/")[-1]
-
-            directory=file_data
-            if len(files_in_ruciowith_duplicates)>0:
-                duplicates=len(files_in_ruciowith_duplicates)
-                duplciate_locations=json.dumps(files_in_ruciowith_duplicates)
-            else:
-                duplicates=0
-                duplciate_locations="[]"
-            database_missing_from_rucio.execute(f"INSERT INTO {table} (name, directory, duplciates, duplciate_locations) VALUES ( '{file}', '{directory}', '{duplicates}', '{duplciate_locations}')")
-    # Commit the changes to the database
-    database_missing_from_rucio.commit()"""
+    database_missing_from_rucio.execute(f"CREATE TABLE IF NOT EXISTS {table} (scope TEXT not null, name TEXT not null, location TEXT not null, directory TEXT not null, filenumber integer not null, replicas TEXT)")
+    query = "INSERT INTO {table} (scope, name, location, directory, filenumber, replicas) VALUES (?, ?, ?, ?, ?, ?)"
+    for item in output:
+        subitem = item[0]
+        has_replicas = item[1]
+        scope = str(subitem[0])
+        file = str(subitem[1])
+        location = str(subitem[2])
+        directory = str(subitem[3])
+        filenumber = int(subitem[4])
+        if has_replicas is None:
+            has_replicas = []
+        values = (scope, file, location, directory, filenumber, str(has_replicas))
+        database_missing_from_rucio.execute(query.format(table=table), values)
+        for replica in has_replicas:
+            replica_scope = replica[0]
+            replica_name = replica[1]
+            replica_location = replica[2]
+            replica_values = (replica_scope, replica_name, replica_location, directory, filenumber, str(has_replicas))
+            database_missing_from_rucio.execute(query.format(table=table), replica_values)
+    database_missing_from_rucio.commit()
 
 def missing_from_rucio(files_missing_from_rucio,table,rucio_database):
     scope=[i[0] for i in files_missing_from_rucio]
     full_name=[i[2] for i in files_missing_from_rucio]
+    file=[i[2].split("/")[-1] for i in files_missing_from_rucio]
+    file_number=[i.split("_")[-2].replace("run","") for i in file]
     location=full_name[1].rsplit("_", 2)[0]
-    print(scope[0])
-    print(full_name[0])
-    print(location)
-            
-        
+    file_numbers_dict={}
     
-    #files_in_rucio = rucio_database.execute(f"SELECT scope ,name, location FROM {table} WHERE filenumber={key} and location LIKE '%{location}%'").fetchall()
+    for n in range(len(file_number)):
+        if file_number[n] not in file_numbers_dict:
+            file_numbers_dict[file_number[n]]=[]
+        file_numbers_dict[file_number[n]].append((scope[n],file[n],full_name[n],location,file_number[n]))
+
+    output=[]
+    for number in file_numbers_dict:
+        files_in_rucio = rucio_database.execute(f"SELECT scope ,name, location FROM {table} WHERE filenumber={number} and location LIKE '%{location}%'").fetchall()
+        files_in_rucio=[(x[0],x[1],x[2]) for x in files_in_rucio]
+        for item in file_numbers_dict[number]:
+            output.append([item,files_in_rucio])
+    return output
