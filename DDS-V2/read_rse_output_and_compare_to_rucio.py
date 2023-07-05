@@ -29,9 +29,9 @@ def main():
                 print("       "+"Dataset:", table)
                 print("\n")
                 files_in_storage_missing_from_rucio,files_in_rucio_missing_from_storage,files_in_rucio_and_storage=comparison(table,rucio_database,storage_output_database)
-                #print("Files in rucio and storage: ",len(files_in_rucio_and_storage))
-                #print("Files in storage missing from rucio: ",len(files_in_storage_missing_from_rucio))
-                #print("Files in rucio missing from storage: ",len(files_in_rucio_missing_from_storage))
+                print("Files in rucio and storage: ",len(files_in_rucio_and_storage))
+                print("Files in storage missing from rucio: ",len(files_in_storage_missing_from_rucio))
+                print("Files in rucio missing from storage: ",len(files_in_rucio_missing_from_storage))
                 
                 if len(files_in_rucio_missing_from_storage)>0:
                     print("             "+"Files missing from storage")
