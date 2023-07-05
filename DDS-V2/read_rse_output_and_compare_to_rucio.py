@@ -26,23 +26,28 @@ def main():
             tables = [x[0] for x in tables]
             for table in tables:
                 #print("\n\n")
-                print("Dataset:", table)
+                print("       "+"Dataset:", table)
+                print("\n")
                 files_in_storage_missing_from_rucio,files_in_rucio_missing_from_storage,files_in_rucio_and_storage=comparison(table,rucio_database,storage_output_database)
                 #print("Files in rucio and storage: ",len(files_in_rucio_and_storage))
                 #print("Files in storage missing from rucio: ",len(files_in_storage_missing_from_rucio))
                 #print("Files in rucio missing from storage: ",len(files_in_rucio_missing_from_storage))
                 
                 if len(files_in_rucio_missing_from_storage)>0:
+                    print("             "+"Files missing from storage")
                     replicas_add_to_table,scope=missing_from_storage(table,files_in_rucio_missing_from_storage,rucio_database)
                     #replicas_add_to_table=[str(x) for x in replicas_add_to_table]
                     create_table_missing_from_storage(table=table,database_missing_from_storage=database_missing_from_storage,scope=scope,replicas_add_to_table=replicas_add_to_table,files_missing_from_storage=files_in_rucio_missing_from_storage)
                 else:
-                    print("No files missing from storage")
+                    print("             "+"No files missing from storage")
                 
                 if len(files_in_storage_missing_from_rucio)>0:
+                    print("             "+"Files missing from rucio")
                     missing_from_rucio_output=missing_from_rucio(files_missing_from_rucio=files_in_storage_missing_from_rucio,table=table,rucio_database=rucio_database)
                     create_table_missing_from_rucio(table,missing_from_rucio_output,database_missing_from_rucio)
-                break
+                else:
+                    print("             "+"No files missing from rucio")
+                print("\n")
                 
 
 if __name__ == "__main__":
