@@ -60,6 +60,21 @@ def list_replicas(scope, name):
         print(f"Error listing replicas: {e}")
         return None
 
+# Function to list all the replicas for a list of files
+def list_replicas_batch(file_list):
+    # Create a list of DIDs from the input file list
+    dids = [{'scope': scope, 'name': name} for scope, name in file_list]
+    try:
+        # Use the list_replicas method to check for the existence of the files
+        replicas = rucioclient.list_replicas(dids=dids)
+        replicas = list(replicas)
+        return replicas
+    except Exception as e:
+        print(f"Error listing replicas in bulk: {e}")
+        return None
+    
+
+
 # Function to count the number of files in a dataset
 def count_files_func(scope, dataset_name):
     try:
@@ -88,7 +103,7 @@ def check_files_exist(file_list):
         for replica in replicas:
             scope = replica['scope']
             name = replica['name']
-            results.append((scope, name))
+            results.append((scope, name,replica))
 
         return results
     except Exception as e:
@@ -107,3 +122,4 @@ def list_dataset(scope):
     except Exception as e:
         print(f"Error listing datasets: {e}")
         return None
+    

@@ -3,7 +3,7 @@ import signal
 import sqlite3 as sl
 import re
 from tqdm import tqdm
-from Rucio_functions import list_files_dataset, list_replicas, count_files_func,list_scopes,list_dataset
+from Rucio_functions import list_files_dataset, list_replicas, count_files_func,list_scopes,list_dataset,list_replicas_batch
 import sys
 import traceback
 import os
@@ -42,29 +42,34 @@ def reading_data_from_file(file):
     return dataset
 
 # Function to read Rucio dataset files and extract metadata
-def read_rucio_dataset_files_and_extract_metadata(file_data_from_dataset_output,scope):
-    file_info={}
-    file_info["name"]=[]
-    file_info["scope"]=[]
-    file_info["adler32"]=[]
-    file_info["rse"]=[]
-    file_info["location"]=[]
-    file_info["has_replicas"]=[]
-    print(scope)
-    print(file_data_from_dataset_output["name"])
-    metadata=list_replicas(scope, file_data_from_dataset_output["name"])
-    metadata=list(metadata)
-    metadata=metadata[0]
-    replicas=len(metadata["rses"])-1
-    for i in range(len((metadata["rses"]))):
-        file_info["name"].append(file_data_from_dataset_output["name"])
-        file_info["scope"].append(file_data_from_dataset_output["scope"])
-        file_info["adler32"].append(file_data_from_dataset_output["adler32"])
-        # For key number i, so first key for i=0, second key for i=1, etc
-        file_info["rse"].append(list(metadata["rses"].keys())[i])
-        file_info["location"].append(metadata["rses"][list(metadata["rses"].keys())[i]][0])
-        file_info["has_replicas"].append(replicas)
-    return file_info
+# Function to read Rucio dataset files and extract metadata
+def read_rucio_dataset_files_and_extract_metadata(file_data_from_dataset_output, scope):
+    file_list = [(file_data["scope"], file_data["name"]) for file_data in file_data_from_dataset_output]
+    replicas = list_replicas_batch(file_list)
+    data = []
+    for replica in replicas:
+        #print(replica)
+        replicas_count = len(replica["rses"])
+        for j in range(replicas_count):
+            file_info = {}
+            file_info["name"] = []
+            file_info["scope"] = []
+            file_info["adler32"] = []
+            file_info["rse"] = []
+            file_info["location"] = []
+            file_info["has_replicas"] = []
+            file_info["name"].append(replica["name"])
+            file_info["scope"].append(replica["scope"])
+            file_info["adler32"].append(replica["adler32"])
+            file_info["rse"].append(list(replica["rses"].keys())[j])
+            file_info["location"].append(replica["rses"][list(replica["rses"].keys())[j]][0])
+            file_info["has_replicas"].append(replicas_count-1)
+            data.append(file_info)
+    return data
+
+
+
+
 
 # Function to create a table in the database
 def create_table(dataset_table_name):
@@ -165,16 +170,20 @@ def main():
                         print(number_in_table)
                         print(number_in_rucio)
                         raise Exception("Error: number of files in table does not match number of files in rucio")
+                    else:
+                        print("                 The number of files in the table matches the number of files in rucio, skipping...")
                         
                 else:
                     print("                 The dataset "+dataset_name+" is not in the table")
                     scope, name = dataset_name.split(":")
                     output=(list(list_files_dataset(scope, name)))
                     data=[]
-                    for file_data_from_dataset_output in tqdm(output):
+                    
+                    iterate_list=[output[i:i + 999] for i in range(0, len(output), 999)]
+                    for file_data_from_dataset_list in tqdm(iterate_list):
                         #print(file_data_from_dataset_output)
-                        file_info=read_rucio_dataset_files_and_extract_metadata(file_data_from_dataset_output,scope)
-                        data.append(file_info)
+                        file_info=read_rucio_dataset_files_and_extract_metadata(file_data_from_dataset_list,scope)
+                        data.extend(file_info)
                     
                     length=0
                     for i in range(len(data)):
