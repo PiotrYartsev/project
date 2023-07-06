@@ -1,0 +1,6 @@
+file:///nfs/raid01/ldmx/ldmxstore/ldmx/mc-data/v9/8.0GeV
+file:///nfs/raid01/ldmx/ldmxstore/ldmx/mc-data/v9/8.0GeV
+file:///nfs/raid01/ldmx/ldmxstore/ldmx/mc-data/v9/8.0GeV
+file:///nfs/raid01/ldmx/ldmxstore/ldmx/mc-data/v9/8.0GeV
+file:///nfs/raid01/ldmx/ldmxstore/ldmx/mc-data/v9/8.0GeV
+file:///nfs/raid01/ldmx/ldmxstore/ldmx/mc-data/v9/8.0GeV
