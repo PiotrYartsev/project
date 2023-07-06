@@ -38,7 +38,6 @@ def transforming_to_database_from_txt():
                 if directory_val in directory:
                     dataset=table_name
                     break
-            #print(dataset)
             #create new database called storage_output.db
             storage_output_database = sl.connect("RSE/"+rse+"/output/"+'storage_output.db')
             #create table with the name of the dataset

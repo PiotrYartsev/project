@@ -103,7 +103,7 @@ def check_files_exist(file_list):
         for replica in replicas:
             scope = replica['scope']
             name = replica['name']
-            results.append((scope, name,replica))
+            results.append((scope, name))
 
         return results
     except Exception as e:
@@ -122,4 +122,5 @@ def list_dataset(scope):
     except Exception as e:
         print(f"Error listing datasets: {e}")
         return None
-    
+
+print(check_files_exist([('mc20', 'mc_v9-8GeV-1e-target_gammamumu_run2475_t1651181127.root')]))

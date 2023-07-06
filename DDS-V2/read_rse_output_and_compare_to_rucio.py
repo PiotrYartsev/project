@@ -25,7 +25,6 @@ def main():
             tables = storage_output_database.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
             tables = [x[0] for x in tables]
             for table in tables:
-                #print("\n\n")
                 print("       "+"Dataset:", table)
                 print("\n")
                 files_in_storage_missing_from_rucio,files_in_rucio_missing_from_storage,files_in_rucio_and_storage=comparison(table,rucio_database,storage_output_database)
@@ -48,7 +47,7 @@ def main():
                 else:
                     print("             "+"No files missing from rucio")
                 print("\n")
-                
+                    
 
 if __name__ == "__main__":
     main()

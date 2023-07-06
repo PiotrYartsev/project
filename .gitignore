@@ -2,6 +2,5 @@
 *.db
 /__pycache__
 /*.pyc
-*.db
-*.db
+/DDS/*.db
 DDS-V2/directories_and_dataset_for_RSE.db
