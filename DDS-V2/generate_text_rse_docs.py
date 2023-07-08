@@ -39,11 +39,11 @@ for dataset in datasets:
         #print(rse)
         directory=list[1]
         #print(directory)
-        if not os.path.exists("RSE/"+rse):
+        if not os.path.exists("/home/piotr/media/aurora-home/RSE/"+rse):
             # Create directory
-            os.mkdir("RSE/"+rse)
+            os.mkdir("/home/piotr/media/aurora-home/RSE/"+rse)
         #open the file without deleting the content
-        file = open("RSE/"+rse+f"/{rse}_rucio_dump_{date}.txt","a")
+        file = open("/home/piotr/media/aurora-home/RSE/"+rse+f"/{rse}_rucio_dump_{date}.txt","a")
         #write the directory to the file
         file.write(directory + "\n")    
         #close the file
