@@ -5,6 +5,9 @@ from archives_generator import archives_generator,move_to_archives
 from generate_gridftp_instructional_files import adding_data_about_replicas
 
 from generate_text_rse_docs import generate_txt
+
+from read_rse_output_and_compare_to_rucio import find_dark_data
+
 import datetime
 import os
 import shutil
@@ -34,8 +37,8 @@ adding_data_about_replicas()
 print("\n\n")
 generate_txt()
 
-
-
+print("\n\n")
+find_dark_data(today)
 
 
 print("\n\n")

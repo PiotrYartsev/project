@@ -43,8 +43,8 @@ def missing_from_rucio(rse):
 
 def create_missing_from_storage(rse):
     #check if the database exists
-    if not os.path.isfile("RSE/"+rse+"/Dark_data/"+'missing_from_storage.db'):
-        pass
+    if os.path.isfile("RSE/"+rse+"/Dark_data/"+'missing_from_storage.db'):
+        
 
 
 
