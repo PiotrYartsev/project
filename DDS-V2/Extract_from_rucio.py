@@ -112,7 +112,7 @@ def write_to_table(dataset_table_name,append_to_table_input,length):
         raise Exception("Error: count does not match length of dataset")
 
 # Main function
-def main():
+def extract_from_rucio():
     #get scopes
     scopes=list_scopes()
     dataset=[]
@@ -202,6 +202,3 @@ def main():
 
     # Cleanup code or any final actions before exiting
     print("Exiting the script...")
-
-if __name__ == "__main__":
-    main()
