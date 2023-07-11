@@ -1,0 +1,72 @@
+********************************************************************************
+********************************************************************************
+--------------------------------------------------------------------------------
+Welcome to the DDS v2 software, part of LDCS.
+--------------------------------------------------------------------------------
+This software creates a local copy of the LDCS Rucio database, perform some post processing and generate list of files at different RSEs.
+Another software, called the dumper, running on the RSE generates a dump of files at directories registered in Rucio for that RSE.
+This software compares the two lists and generates a list of files that are missing from Rucio or missing from storage.
+For files missing from storage, it finds all the replicas of that file at other locations, in case we want to recover the file.
+For files missing from Rucio it shecks if the file is a duplciate file
+These files are then verified to be lost by checking Rucio and the RSE again.
+The list of files that are lost are then sent to the LDCS team or deleted automaticaly.
+--------------------------------------------------------------------------------
+********************************************************************************
+********************************************************************************
+
+
+
+********************************************************************************
+********************************************************************************
+--------------------------------------------------------------------------------
+Welcome to the DDS v2 software, part of LDCS.
+--------------------------------------------------------------------------------
+This software creates a local copy of the LDCS Rucio database, perform some post processing and generate list of files at different RSEs.
+Another software, called the dumper, running on the RSE generates a dump of files at directories registered in Rucio for that RSE.
+This software compares the two lists and generates a list of files that are missing from Rucio or missing from storage.
+For files missing from storage, it finds all the replicas of that file at other locations, in case we want to recover the file.
+For files missing from Rucio it shecks if the file is a duplciate file
+These files are then verified to be lost by checking Rucio and the RSE again.
+The list of files that are lost are then sent to the LDCS team or deleted automaticaly.
+--------------------------------------------------------------------------------
+The printouts and error messages are saved in this log file for debugging purposes.
+--------------------------------------------------------------------------------
+********************************************************************************
+********************************************************************************
+
+
+
+mkdir: cannot create directory ‘archives/2023_07_11’: No such file or directory
+mv: cannot move 'log.txt' to 'archives/2023_07_11/log.txt': No such file or directory
+********************************************************************************
+********************************************************************************
+--------------------------------------------------------------------------------
+Welcome to the DDS v2 software, part of LDCS.
+--------------------------------------------------------------------------------
+This software creates a local copy of the LDCS Rucio database, perform some post processing and generate list of files at different RSEs.
+Another software, called the dumper, running on the RSE generates a dump of files at directories registered in Rucio for that RSE.
+This software compares the two lists and generates a list of files that are missing from Rucio or missing from storage.
+For files missing from storage, it finds all the replicas of that file at other locations, in case we want to recover the file.
+For files missing from Rucio it shecks if the file is a duplciate file
+These files are then verified to be lost by checking Rucio and the RSE again.
+The list of files that are lost are then sent to the LDCS team or deleted automaticaly.
+--------------------------------------------------------------------------------
+The printouts and error messages are saved in this log file for debugging purposes.
+--------------------------------------------------------------------------------
+********************************************************************************
+********************************************************************************
+
+
+
+
+
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Generating a new archive directory for today's date
+The directory has been created
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+
+

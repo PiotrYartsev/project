@@ -1,22 +1,21 @@
-#import libraries
 import os
 import sqlite3 as sl
 import datetime
 from tqdm import tqdm
-from Rucio_functions import check_files_exist
+#from Rucio_functions import check_files_exist
 
-def main():
-    for rse in os.listdir("RSE"):
+def verify(logger):
+    for rse in os.listdir("/home/piotr/media/aurora-home/RSE"):
         print(rse)
-        if os.path.isdir("RSE/"+rse+"/Dark_data"):
-            missing_from_rucio(rse)
+        if os.path.isdir("/home/piotr/media/aurora-home/RSE/"+rse+"/Dark_data"):
+            #missing_from_rucio(rse)
             create_missing_from_storage(rse)
             
-
+"""
 def missing_from_rucio(rse):
     #check if the database exists
-    if os.path.isfile("RSE/"+rse+"/Dark_data/"+'missing_from_rucio.db'):
-        missing_from_rucio_database = sl.connect("RSE/"+rse+"/Dark_data/"+'missing_from_rucio.db')
+    if os.path.isfile("/home/piotr/media/aurora-home/RSE/"+rse+"/Dark_data/"+'missing_from_rucio.db'):
+        missing_from_rucio_database = sl.connect("/home/piotr/media/aurora-home/RSE/"+rse+"/Dark_data/"+'missing_from_rucio.db')
         
         for table in missing_from_rucio_database.execute("SELECT name FROM sqlite_master WHERE type='table';"):
             print(table[0])
@@ -26,7 +25,7 @@ def missing_from_rucio(rse):
             splitlist=[get_files_missing_from_rucio[i:i + 999] for i in range(0, len(get_files_missing_from_rucio), 999)]
         
             delete_list=[]
-            for list in tqdm(splitlist):
+            for list in tqdm(splitlist): 
                 value=(check_files_exist(list))
                 delete_list.extend(value)
             print(len(delete_list))
@@ -39,15 +38,22 @@ def missing_from_rucio(rse):
                 missing_from_rucio_database.execute("DROP TABLE "+table[0])
                 missing_from_rucio_database.commit()
         missing_from_rucio_database.close()
-
+"""
 
 def create_missing_from_storage(rse):
     #check if the database exists
-    if os.path.isfile("RSE/"+rse+"/Dark_data/"+'missing_from_storage.db'):
-        
+    if os.path.isfile("/home/piotr/media/aurora-home/RSE/"+rse+"/Dark_data/"+'missing_from_storage.db'):
+        #for each table, create a new text file with the missing direcoty 
+        missing_from_storage_database = sl.connect("/home/piotr/media/aurora-home/RSE/"+rse+"/Dark_data/"+'missing_from_storage.db')
+        for table in missing_from_storage_database.execute("SELECT name FROM sqlite_master WHERE type='table';"):
+            directory_list=missing_from_storage_database.execute("SELECT directory FROM "+table[0]).fetchall()
+            #if folder "/home/piotr/media/aurora-home/RSE/"+rse+"/verify/" does not exist, create it
+            if not os.path.isdir("/home/piotr/media/aurora-home/RSE/"+rse+"/verify/"):
+                os.mkdir("/home/piotr/media/aurora-home/RSE/"+rse+"/verify/")
 
-
-
-
-if __name__ == "__main__":
-    main()
+            #write it to file
+            file = open("/home/piotr/media/aurora-home/RSE/"+rse+"/verify/"+table[0]+".txt","w")
+            for directory in directory_list:
+                file.write(directory[0]+"\n")
+            file.close()
+        missing_from_storage_database.close()
