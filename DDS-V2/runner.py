@@ -12,9 +12,9 @@ from dark_data_functions import transforming_to_database_from_txt
 
 from verify import verify
 import datetime
-import os
 import shutil
 import logging
+
 
 # Create a logger object
 logger = logging.getLogger(__name__)
@@ -87,5 +87,3 @@ verify(logger)
 print("\n\n")
 print("Moving the log file to the archives directory")
 move_to_archives(today,logger)
-
-
