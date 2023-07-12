@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"name": "DDS-V2",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.autoSave": "afterDelay"
+	}
+}
