@@ -110,6 +110,20 @@ def check_files_exist(file_list):
         print(f"Error checking file existence: {e}")
         return None
 
+# Function to get the list of files in a dataset
+def list_files(dataset):
+    # Run the CLI command "rucio list-files <dataset>"
+    command = f"rucio list-files {dataset}"
+    try:
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, text=True)
+        files = result.stdout.strip().split("\n")[3:-2]
+        files = [x.strip().split()[0] for x in files]
+        return files
+    except Exception as e:
+        print(f"Error listing files: {e}")
+        return None
+
+
 # Function to list all the datasets in a scope
 def list_dataset(scope):
     # Run the CLI command "rucio list-dids --filter type=DATASET scope:*"
@@ -122,5 +136,3 @@ def list_dataset(scope):
     except Exception as e:
         print(f"Error listing datasets: {e}")
         return None
-
-print(check_files_exist([('mc20', 'mc_v9-8GeV-1e-target_gammamumu_run2475_t1651181127.root')]))
