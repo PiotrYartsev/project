@@ -1,6 +1,0 @@
-/classifier
-*.db
-/__pycache__
-/*.pyc
-/DDS/*.db
-DDS-V2/directories_and_dataset_for_RSE.db
