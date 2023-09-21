@@ -8,40 +8,12 @@ import sys
 import traceback
 import os
 
-
-
-def exception_handler(exception_type, exception, traceback):
-    with open('Extract_from_rucio_error.log', 'a') as f:
-        f.write(''.join(traceback))
-
-sys.excepthook = exception_handler
-
 # Connect to the database
 con = sl.connect('Rucio_data_LUND_GRIDFTP.db')
 
 # Flag to indicate if the script should exit
 should_exit = False
 
-# Signal handler for interrupt signal
-def handle_interrupt(signal, frame):
-    global should_exit
-    print("Interrupt signal received. Finishing current iteration...")
-    should_exit = True
-
-# Register the signal handler
-signal.signal(signal.SIGINT, handle_interrupt)
-
-# Function to read data from a file
-def reading_data_from_file(file):
-    # Read a txt file line by line to extract the datasets
-    with open('{}'.format(file)) as f:
-        lines = f.readlines()
-
-    # Remove whitespace characters like `\n` at the end of each line and remove the count of files
-    dataset=[line.split(",")[0].strip() for line in lines]
-    return dataset
-
-# Function to read Rucio dataset files and extract metadata
 # Function to read Rucio dataset files and extract metadata
 def read_rucio_dataset_files_and_extract_metadata(file_data_from_dataset_output, scope):
     file_list = [(file_data["scope"], file_data["name"]) for file_data in file_data_from_dataset_output]
@@ -66,8 +38,6 @@ def read_rucio_dataset_files_and_extract_metadata(file_data_from_dataset_output,
             file_info["has_replicas"].append(replicas_count-1)
             data.append(file_info)
     return data
-
-
 
 
 

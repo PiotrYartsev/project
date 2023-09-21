@@ -1,12 +1,14 @@
 import argparse
+from Rucio_functions import RucioFunctions
 
 def get_args():
     parser = argparse.ArgumentParser(description='Dark Data Search toolkit, software developed for the search and analysis of dark data at LDCS/LDMX.', formatter_class=argparse.RawDescriptionHelpFormatter)
 
-    scopes_all_datasets = parser.add_mutually_exclusive_group(required=True)
-    scopes_all_datasets.add_argument('--scopes', dest='scopes', nargs='+', metavar='SCOPE', help='Comma separated list of scopes for which to perform the dark data search', type=str)
-    scopes_all_datasets.add_argument('--datasets', dest='datasets', nargs='+', metavar='DATASET', help='Comma separated list of datasets for which to perform the dark data search', type=str)
-    scopes_all_datasets.add_argument('--all', dest='all', action='store_true', help='Perform the dark data search for all datasets in the Rucio instance')
+    parser = argparse.ArgumentParser(description='Dark Data Search toolkit, software developed for the search and analysis of dark data at LDCS/LDMX.', formatter_class=argparse.RawDescriptionHelpFormatter)
+
+    parser.add_argument('--scopes', dest='scopes', nargs='+', metavar='SCOPE', help='Comma separated list of scopes for which to perform the dark data search', type=str)
+    parser.add_argument('--datasets', dest='datasets', nargs='+', metavar='DATASET', help='Comma separated list of datasets for which to perform the dark data search', type=str)
+    parser.add_argument('--all', dest='all', action='store_true', help='Perform the dark data search for all datasets in the Rucio instance')
 
     #For which if the RSE (Rucio Storage Element) should the dark data search be performed. Only one is allowed
     parser.add_argument('--rse', dest='rse', action='store', help='RSE to use for the dark data search', required=True)
@@ -29,3 +31,78 @@ def get_args():
         args.datasets = [dataset.strip() for dataset in args.datasets[0].split(',')]
 
     return args
+
+def get_datasets_from_args(args):
+    if args.all:
+        if args.scopes or args.datasets:
+            print("Error: cannot specify scopes or datasets when using --all")
+            exit(1)
+        else:
+            print("all")
+            # Retrieve a list of all the datasets
+            scopes_in_rucio = RucioFunctions.list_scopes()
+            datasets = []
+            for scope in scopes_in_rucio:
+                output_list = RucioFunctions.list_dataset(scope=scope)
+                output_list2 = [(scope, dataset) for dataset in output_list]
+                datasets.extend(output_list2)
+
+    elif args.scopes and not args.datasets:
+        print("scopes")
+        # Retrieve a list of datasets for the specified scopes
+        scopes_in_rucio = RucioFunctions.list_scopes()
+        scopes_arg = args.scopes
+        # Check if the scopes are valid
+        for scope in scopes_arg:
+            if scope not in scopes_in_rucio:
+                print(f"Error: scope {scope} is not valid")
+                exit(1)
+        # Retrieve the datasets in the scopes
+        datasets = []
+        for scope in scopes_arg:
+            output_list = RucioFunctions.list_dataset(scope=scope)
+            output_list2 = [(scope, name) for name in output_list]
+            datasets.extend(output_list2)
+
+    elif args.datasets and not args.scopes:
+        print("datasets")
+        # Retrieve a list of all the datasets
+        datasets_arg = args.datasets
+        scopes_in_rucio = RucioFunctions.list_scopes()
+        datasets = []
+        for scope in scopes_in_rucio:
+            output_list = RucioFunctions.list_dataset(scope=scope)
+            output_list2 = [(scope, dataset) for dataset in output_list if dataset in datasets_arg]
+            datasets.extend(output_list2)
+        for dataset in datasets_arg:
+            if dataset not in [a[1] for a in datasets]:
+                print(f"Error: dataset {dataset} is not valid")
+                exit(1)
+
+    elif args.scopes and args.datasets:
+        print("scopes and datasets")
+        # Retrieve a list of datasets for the specified scopes and datasets
+        scopes_in_rucio = RucioFunctions.list_scopes()
+        scopes_arg = args.scopes
+        datasets_arg = args.datasets
+        # Check if the scopes are valid
+        for scope in scopes_arg:
+            if scope not in scopes_in_rucio:
+                print(f"Error: scope {scope} is not valid")
+                exit(1)
+        # Retrieve the datasets in the scopes and datasets
+        datasets = []
+        for scope in scopes_arg:
+            output_list = RucioFunctions.list_dataset(scope=scope)
+            output_list2 = [(scope, dataset) for dataset in output_list if dataset in datasets_arg]
+            datasets.extend(output_list2)
+        for dataset in datasets_arg:
+            if dataset not in [a[1] for a in datasets]:
+                print(f"Error: dataset {dataset} is not valid")
+                exit(1)
+
+    else:
+        print("Error: no scopes or datasets specified")
+        exit(1)
+    
+    return datasets
