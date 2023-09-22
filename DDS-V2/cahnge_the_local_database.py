@@ -15,4 +15,4 @@ for table in (database.execute("SELECT name FROM sqlite_master WHERE type='table
         #to the table dataset add the rses and the directories where the table_name matches the table
         database.execute("UPDATE dataset SET exist_at_rses = ?, directory = ? WHERE table_name = ?", (str(list(set(rse))),str(list(set(directory))),table[0]))
         database.commit()
-        print("done")
+print("done")

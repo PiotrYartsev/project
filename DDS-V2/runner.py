@@ -80,19 +80,15 @@ if __name__ == "__main__":
 
 
     #check if the number of threads argument is a whole integer and larger or equal to 1
-    print("Verifying if the threads argument is valid:\n"+str(args.threads))
+    print("Verifying if the threads argument is valid.\n")
     if args.threads < 1 or args.threads % 1 != 0:
         print("Error: --threads must be a whole integer larger or equal to 1")
         exit(1)
     
-
     # Get the datasets, based on the arguments
     print("Loading datasets\n")
     datasets = get_datasets_from_args(args)
 
-    #datasets=datasets[0:10]
-
-    
     #remove any spaces in the dataset names or scopes
     print("Removing spaces from the dataset names and scopes\n")
     datasets = [(dataset[0].replace(" ",""),dataset[1].replace(" ","")) for dataset in datasets]
@@ -102,12 +98,19 @@ if __name__ == "__main__":
     if os.path.isfile('local_rucio_database.db'):
         LocalRucioDataset=sl.connect('local_rucio_database.db')
         local_database_dataset_data=LocalRucioDataset.execute("SELECT scope, name, length FROM dataset").fetchall()
-        print(local_database_dataset_data)
+
+        #print(local_database_dataset_data)
+        output=run_threads(thread_count=args.threads,function=RucioDataset.check_if_exist,data=datasets,const_data=local_database_dataset_data)
+        list_of_dataset_not_in_local_database=[]
+        list_of_dataset_already_in_local_database=[]
+        for item in output:
+            if item[1]:
+                list_of_dataset_already_in_local_database.append(item[0])
+            else:
+                list_of_dataset_not_in_local_database.append(item[0])
     else:
         list_of_dataset_not_in_local_database=datasets
         list_of_dataset_already_in_local_database=[]
-    """
-    list_of_dataset_not_in_local_database,list_of_dataset_already_in_local_database=RucioDataset.check_if_exist(dataset_list=datasets)
 
     print("Number of datasets that do not exist in the local database: "+str(len(list_of_dataset_not_in_local_database)))
     print("Number of datasets that already exist in the local database: "+str(len(list_of_dataset_already_in_local_database)))
@@ -115,7 +118,8 @@ if __name__ == "__main__":
     #This is done by simply extracting the values from Rucio and putting it in the custom data structure
     #This is done in a multithreaded way
     Data_from_datasets=(run_threads(thread_count=args.threads,function=RucioDataset.fill_data_from_local,data=list_of_dataset_already_in_local_database))
-    
+    print(Data_from_datasets)
+
     #combibine the list of list into one list
     Data_from_datasets=[item for sublist in Data_from_datasets for item in sublist]
 
@@ -123,4 +127,4 @@ if __name__ == "__main__":
     #RucioFunctions.list_files_dataset
     #This is done in a multithreaded way
     RucioDataset.extract_from_rucio(dataset=list_of_dataset_not_in_local_database[0])
-    """
+    

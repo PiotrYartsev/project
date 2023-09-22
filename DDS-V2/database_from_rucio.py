@@ -10,26 +10,29 @@ class RucioDataset():
         self.con.execute("CREATE TABLE {} (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, scope TEXT NOT NULL, rse TEXT NOT NULL, adler32 TEXT NOT NULL, timestamp INTEGER NOT NULL, filenumber INTEGER NOT NULL, location TEXT NOT NULL, has_replicas INTEGER NOT NULL);".format(self.dataset_table_name))
     
     @classmethod
-    def check_if_exist(cls, dataset_and_scope, LocalRucioDataset,local_database_dataset_data):
+    def check_if_exist(cls, dataset_and_scope,local_database_dataset_data):
         dataset=dataset_and_scope[1]
         scope=dataset_and_scope[0]
-        list_of_dataset_not_in_local_database=[]
-        list_of_dataset_already_in_local_database=[]
-        try:
-            number_of_files_in_local=LocalRucioDataset.execute("SELECT length FROM dataset WHERE scope=? AND name=?",(scope,dataset)).fetchone()[0]
-            number_of_files_in_rucio=RucioFunctions.count_files_func(scope,dataset)
-
+        output=[]
+        number_of_files_in_rucio=RucioFunctions.count_files_func(scope,dataset)
+        
+        for item in local_database_dataset_data:
+            Found=False
+            if item[1]==dataset and item[0]==scope:
+                number_of_files_in_local=item[2]
+                Found=True
+                break
+        if Found==False:
+            output=[dataset_and_scope,False]
+        else:
             if number_of_files_in_local==number_of_files_in_rucio:
-
-                list_of_dataset_already_in_local_database.append(dataset_and_scope)
+                output=[dataset_and_scope,True]
 
             else:
 
-                list_of_dataset_not_in_local_database.append(dataset_and_scope)
-        except:
-            list_of_dataset_not_in_local_database.append(dataset_and_scope)
+                output=[dataset_and_scope,False]
 
-        return list_of_dataset_not_in_local_database,list_of_dataset_already_in_local_database
+        return output
     
     @classmethod
     def fill_data_from_local(cls, dataset_in_local):
@@ -50,6 +53,7 @@ class RucioDataset():
             for i in range(len(data_in_local_database)):
                 output=FileMetadata(
                     name=data_in_local_database[0][1],
+                    dataset=dataset,
                     scope=data_in_local_database[0][2],
                     rse=data_in_local_database[0][3],
                     adler32=data_in_local_database[0][4],
@@ -68,8 +72,9 @@ class RucioDataset():
     
 
 class FileMetadata:
-    def __init__(self, name,rse, scope, adler32,timestamp,filenumber,  location, has_replicas):
+    def __init__(self, name,dataset,rse, scope, adler32,timestamp,filenumber,  location, has_replicas):
         self.name = name
+        self.dataset=dataset
         self.rse = rse
         self.scope = scope
         self.adler32 = adler32
@@ -83,6 +88,7 @@ class CustomDataStructure:
         # Initialize dictionaries for each metadata category
         self.name_index = {}
         self.rse_index = {}
+        self.dataset_index={}
         self.scope_index = {}
         self.adler32_index = {}
         self.timestamp_index = {}
@@ -94,6 +100,7 @@ class CustomDataStructure:
         # Create a FileMetadata instance and add it to all relevant indexes
         metadata = FileMetadata(
             item["name"],
+            item["dataset"],
             item["rse"],
             item["scope"],
             item["adler32"],
@@ -103,6 +110,7 @@ class CustomDataStructure:
             item["has_replicas"]
         )
         self.name_index[item["name"]] = metadata
+        self.dataset_index[item["dataset"]] = metadata
         self.rse_index[item["rse"]] = metadata
         self.scope_index[item["scope"]] = metadata
         self.adler32_index[item["adler32"]] = metadata
@@ -115,6 +123,8 @@ class CustomDataStructure:
         # Retrieve items by a specific metadata category and value
         if metadata_category == "name":
             return self.name_index.get(value)
+        elif metadata_category == "dataset":
+            return self.dataset_index.get(value)
         elif metadata_category == "rse":
             return self.rse_index.get(value)
         elif metadata_category == "scope":

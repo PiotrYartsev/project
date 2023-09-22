@@ -25,6 +25,7 @@ def get_args():
     # Split comma-separated scopes into a list
     if args.scopes:
         args.scopes = [scope.strip() for scope in args.scopes[0].split(',')]
+        args.scopes = [i for i in args.scopes if "." in i or "test" in i or "validation" in i]
 
     # Split comma-separated datasets into a list
     if args.datasets:
@@ -43,9 +44,12 @@ def get_datasets_from_args(args):
             scopes_in_rucio = RucioFunctions.list_scopes()
             datasets = []
             for scope in scopes_in_rucio:
-                output_list = RucioFunctions.list_dataset(scope=scope)
-                output_list2 = [(scope, dataset) for dataset in output_list]
-                datasets.extend(output_list2)
+                if "." in scope or "test" in scope or "validation" in scope:
+                    continue
+                else:
+                    output_list = RucioFunctions.list_dataset(scope=scope)
+                    output_list2 = [(scope, dataset) for dataset in output_list]
+                    datasets.extend(output_list2)
 
     elif args.scopes and not args.datasets:
         print("Loading datasets for scopes {}.\n".format(args.scopes))
