@@ -14,7 +14,7 @@ def get_args():
     parser.add_argument('--rse', dest='rse', action='store', help='RSE to use for the dark data search', required=True)
 
     #The worker threads are used to perform the dark data search in parallel, splitting the work between the threads evenly
-    parser.add_argument('--treads', dest='treads', action='store', type=int, default=1, help='Number of threads to use for the dark data search')
+    parser.add_argument('--threads', dest='threads', action='store', type=int, default=1, help='Number of threads to use for the dark data search')
 
     #Post comparison, when the dark data is already found, the following options can be used to perform a more detailed analysis
     parser.add_argument('--replica-search', dest='replica_search', action='store_true', help='Look for replicas to replace the dark data', default=False)
@@ -38,7 +38,7 @@ def get_datasets_from_args(args):
             print("Error: cannot specify scopes or datasets when using --all")
             exit(1)
         else:
-            print("all")
+            print("Loading all datasets\n")
             # Retrieve a list of all the datasets
             scopes_in_rucio = RucioFunctions.list_scopes()
             datasets = []
@@ -48,7 +48,7 @@ def get_datasets_from_args(args):
                 datasets.extend(output_list2)
 
     elif args.scopes and not args.datasets:
-        print("scopes")
+        print("Loading datasets for scopes {}.\n".format(args.scopes))
         # Retrieve a list of datasets for the specified scopes
         scopes_in_rucio = RucioFunctions.list_scopes()
         scopes_arg = args.scopes
@@ -65,7 +65,7 @@ def get_datasets_from_args(args):
             datasets.extend(output_list2)
 
     elif args.datasets and not args.scopes:
-        print("datasets")
+        print("Loading datasets {}.\n".format(args.datasets))
         # Retrieve a list of all the datasets
         datasets_arg = args.datasets
         scopes_in_rucio = RucioFunctions.list_scopes()
@@ -80,7 +80,7 @@ def get_datasets_from_args(args):
                 exit(1)
 
     elif args.scopes and args.datasets:
-        print("scopes and datasets")
+        print("Loading datasets {} for scopes {}.\n".format(args.datasets, args.scopes))
         # Retrieve a list of datasets for the specified scopes and datasets
         scopes_in_rucio = RucioFunctions.list_scopes()
         scopes_arg = args.scopes

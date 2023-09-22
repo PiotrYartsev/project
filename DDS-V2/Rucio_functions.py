@@ -78,10 +78,9 @@ class RucioFunctions:
         try:
             dataset_info = cls.rucioclient.list_dataset_replicas(scope, dataset_name, deep=True)
             length = 0
-            dataset_info = list(dataset_info)
             for each in dataset_info:
                 length = length + each["available_length"]
-            return length, dataset_info
+            return length
         except Exception as e:
             print(f"Error counting files in dataset: {e}")
             return None

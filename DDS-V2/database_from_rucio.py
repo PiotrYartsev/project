@@ -1,81 +1,131 @@
-import signal
 import sqlite3 as sl
-import re
 from tqdm import tqdm
-#from Rucio_functions import list_files_dataset, list_replicas, count_files_func,list_scopes,list_dataset,list_replicas_batch
-import sys
-import traceback
 import os
+from Rucio_functions import RucioFunctions
 
-class RucioDataset(object):
-    def __init__(self, dataset_table_name):
-        self.dataset_table_name = dataset_table_name
-        self.con = sl.connect('Rucio_data_LUND_GRIDFTP.db')
-        self.create_table()
+class RucioDataset():
+
     @classmethod
     def create_table(self):
         self.con.execute("CREATE TABLE {} (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, scope TEXT NOT NULL, rse TEXT NOT NULL, adler32 TEXT NOT NULL, timestamp INTEGER NOT NULL, filenumber INTEGER NOT NULL, location TEXT NOT NULL, has_replicas INTEGER NOT NULL);".format(self.dataset_table_name))
-    """
+    
     @classmethod
-    def append_to_table(self, data):
-        append_to_table_output=[]
-        for key in data:
-            name_all=key["name"]
-            scope_all=key["scope"]
-            adler32_all=key["adler32"]
-            rse_all=key["rse"]
-            location_all=key["location"]
-            has_replicas_all=key["has_replicas"]
-            for i in range(len(name_all)):
-                name=name_all[i]
-                scope=scope_all[i]
-                adler32=adler32_all[i]
-                rse=rse_all[i]
-                location=location_all[i]
-                has_replicas=has_replicas_all[i]
-                namesplit=name.split("_")
-                timestamp=namesplit[-1].replace(".root","").replace("t","")
-                filenumber=namesplit[-2].replace("run","")
-                append_to_table_output.append((name, scope, rse, adler32, timestamp, filenumber, location,has_replicas))
-        self.con.executemany("INSERT INTO {} (name, scope, rse, adler32, timestamp, filenumber, location, has_replicas) VALUES (?, ?, ?, ?, ?, ?, ?, ?)".format(self.dataset_table_name), append_to_table_output)
-        self.con.commit()
+    def check_if_exist(cls, dataset_and_scope, LocalRucioDataset,local_database_dataset_data):
+        dataset=dataset_and_scope[1]
+        scope=dataset_and_scope[0]
+        list_of_dataset_not_in_local_database=[]
+        list_of_dataset_already_in_local_database=[]
+        try:
+            number_of_files_in_local=LocalRucioDataset.execute("SELECT length FROM dataset WHERE scope=? AND name=?",(scope,dataset)).fetchone()[0]
+            number_of_files_in_rucio=RucioFunctions.count_files_func(scope,dataset)
+
+            if number_of_files_in_local==number_of_files_in_rucio:
+
+                list_of_dataset_already_in_local_database.append(dataset_and_scope)
+
+            else:
+
+                list_of_dataset_not_in_local_database.append(dataset_and_scope)
+        except:
+            list_of_dataset_not_in_local_database.append(dataset_and_scope)
+
+        return list_of_dataset_not_in_local_database,list_of_dataset_already_in_local_database
+    
     @classmethod
-    def read_rucio_dataset_files_and_extract_metadata(self, file_data_from_dataset_output, scope):
-        file_list = [(file_data["scope"], file_data["name"]) for file_data in file_data_from_dataset_output]
-        replicas = list_replicas_batch(file_list)
-        data = []
-        for replica in replicas:
-            replicas_count = len(replica["rses"])
-            for j in range(replicas_count):
-                file_info = {}
-                file_info["name"] = []
-                file_info["scope"] = []
-                file_info["adler32"] = []
-                file_info["rse"] = []
-                file_info["location"] = []
-                file_info["has_replicas"] = []
-                file_info["name"].append(replica["name"])
-                file_info["scope"].append(replica["scope"])
-                file_info["adler32"].append(replica["adler32"])
-                file_info["rse"].append(list(replica["rses"].keys())[j])
-                file_info["location"].append(replica["rses"][list(replica["rses"].keys())[j]][0])
-                file_info["has_replicas"].append(replicas_count-1)
-                data.append(file_info)
-        return data
+    def fill_data_from_local(cls, dataset_in_local):
+        LocalRucioDataset=sl.connect('local_rucio_database.db')
+        dataset=dataset_in_local[1]
+        scope=dataset_in_local[0]
+        changed_dataset_name=LocalRucioDataset.execute("SELECT table_name FROM dataset WHERE scope=? AND name=?",(scope,dataset)).fetchall()
+        #changed_dataset_name=LocalRucioDataset.execute(f"SELECT table_name FROM dataset WHERE scope= '{scope}'").fetchall()
+        if len(changed_dataset_name)>1:
+            print("Error: more than one dataset with the same name and scope")
+            exit(1)
+        else:
+            changed_dataset_name=changed_dataset_name[0][0]
+            #open that table and read the data
+            data_in_local_database=LocalRucioDataset.execute("SELECT * FROM {}".format(changed_dataset_name)).fetchall()
+            #fill the FileMetadata class
+            ouptut_list=[]
+            for i in range(len(data_in_local_database)):
+                output=FileMetadata(
+                    name=data_in_local_database[0][1],
+                    scope=data_in_local_database[0][2],
+                    rse=data_in_local_database[0][3],
+                    adler32=data_in_local_database[0][4],
+                    timestamp=data_in_local_database[0][5],
+                    filenumber=data_in_local_database[0][6],
+                    location=data_in_local_database[0][7],
+                    has_replicas=data_in_local_database[0][8])
+                ouptut_list.append(output)
+            return ouptut_list
+
+    @classmethod
+    def extract_from_rucio(cls,dataset):
+        dataset_name=dataset[1]
+        scope=dataset[0]
+        print(RucioFunctions.list_files_dataset(scope=scope,name=dataset_name))
     
 
+class FileMetadata:
+    def __init__(self, name,rse, scope, adler32,timestamp,filenumber,  location, has_replicas):
+        self.name = name
+        self.rse = rse
+        self.scope = scope
+        self.adler32 = adler32
+        self.timestamp=timestamp
+        self.filenumber=filenumber
+        self.location = location
+        self.has_replicas = has_replicas
+        
+class CustomDataStructure:
+    def __init__(self):
+        # Initialize dictionaries for each metadata category
+        self.name_index = {}
+        self.rse_index = {}
+        self.scope_index = {}
+        self.adler32_index = {}
+        self.timestamp_index = {}
+        self.filenumber_index = {}
+        self.location_index = {}
+        self.has_replicas_index = {}
 
-    @classmethod
-    def process_dataset(self, scope, name):
-        files_in_dataset = list_files_dataset(scope, name)
-        metadata = self.read_rucio_dataset_files_and_extract_metadata(files_in_dataset, scope)
-        self.append_to_table(metadata)
-    """
+    def add_item(self, item):
+        # Create a FileMetadata instance and add it to all relevant indexes
+        metadata = FileMetadata(
+            item["name"],
+            item["rse"],
+            item["scope"],
+            item["adler32"],
+            item["timestamp"],
+            item["filenumber"],
+            item["location"],
+            item["has_replicas"]
+        )
+        self.name_index[item["name"]] = metadata
+        self.rse_index[item["rse"]] = metadata
+        self.scope_index[item["scope"]] = metadata
+        self.adler32_index[item["adler32"]] = metadata
+        self.timestamp_index[item["timestamp"]] = metadata
+        self.filenumber_index[item["filenumber"]] = metadata
+        self.location_index[item["location"]] = metadata
+        self.has_replicas_index[item["has_replicas"]] = metadata
 
-class RucioFileMetadata(RucioDataset):
-    name: str
-    scope: str
-    adler32: str
-    rse: str
-    location: str
-    has_replicas: int
+    def find_by_metadata(self, metadata_category, value):
+        # Retrieve items by a specific metadata category and value
+        if metadata_category == "name":
+            return self.name_index.get(value)
+        elif metadata_category == "rse":
+            return self.rse_index.get(value)
+        elif metadata_category == "scope":
+            return self.scope_index.get(value)
+        elif metadata_category == "adler32":
+            return self.adler32_index.get(value)
+        elif metadata_category == "timestamp":
+            return self.timestamp_index.get(value)
+        elif metadata_category == "filenumber":
+            return self.filenumber_index.get(value)
+        elif metadata_category == "location":
+            return self.location_index.get(value)
+        elif metadata_category == "has_replicas":
+            return self.has_replicas_index.get(value)

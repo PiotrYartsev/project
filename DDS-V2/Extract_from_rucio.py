@@ -96,7 +96,7 @@ def extract_from_rucio():
             #get datasets
             dataset.extend(output)
     
-     # If table does not already exist, create it
+    # If table does not already exist, create it
     if not con.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='dataset';").fetchall():
         con.execute("""
             CREATE TABLE dataset (
