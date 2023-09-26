@@ -21,15 +21,11 @@ def get_args():
     parser.add_argument('--duplicate-search', dest='duplicate_search', action='store_true', help='Look if dark data is coused by duplciate files', default=False)
 
     args = parser.parse_args()
-
-    # Split comma-separated scopes into a list
     if args.scopes:
-        args.scopes = [scope.strip() for scope in args.scopes[0].split(',')]
-        args.scopes = [i for i in args.scopes if "." in i or "test" in i or "validation" in i]
-
-    # Split comma-separated datasets into a list
+        args.scopes = args.scopes[0].split(",")
+    
     if args.datasets:
-        args.datasets = [dataset.strip() for dataset in args.datasets[0].split(',')]
+        args.datasets = args.datasets[0].split(",")
 
     return args
 
@@ -52,7 +48,7 @@ def get_datasets_from_args(args):
                     datasets.extend(output_list2)
 
     elif args.scopes and not args.datasets:
-        print("Loading datasets for scopes {}.\n".format(args.scopes))
+         
         # Retrieve a list of datasets for the specified scopes
         scopes_in_rucio = RucioFunctions.list_scopes()
         scopes_arg = args.scopes

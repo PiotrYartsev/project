@@ -1,7 +1,7 @@
 #this is the main software that runs all the other parts
 from Rucio_functions import RucioFunctions
 
-from database_from_rucio import RucioDataset
+from database_from_rucio import RucioDataset, CustomDataStructure
 from argument_loader import get_args, get_datasets_from_args
 from multithreading import run_threads
 
@@ -88,6 +88,7 @@ if __name__ == "__main__":
     # Get the datasets, based on the arguments
     print("Loading datasets\n")
     datasets = get_datasets_from_args(args)
+    #datasets=datasets[0:10]
 
     #remove any spaces in the dataset names or scopes
     print("Removing spaces from the dataset names and scopes\n")
@@ -95,7 +96,9 @@ if __name__ == "__main__":
 
     #check if the datasets exist in the local database
     print("Checking if the datasets exist in the local database\n")
+
     if os.path.isfile('local_rucio_database.db'):
+        print("Local database found, checking if the datasets exist in the local database\n")
         LocalRucioDataset=sl.connect('local_rucio_database.db')
         local_database_dataset_data=LocalRucioDataset.execute("SELECT scope, name, length FROM dataset").fetchall()
 
@@ -103,28 +106,52 @@ if __name__ == "__main__":
         output=run_threads(thread_count=args.threads,function=RucioDataset.check_if_exist,data=datasets,const_data=local_database_dataset_data)
         list_of_dataset_not_in_local_database=[]
         list_of_dataset_already_in_local_database=[]
+        print("Moving datasets to the correct list\n")
         for item in output:
             if item[1]:
                 list_of_dataset_already_in_local_database.append(item[0])
             else:
                 list_of_dataset_not_in_local_database.append(item[0])
     else:
+        print("Local database not found, all datasets will be loaded from Rucio\n")
         list_of_dataset_not_in_local_database=datasets
         list_of_dataset_already_in_local_database=[]
 
     print("Number of datasets that do not exist in the local database: "+str(len(list_of_dataset_not_in_local_database)))
     print("Number of datasets that already exist in the local database: "+str(len(list_of_dataset_already_in_local_database)))
+    print("\n")
+    #print(list_of_dataset_already_in_local_database[:10])
+    #Ap0.001GeV-sim-test,Ap0.001GeV,v3.2.10_targetPN-batch1,v1.7.1_ecal_photonuclear-recon_bdt2-batch1,v1.7.1_target_gammamumu-batch30,v1.7.1_target_gammamumu_8gev_reco-batch19,v2.3.0-batch20
+
+
     #For data that already exist in local database and the number of files match, we can use the old local database data isnteaed of loading it from Rucio.
     #This is done by simply extracting the values from Rucio and putting it in the custom data structure
     #This is done in a multithreaded way
     Data_from_datasets=(run_threads(thread_count=args.threads,function=RucioDataset.fill_data_from_local,data=list_of_dataset_already_in_local_database))
-    print(Data_from_datasets)
+    Data_from_datasets=[item for sublist in Data_from_datasets for item in sublist]
+    #print(Data_from_datasets)
+    grrgsd=CustomDataStructure()
+    for data in Data_from_datasets:
+        grrgsd.add_item(data)
+    lund=grrgsd.adler32_index.get("460c3cd2")
+    for file in lund:
+        print("The scope is:"+str(file.scope))
+        print("The name is:"+str(file.name))
+        print("The rse is:"+str(file.rse))
+        print("The dataset is:"+str(file.dataset))
+        print("The adler32 is:"+str(file.adler32))
+        print("The timestamp is:"+str(file.timestamp))
+        print("The filenumber is:"+str(file.filenumber))
+        print("The location is:"+str(file.location))
+        print("The has_replicas is:"+str(file.has_replicas))
+        print("\n")
+        break
+        #print(file.name)
 
     #combibine the list of list into one list
-    Data_from_datasets=[item for sublist in Data_from_datasets for item in sublist]
-
+    #print(Data_from_datasets)
     #For data that does not exist in the local database, we need to load it from Rucio.
     #RucioFunctions.list_files_dataset
     #This is done in a multithreaded way
-    RucioDataset.extract_from_rucio(dataset=list_of_dataset_not_in_local_database[0])
+    RucioDataset.extract_from_rucio(dataset=list_of_dataset_not_in_local_database[0],thread_count=args.threads)
     

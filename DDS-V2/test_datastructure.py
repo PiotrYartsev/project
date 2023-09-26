@@ -1,105 +1,102 @@
 class FileMetadata:
-    def __init__(self, name, scope, adler32, rse, location, has_replicas):
+    def __init__(self, name, dataset, scope, rse, adler32, timestamp, filenumber, location, has_replicas):
         self.name = name
+        self.dataset = dataset
         self.scope = scope
-        self.adler32 = adler32
         self.rse = rse
+        self.adler32 = adler32
+        self.timestamp = timestamp
+        self.filenumber = filenumber
         self.location = location
         self.has_replicas = has_replicas
 
+    def __getitem__(self, key):
+        return getattr(self, key)
 class CustomDataStructure:
     def __init__(self):
-        # Initialize dictionaries for each metadata category
+        # Initialize dictionaries (indexes) for each metadata category
         self.name_index = {}
+        self.dataset_index = {}
+        self.rse_index = {}
         self.scope_index = {}
         self.adler32_index = {}
-        self.rse_index = {}
+        self.timestamp_index = {}
+        self.filenumber_index = {}
         self.location_index = {}
         self.has_replicas_index = {}
 
     def add_item(self, item):
-        # Create a FileMetadata instance and add it to all relevant indexes
+        # Create a FileMetadata instance
         metadata = FileMetadata(
             item["name"],
+            item["dataset"],
+            item["rse"],
             item["scope"],
             item["adler32"],
-            item["rse"],
+            item["timestamp"],
+            item["filenumber"],
             item["location"],
             item["has_replicas"]
         )
-        self.name_index[item["name"]] = metadata
-        self.scope_index[item["scope"]] = metadata
-        self.adler32_index[item["adler32"]] = metadata
-        self.rse_index[item["rse"]] = metadata
-        self.location_index[item["location"]] = metadata
-        self.has_replicas_index[item["has_replicas"]] = metadata
+        
+        # Append the metadata to the relevant indexes
+        self._append_to_index(self.name_index, item["name"], metadata)
+        self._append_to_index(self.dataset_index, item["dataset"], metadata)
+        self._append_to_index(self.rse_index, item["rse"], metadata)
+        self._append_to_index(self.scope_index, item["scope"], metadata)
+        self._append_to_index(self.adler32_index, item["adler32"], metadata)
+        self._append_to_index(self.timestamp_index, item["timestamp"], metadata)
+        self._append_to_index(self.filenumber_index, item["filenumber"], metadata)
+        self._append_to_index(self.location_index, item["location"], metadata)
+        self._append_to_index(self.has_replicas_index, item["has_replicas"], metadata)
 
     def find_by_metadata(self, metadata_category, value):
         # Retrieve items by a specific metadata category and value
-        if metadata_category == "name":
-            return self.name_index.get(value)
-        elif metadata_category == "scope":
-            return self.scope_index.get(value)
-        elif metadata_category == "adler32":
-            return self.adler32_index.get(value)
-        elif metadata_category == "rse":
-            return self.rse_index.get(value)
-        elif metadata_category == "location":
-            return self.location_index.get(value)
-        elif metadata_category == "has_replicas":
-            return self.has_replicas_index.get(value)
+        index = getattr(self, f"{metadata_category}_index")
+        return index.get(value)
 
-# Create an instance of the custom data structure
-data_structure = CustomDataStructure()
+    def _append_to_index(self, index, key, value):
+        # Helper method to append metadata to an index (dictionary) allowing for multiple values
+        if key in index:
+            index[key].append(value)
+        else:
+            index[key] = [value]
 
-# Create instances of FileMetadata
-metadata1 = FileMetadata(
-    name="file1.txt",
-    scope="scope1",
-    adler32="12345",
-    rse="rse1",
-    location="/path1",
-    has_replicas=1
-)
+# Create a CustomDataStructure instance
+custom_structure = CustomDataStructure()
 
-metadata2 = FileMetadata(
-    name="file2.txt",
-    scope="scope2",
-    adler32="67890",
-    rse="rse2",
-    location="/path2",
-    has_replicas=0
-)
+# Create some FileMetadata instances
+file1 = {
+    "name": "file1.txt",
+    "dataset": "data1",
+    "rse": "rse1",
+    "scope": "scope1",
+    "adler32": "12345",
+    "timestamp": "2023-09-25",
+    "filenumber": 1,
+    "location": "Sweden",
+    "has_replicas": True
+}
 
-# Add instances of FileMetadata to the custom data structure
-data_structure.add_item({
-    "name": metadata1.name,
-    "scope": metadata1.scope,
-    "adler32": metadata1.adler32,
-    "rse": metadata1.rse,
-    "location": metadata1.location,
-    "has_replicas": metadata1.has_replicas
-})
+file2 = {
+    "name": "file2.txt",
+    "dataset": "data2",
+    "rse": "rse1",
+    "scope": "scope2",
+    "adler32": "67890",
+    "timestamp": "2023-09-26",
+    "filenumber": 2,
+    "location": "USA",
+    "has_replicas": False
+}
 
-data_structure.add_item({
-    "name": metadata2.name,
-    "scope": metadata2.scope,
-    "adler32": metadata2.adler32,
-    "rse": metadata2.rse,
-    "location": metadata2.location,
-    "has_replicas": metadata2.has_replicas
-})
+# Add these FileMetadata instances to the CustomDataStructure
+custom_structure.add_item(file1)
+custom_structure.add_item(file2)
 
-# Retrieve items by metadata category and value
-result = data_structure.find_by_metadata("name", "file1.txt")
+# Now you can retrieve file metadata efficiently using the indexes
+files_by_rse = custom_structure.find_by_metadata("rse", "rse1")
 
-# Print the retrieved item
-if result:
-    print(result.name)
-    print(result.scope)
-    print(result.adler32)
-    print(result.rse)
-    print(result.location)
-    print(result.has_replicas)
-else:
-    print("Item not found.")
+# files_by_rse will contain both "file1.txt" and "file2.txt" objects with the same "rse" value.
+for file in files_by_rse:
+    print(file.rse)

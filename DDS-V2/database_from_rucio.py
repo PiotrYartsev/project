@@ -49,46 +49,72 @@ class RucioDataset():
             #open that table and read the data
             data_in_local_database=LocalRucioDataset.execute("SELECT * FROM {}".format(changed_dataset_name)).fetchall()
             #fill the FileMetadata class
-            ouptut_list=[]
-            for i in range(len(data_in_local_database)):
-                output=FileMetadata(
-                    name=data_in_local_database[0][1],
+            # Create a new instance of CustomDataStructure
+            list_of_metadata=[]
+
+            # Loop over the data in the local database and add each item to the custom data structure
+            for item in data_in_local_database:
+                #print(item)
+                metadata = FileMetadata(
+                    name=item[1],
                     dataset=dataset,
-                    scope=data_in_local_database[0][2],
-                    rse=data_in_local_database[0][3],
-                    adler32=data_in_local_database[0][4],
-                    timestamp=data_in_local_database[0][5],
-                    filenumber=data_in_local_database[0][6],
-                    location=data_in_local_database[0][7],
-                    has_replicas=data_in_local_database[0][8])
-                ouptut_list.append(output)
-            return ouptut_list
+                    scope=item[2],
+                    rse=item[3],
+                   
+                    adler32=item[4],
+                    timestamp=item[5],
+                    filenumber=item[6],
+                    location=item[7],
+                    has_replicas=item[8]
+                )
+                list_of_metadata.append(metadata)
+
+            # Return the custom data structure
+            return list_of_metadata
 
     @classmethod
-    def extract_from_rucio(cls,dataset):
+    def extract_from_rucio(cls,dataset,thread_count):
         dataset_name=dataset[1]
         scope=dataset[0]
-        print(RucioFunctions.list_files_dataset(scope=scope,name=dataset_name))
-    
+        files=((RucioFunctions.list_files_dataset(scope=scope,name=dataset_name)))
+        files=[(scope,file["name"]) for file in files]
+        item=RucioFunctions.list_replicas_batch(files)
+        #fill_me=FileMetadata
+        
+    @classmethod
+    def combine_datastructure(cls,list_of_data_structures):
+        # Create a new instance of CustomDataStructure
+        combined_data_structure = CustomDataStructure()
+
+        # Loop over the list of data structures and add their items to the combined data structure
+        for data_structure in list_of_data_structures:
+            combined_data_structure.add_items(data_structure.items())
+
+        # Return the combined data structure
+        return combined_data_structure
+
 
 class FileMetadata:
-    def __init__(self, name,dataset,rse, scope, adler32,timestamp,filenumber,  location, has_replicas):
+    def __init__(self, name, dataset, scope, rse, adler32, timestamp, filenumber, location, has_replicas):
         self.name = name
-        self.dataset=dataset
-        self.rse = rse
+        self.dataset = dataset
         self.scope = scope
+        self.rse = rse
         self.adler32 = adler32
-        self.timestamp=timestamp
-        self.filenumber=filenumber
+        self.timestamp = timestamp
+        self.filenumber = filenumber
         self.location = location
         self.has_replicas = has_replicas
+
+    def __getitem__(self, key):
+        return getattr(self, key)
         
 class CustomDataStructure:
     def __init__(self):
-        # Initialize dictionaries for each metadata category
+        # Initialize dictionaries (indexes) for each metadata category
         self.name_index = {}
+        self.dataset_index = {}
         self.rse_index = {}
-        self.dataset_index={}
         self.scope_index = {}
         self.adler32_index = {}
         self.timestamp_index = {}
@@ -97,7 +123,7 @@ class CustomDataStructure:
         self.has_replicas_index = {}
 
     def add_item(self, item):
-        # Create a FileMetadata instance and add it to all relevant indexes
+        # Create a FileMetadata instance
         metadata = FileMetadata(
             item["name"],
             item["dataset"],
@@ -109,33 +135,26 @@ class CustomDataStructure:
             item["location"],
             item["has_replicas"]
         )
-        self.name_index[item["name"]] = metadata
-        self.dataset_index[item["dataset"]] = metadata
-        self.rse_index[item["rse"]] = metadata
-        self.scope_index[item["scope"]] = metadata
-        self.adler32_index[item["adler32"]] = metadata
-        self.timestamp_index[item["timestamp"]] = metadata
-        self.filenumber_index[item["filenumber"]] = metadata
-        self.location_index[item["location"]] = metadata
-        self.has_replicas_index[item["has_replicas"]] = metadata
+        
+        # Append the metadata to the relevant indexes, using lists
+        self._append_to_index(self.name_index, item["name"], metadata)
+        self._append_to_index(self.dataset_index, item["dataset"], metadata)
+        self._append_to_index(self.rse_index, item["rse"], metadata)
+        self._append_to_index(self.scope_index, item["scope"], metadata)
+        self._append_to_index(self.adler32_index, item["adler32"], metadata)
+        self._append_to_index(self.timestamp_index, item["timestamp"], metadata)
+        self._append_to_index(self.filenumber_index, item["filenumber"], metadata)
+        self._append_to_index(self.location_index, item["location"], metadata)
+        self._append_to_index(self.has_replicas_index, item["has_replicas"], metadata)
 
     def find_by_metadata(self, metadata_category, value):
         # Retrieve items by a specific metadata category and value
-        if metadata_category == "name":
-            return self.name_index.get(value)
-        elif metadata_category == "dataset":
-            return self.dataset_index.get(value)
-        elif metadata_category == "rse":
-            return self.rse_index.get(value)
-        elif metadata_category == "scope":
-            return self.scope_index.get(value)
-        elif metadata_category == "adler32":
-            return self.adler32_index.get(value)
-        elif metadata_category == "timestamp":
-            return self.timestamp_index.get(value)
-        elif metadata_category == "filenumber":
-            return self.filenumber_index.get(value)
-        elif metadata_category == "location":
-            return self.location_index.get(value)
-        elif metadata_category == "has_replicas":
-            return self.has_replicas_index.get(value)
+        index = getattr(self, f"{metadata_category}_index")
+        return index.get(value)
+
+    def _append_to_index(self, index, key, value):
+        # Helper method to append metadata to an index (list) allowing for multiple values
+        if key in index:
+            index[key].append(value)
+        else:
+            index[key] = [value]
