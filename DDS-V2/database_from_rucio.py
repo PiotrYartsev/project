@@ -60,7 +60,6 @@ class RucioDataset():
                     dataset=dataset,
                     scope=item[2],
                     rse=item[3],
-                   
                     adler32=item[4],
                     timestamp=item[5],
                     filenumber=item[6],
@@ -114,8 +113,9 @@ class CustomDataStructure:
         # Initialize dictionaries (indexes) for each metadata category
         self.name_index = {}
         self.dataset_index = {}
-        self.rse_index = {}
         self.scope_index = {}
+        self.rse_index = {}
+        
         self.adler32_index = {}
         self.timestamp_index = {}
         self.filenumber_index = {}
@@ -127,8 +127,9 @@ class CustomDataStructure:
         metadata = FileMetadata(
             item["name"],
             item["dataset"],
-            item["rse"],
             item["scope"],
+            item["rse"],
+            
             item["adler32"],
             item["timestamp"],
             item["filenumber"],
@@ -139,8 +140,9 @@ class CustomDataStructure:
         # Append the metadata to the relevant indexes, using lists
         self._append_to_index(self.name_index, item["name"], metadata)
         self._append_to_index(self.dataset_index, item["dataset"], metadata)
-        self._append_to_index(self.rse_index, item["rse"], metadata)
         self._append_to_index(self.scope_index, item["scope"], metadata)
+        self._append_to_index(self.rse_index, item["rse"], metadata)
+        
         self._append_to_index(self.adler32_index, item["adler32"], metadata)
         self._append_to_index(self.timestamp_index, item["timestamp"], metadata)
         self._append_to_index(self.filenumber_index, item["filenumber"], metadata)

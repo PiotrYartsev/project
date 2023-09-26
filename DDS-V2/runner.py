@@ -133,7 +133,7 @@ if __name__ == "__main__":
     grrgsd=CustomDataStructure()
     for data in Data_from_datasets:
         grrgsd.add_item(data)
-    lund=grrgsd.adler32_index.get("460c3cd2")
+    lund=grrgsd.rse_index.get("LUND")
     for file in lund:
         print("The scope is:"+str(file.scope))
         print("The name is:"+str(file.name))
