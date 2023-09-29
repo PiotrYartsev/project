@@ -4,26 +4,8 @@ from Rucio_functions import RucioFunctions
 from database_from_rucio import RucioDataset, CustomDataStructure
 from argument_loader import get_args, get_datasets_from_args
 from multithreading import run_threads
+import tqdm as tqdm
 
-#from archives_generator import archives_generator,move_to_archives
-
-#from generate_gridftp_instructional_files import adding_data_about_replicas
-
-#from generate_text_rse_docs import generate_txt
-
-#from read_rse_output_and_compare_to_rucio import find_dark_data
-
-#from dark_data_functions import transforming_to_database_from_txt
-
-
-
-from verify import verify
-import os
-import sqlite3 as sl
-#import multiprocessing, Queue
-import threading
-from queue import Queue
-import shutil
 """
 
 # Create a logger object
@@ -125,7 +107,7 @@ if __name__ == "__main__":
     print("Number of datasets that already exist in the local database: "+str(len(list_of_dataset_already_in_local_database)))
     print("\n")
     #print(list_of_dataset_already_in_local_database[:10])
-    #Ap0.001GeV-sim-test,Ap0.001GeV,v3.2.10_targetPN-batch1,v1.7.1_ecal_photonuclear-recon_bdt2-batch1,v1.7.1_target_gammamumu-batch30,v1.7.1_target_gammamumu_8gev_reco-batch19,v2.3.0-batch20
+    #Ap0.001GeV-sim-test,Ap0.001GeV,v3.2.10_targetPN-batch1,v1.7.1_ecal_photonuclear-recon_bdt2-batch1,v1.7.1_target_gammamumu-batch30,v1.7.1_target_gammamumu_8gev_reco-batch19,v2.3.0-batch20,v2.3.0-batch34
 
 
     #For data that already exist in local database and the number of files match, we can use the old local database data isnteaed of loading it from Rucio.
@@ -159,6 +141,13 @@ if __name__ == "__main__":
     #For data that does not exist in the local database, we need to load it from Rucio.
     #RucioFunctions.list_files_dataset
     #This is done in a multithreaded way
-    for n in range(len(list_of_dataset_not_in_local_database)):
-        RucioDataset.extract_from_rucio(dataset=list_of_dataset_not_in_local_database[n],thread_count=args.threads)
-        break
+    Data_from_Rucio=CustomDataStructure()
+    for n in (range(len(list_of_dataset_not_in_local_database))):
+
+        datastructure=RucioDataset.extract_from_rucio(dataset=list_of_dataset_not_in_local_database[n],thread_count=args.threads)
+        RucioDataset.find_replicas(datastructure)
+        
+        
+        #print(list(datastructure.find_by_metadata("scope","mc20"))[0].name)
+        
+        

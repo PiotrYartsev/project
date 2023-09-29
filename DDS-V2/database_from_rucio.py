@@ -2,6 +2,7 @@ import sqlite3 as sl
 from tqdm import tqdm
 import os
 from Rucio_functions import RucioFunctions
+from multithreading import run_threads
 
 class RucioDataset():
 
@@ -75,23 +76,64 @@ class RucioDataset():
     def extract_from_rucio(cls,dataset,thread_count):
         dataset_name=dataset[1]
         scope=dataset[0]
-        files=((RucioFunctions.list_dataset_replicas_bulk(scope=scope,name=dataset_name)))
-        for file in files:
-            scope=file[0]
-            name=file[1]
-            adler32=file[3]
-            rse=file[4].split(":")[0]
-            location=file[4].split(":")[1]
-            print(scope)
-            print(name)
-            print(adler32)
-            print(rse)
-            print(location)
-            break
-            
+        #Rucio does not provide all the necessaty information abotu the files in a single place. Therefore, we need to use multiple functions to get all the information
+
+        #First, we get the list of files in the dataset using the list_files_dataset function. It does not exist as part of the Rucio PythonAPI (for some reason even thought documentation says it does), so we use the CLI version instead instead
+        #FIXME Make this work with python API, we dont want two systems
+        files_using_list_dataset_replicas_bulk_CLI=((RucioFunctions.list_dataset_replicas_bulk_CLI(scope=scope,name=dataset_name)))
+        datastructure=CustomDataStructure()
+        if len(files_using_list_dataset_replicas_bulk_CLI)==0:
+            return datastructure
+        else:
+            output=run_threads(thread_count=thread_count,function=RucioDataset.multithreaded_add_to_FileMetadata,data=files_using_list_dataset_replicas_bulk_CLI,const_data=dataset)
+            for item in output:
+                datastructure.add_item(item)
+            return datastructure
+    
+    @classmethod
+    def find_replicas(cls, datastructure):
+        #for each file in the datastructure, we check if it has replicas
+        for metadata in datastructure.name_index.values():
+            # Do something with the metadata instance
+            print(metadata)
+        """dict_search={"name":name,"scope":scope,"adler32":adler32}
+        matching_index=datastructure.find_by_metadata_dict(dict_search)
+        if len(matching_index)!=0:
+            for item in matching_index:
+                item.has_replicas=1
+                has_replicas=1
+        else:
+            has_replicas=0"""
 
 
-                  
+    def multithreaded_add_to_FileMetadata(file, scope_dataset):
+        dataset_name=scope_dataset[1]
+        scope=file[0]
+        name=file[1]
+        adler32=file[3]
+
+        rse=file[4].split(":")[0]
+        location=file[4].replace(rse+":","")
+        timestamp=name.split("_")[-1].replace(".root","").replace("t","")
+        filenumber=name.split("_")[-2].replace("run","")
+        has_replicas=0
+
+        #check if a file with this name and scope and adler32 already exist in the datastructure
+        #if it does, then we set has_replcias to 1 for both
+        #if it does not, we set has_replicas to 0 for both
+        metadata=FileMetadata(
+            name=name,
+            dataset=dataset_name,
+            scope=scope,
+            rse=rse,
+            adler32=adler32,
+            timestamp=timestamp,
+            filenumber=filenumber,
+            location=location,
+            has_replicas=has_replicas
+        )
+        return metadata
+    
     @classmethod
     def combine_datastructure(cls,list_of_data_structures):
         # Create a new instance of CustomDataStructure
@@ -165,6 +207,15 @@ class CustomDataStructure:
         # Retrieve items by a specific metadata category and value
         index = getattr(self, f"{metadata_category}_index")
         return index.get(value)
+    
+    def find_by_metadata_dict(self, metadata_dict):
+        # Retrieve items by multiple metadata categories and values
+        indexes = []
+        for category, value in metadata_dict.items():
+            index = getattr(self, f"{category}_index")
+            indexes.append(set(index.get(value, [])))
+        result = set.intersection(*indexes)
+        return list(result)
 
     def _append_to_index(self, index, key, value):
         # Helper method to append metadata to an index (list) allowing for multiple values

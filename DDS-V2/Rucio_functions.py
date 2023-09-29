@@ -27,7 +27,7 @@ class RucioFunctions:
     @classmethod
     def list_files_dataset(cls, scope, name):
         try:
-            files = cls.rucioclient.list_file_replicas(scope=scope, name=name, long=True)
+            files = cls.rucioclient.list_files(scope=scope, name=name, long=True)
             return files
         except Exception as e:
             print(f"Error listing files in dataset: {e}")
@@ -126,7 +126,7 @@ class RucioFunctions:
     # ...
 
     @classmethod
-    def list_dataset_replicas_bulk(cls, scope, name):
+    def list_dataset_replicas_bulk_CLI(cls, scope, name):
         # Get the list of files in the dataset
         command = f"rucio list-file-replicas {scope}:{name}"
 
