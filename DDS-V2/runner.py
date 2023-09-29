@@ -1,10 +1,11 @@
 #this is the main software that runs all the other parts
 from Rucio_functions import RucioFunctions
 
-from database_from_rucio import RucioDataset, CustomDataStructure
+from database_from_rucio import RucioDataset, CustomDataStructure, combine_datastructures
 from argument_loader import get_args, get_datasets_from_args
 from multithreading import run_threads
-import tqdm as tqdm
+import os
+import sqlite3 as sl
 
 """
 
@@ -78,11 +79,7 @@ if __name__ == "__main__":
 
     #check if the datasets exist in the local database
     print("Checking if the datasets exist in the local database\n")
-
-
-    list_of_dataset_not_in_local_database=datasets
-    list_of_dataset_already_in_local_database=[]
-    """
+    
     if os.path.isfile('local_rucio_database.db'):
         print("Local database found, checking if the datasets exist in the local database\n")
         LocalRucioDataset=sl.connect('local_rucio_database.db')
@@ -101,11 +98,8 @@ if __name__ == "__main__":
     else:
         print("Local database not found, all datasets will be loaded from Rucio\n")
         list_of_dataset_not_in_local_database=datasets
-        list_of_dataset_already_in_local_database=[]"""
-    """
-    print("Number of datasets that do not exist in the local database: "+str(len(list_of_dataset_not_in_local_database)))
-    print("Number of datasets that already exist in the local database: "+str(len(list_of_dataset_already_in_local_database)))
-    print("\n")
+        list_of_dataset_already_in_local_database=[]
+    
     #print(list_of_dataset_already_in_local_database[:10])
     #Ap0.001GeV-sim-test,Ap0.001GeV,v3.2.10_targetPN-batch1,v1.7.1_ecal_photonuclear-recon_bdt2-batch1,v1.7.1_target_gammamumu-batch30,v1.7.1_target_gammamumu_8gev_reco-batch19,v2.3.0-batch20,v2.3.0-batch34
 
@@ -119,23 +113,7 @@ if __name__ == "__main__":
     Data_from_datasets_datastructure=CustomDataStructure()
     for data in Data_from_datasets:
         Data_from_datasets_datastructure.add_item(data)
-    """
-    """
-    lund=grrgsd.rse_index.get("LUND")
-    for file in lund:
-        print("The scope is:"+str(file.scope))
-        print("The name is:"+str(file.name))
-        print("The rse is:"+str(file.rse))
-        print("The dataset is:"+str(file.dataset))
-        print("The adler32 is:"+str(file.adler32))
-        print("The timestamp is:"+str(file.timestamp))
-        print("The filenumber is:"+str(file.filenumber))
-        print("The location is:"+str(file.location))
-        print("The has_replicas is:"+str(file.has_replicas))
-        print("\n")
-        break
-        #print(file.name)
-    """
+ 
     #combibine the list of list into one list
     #print(Data_from_datasets)
     #For data that does not exist in the local database, we need to load it from Rucio.
@@ -143,11 +121,11 @@ if __name__ == "__main__":
     #This is done in a multithreaded way
     Data_from_Rucio=CustomDataStructure()
     for n in (range(len(list_of_dataset_not_in_local_database))):
-
         datastructure=RucioDataset.extract_from_rucio(dataset=list_of_dataset_not_in_local_database[n],thread_count=args.threads)
-        RucioDataset.find_replicas(datastructure)
-        
-        
-        #print(list(datastructure.find_by_metadata("scope","mc20"))[0].name)
+        #RucioDataset.find_replicas(datastructure,args.rse)
+    
+    New_database=combine_datastructures(datastructure1=Data_from_Rucio,datastructure2=Data_from_datasets_datastructure)
+    print(New_database.rse_index.get(args.rse)[0].name)
+    
         
         

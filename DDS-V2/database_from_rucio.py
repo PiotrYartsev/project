@@ -91,20 +91,16 @@ class RucioDataset():
             return datastructure
     
     @classmethod
-    def find_replicas(cls, datastructure):
+    def find_replicas(cls, datastructure,rse):
         #for each file in the datastructure, we check if it has replicas
         for metadata in datastructure.name_index.values():
             # Do something with the metadata instance
-            print(metadata)
-        """dict_search={"name":name,"scope":scope,"adler32":adler32}
-        matching_index=datastructure.find_by_metadata_dict(dict_search)
-        if len(matching_index)!=0:
-            for item in matching_index:
-                item.has_replicas=1
-                has_replicas=1
-        else:
-            has_replicas=0"""
-
+            metadata=metadata[0]
+            dict_search={"name":metadata.name,"scope":metadata.scope,"adler32":metadata.adler32}
+            matching_index=datastructure.find_by_metadata_dict(dict_search)
+            if len(matching_index)!=1:
+                for item in matching_index:
+                    item.has_replicas=1
 
     def multithreaded_add_to_FileMetadata(file, scope_dataset):
         dataset_name=scope_dataset[1]
@@ -223,3 +219,39 @@ class CustomDataStructure:
             index[key].append(value)
         else:
             index[key] = [value]
+
+def combine_datastructures(datastructure1, datastructure2):
+    # Create a new CustomDataStructure instance
+    combined_datastructure = CustomDataStructure()
+
+    # Add all the items from datastructure1 to the combined_datastructure
+    for item in datastructure1.name_index.values():
+        for metadata in item:
+            combined_datastructure.add_item({
+                "name": metadata.name,
+                "dataset": metadata.dataset,
+                "scope": metadata.scope,
+                "rse": metadata.rse,
+                "adler32": metadata.adler32,
+                "timestamp": metadata.timestamp,
+                "filenumber": metadata.filenumber,
+                "location": metadata.location,
+                "has_replicas": metadata.has_replicas
+            })
+
+    # Add all the items from datastructure2 to the combined_datastructure
+    for item in datastructure2.name_index.values():
+        for metadata in item:
+            combined_datastructure.add_item({
+                "name": metadata.name,
+                "dataset": metadata.dataset,
+                "scope": metadata.scope,
+                "rse": metadata.rse,
+                "adler32": metadata.adler32,
+                "timestamp": metadata.timestamp,
+                "filenumber": metadata.filenumber,
+                "location": metadata.location,
+                "has_replicas": metadata.has_replicas
+            })
+
+    return combined_datastructure

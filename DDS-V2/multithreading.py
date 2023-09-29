@@ -63,7 +63,7 @@ def run_threads(thread_count, function, data,const_data=None):
     for thread in threads:
         thread.join()
 
-    print("All threads have finished.")
+    #print("All threads have finished.")
     
     # Return the combined output list
     return output_list
