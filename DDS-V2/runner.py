@@ -146,7 +146,6 @@ if __name__ == "__main__":
         print("The has_replicas is:"+str(file.has_replicas))
         print("\n")
         break
-        #print(file.name)
 
     #combibine the list of list into one list
     #print(Data_from_datasets)
