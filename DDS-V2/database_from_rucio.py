@@ -75,11 +75,23 @@ class RucioDataset():
     def extract_from_rucio(cls,dataset,thread_count):
         dataset_name=dataset[1]
         scope=dataset[0]
-        files=((RucioFunctions.list_files_dataset(scope=scope,name=dataset_name)))
-        files=[(scope,file["name"]) for file in files]
-        item=RucioFunctions.list_replicas_batch(files)
-        #fill_me=FileMetadata
-        
+        files=((RucioFunctions.list_dataset_replicas_bulk(scope=scope,name=dataset_name)))
+        for file in files:
+            scope=file[0]
+            name=file[1]
+            adler32=file[3]
+            rse=file[4].split(":")[0]
+            location=file[4].split(":")[1]
+            print(scope)
+            print(name)
+            print(adler32)
+            print(rse)
+            print(location)
+            break
+            
+
+
+                  
     @classmethod
     def combine_datastructure(cls,list_of_data_structures):
         # Create a new instance of CustomDataStructure
