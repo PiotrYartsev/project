@@ -16,6 +16,8 @@ def get_args():
     #The worker threads are used to perform the dark data search in parallel, splitting the work between the threads evenly
     parser.add_argument('--threads', dest='threads', action='store', type=int, default=1, help='Number of threads to use for the dark data search')
 
+    parser.add_argument('--localdb', dest='localdb', action='store_true', help='Use the local copy of the Rucio database if available', default=False)
+
     #Post comparison, when the dark data is already found, the following options can be used to perform a more detailed analysis
     parser.add_argument('--replica-search', dest='replica_search', action='store_true', help='Look for replicas to replace the dark data', default=False)
     parser.add_argument('--duplicate-search', dest='duplicate_search', action='store_true', help='Look if dark data is coused by duplciate files', default=False)

@@ -55,6 +55,29 @@ verify(logger)
 move_to_archives(today,logger)
 """
 
+def use_local_database(datasets):
+    if os.path.isfile('local_rucio_database.db'):
+        print("Local database found, checking if the datasets exist in the local database\n")
+        LocalRucioDataset=sl.connect('local_rucio_database.db')
+        local_database_dataset_data=LocalRucioDataset.execute("SELECT scope, name, length FROM dataset").fetchall()
+
+        #print(local_database_dataset_data)
+        output=run_threads(thread_count=args.threads,function=RucioDataset.check_if_exist,data=datasets,const_data=local_database_dataset_data)
+        list_of_dataset_not_in_local_database=[]
+        list_of_dataset_already_in_local_database=[]
+        print("Moving datasets to the correct list\n")
+        for item in output:
+            if item[1]:
+                list_of_dataset_already_in_local_database.append(item[0])
+            else:
+                list_of_dataset_not_in_local_database.append(item[0])
+    else:
+        print("Local database not found, all datasets will be loaded from Rucio\n")
+        list_of_dataset_not_in_local_database=datasets
+        list_of_dataset_already_in_local_database=[]
+    return list_of_dataset_not_in_local_database,list_of_dataset_already_in_local_database
+
+#Ap0.001GeV-sim-test,Ap0.001GeV,v3.2.10_targetPN-batch1,v1.7.1_ecal_photonuclear-recon_bdt2-batch1,v1.7.1_target_gammamumu-batch30,v1.7.1_target_gammamumu_8gev_reco-batch19,v2.3.0-batch20,v2.3.0-batch34
 if __name__ == "__main__":
     
     # Get the arguments from the command line
@@ -77,55 +100,45 @@ if __name__ == "__main__":
     print("Removing spaces from the dataset names and scopes\n")
     datasets = [(dataset[0].replace(" ",""),dataset[1].replace(" ","")) for dataset in datasets]
 
-    #check if the datasets exist in the local database
-    print("Checking if the datasets exist in the local database\n")
-    
-    if os.path.isfile('local_rucio_database.db'):
-        print("Local database found, checking if the datasets exist in the local database\n")
-        LocalRucioDataset=sl.connect('local_rucio_database.db')
-        local_database_dataset_data=LocalRucioDataset.execute("SELECT scope, name, length FROM dataset").fetchall()
 
-        #print(local_database_dataset_data)
-        output=run_threads(thread_count=args.threads,function=RucioDataset.check_if_exist,data=datasets,const_data=local_database_dataset_data)
-        list_of_dataset_not_in_local_database=[]
-        list_of_dataset_already_in_local_database=[]
-        print("Moving datasets to the correct list\n")
-        for item in output:
-            if item[1]:
-                list_of_dataset_already_in_local_database.append(item[0])
-            else:
-                list_of_dataset_not_in_local_database.append(item[0])
-    else:
-        print("Local database not found, all datasets will be loaded from Rucio\n")
+
+    #check if the datasets exist in the local database
+
+    if args.localdb: #if we set the --localdb argument, we can use the local database instead of loading the data from Rucio
+        print("Checking if the datasets exist in the local database\n")
+        list_of_dataset_not_in_local_database,list_of_dataset_already_in_local_database=use_local_database(datasets)
+    else: #if we do not set the --localdb argument, we need to load the data from Rucio
         list_of_dataset_not_in_local_database=datasets
         list_of_dataset_already_in_local_database=[]
-    
-    #print(list_of_dataset_already_in_local_database[:10])
-    #Ap0.001GeV-sim-test,Ap0.001GeV,v3.2.10_targetPN-batch1,v1.7.1_ecal_photonuclear-recon_bdt2-batch1,v1.7.1_target_gammamumu-batch30,v1.7.1_target_gammamumu_8gev_reco-batch19,v2.3.0-batch20,v2.3.0-batch34
+
 
 
     #For data that already exist in local database and the number of files match, we can use the old local database data isnteaed of loading it from Rucio.
     #This is done by simply extracting the values from Rucio and putting it in the custom data structure
     #This is done in a multithreaded way
-    Data_from_datasets=(run_threads(thread_count=args.threads,function=RucioDataset.fill_data_from_local,data=list_of_dataset_already_in_local_database))
-    Data_from_datasets=[item for sublist in Data_from_datasets for item in sublist]
-    #print(Data_from_datasets)
-    Data_from_datasets_datastructure=CustomDataStructure()
-    for data in Data_from_datasets:
-        Data_from_datasets_datastructure.add_item(data)
+    if len(list_of_dataset_already_in_local_database) > 0:
+        print("Loading data from the local database\n")
+        Data_from_datasets=(run_threads(thread_count=args.threads,function=RucioDataset.fill_data_from_local,data=list_of_dataset_already_in_local_database))
+        Data_from_datasets=[item for sublist in Data_from_datasets for item in sublist]
+        #print(Data_from_datasets)
+        Data_from_datasets_datastructure=CustomDataStructure()
+        for data in Data_from_datasets:
+            Data_from_datasets_datastructure.add_item(data)
  
     #combibine the list of list into one list
     #print(Data_from_datasets)
     #For data that does not exist in the local database, we need to load it from Rucio.
     #RucioFunctions.list_files_dataset
     #This is done in a multithreaded way
-    Data_from_Rucio=CustomDataStructure()
-    for n in (range(len(list_of_dataset_not_in_local_database))):
-        datastructure=RucioDataset.extract_from_rucio(dataset=list_of_dataset_not_in_local_database[n],thread_count=args.threads)
-        #RucioDataset.find_replicas(datastructure,args.rse)
+    if len(list_of_dataset_not_in_local_database) > 0:
+        print("Loading data from Rucio\n")
+        Data_from_Rucio=CustomDataStructure()
+        for dataset_not_in_local in (list_of_dataset_not_in_local_database):
+            datastructure=RucioDataset.extract_from_rucio(dataset=dataset_not_in_local,thread_count=args.threads)
     
+    print("Combining data from Rucio and the local database\n")
     New_database=combine_datastructures(datastructure1=Data_from_Rucio,datastructure2=Data_from_datasets_datastructure)
-    print(New_database.rse_index.get(args.rse)[0].name)
+    print(New_database.directory_index.keys())
     
         
         

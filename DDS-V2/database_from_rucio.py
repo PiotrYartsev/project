@@ -65,6 +65,7 @@ class RucioDataset():
                     timestamp=item[5],
                     filenumber=item[6],
                     location=item[7],
+                    directory=item[7].replace("/"+item[1],""),
                     has_replicas=item[8]
                 )
                 list_of_metadata.append(metadata)
@@ -126,6 +127,7 @@ class RucioDataset():
             timestamp=timestamp,
             filenumber=filenumber,
             location=location,
+            directory=location.replace("/"+name,""),
             has_replicas=has_replicas
         )
         return metadata
@@ -142,9 +144,9 @@ class RucioDataset():
         # Return the combined data structure
         return combined_data_structure
 
-
+        
 class FileMetadata:
-    def __init__(self, name, dataset, scope, rse, adler32, timestamp, filenumber, location, has_replicas):
+    def __init__(self, name, dataset, scope, rse, adler32, timestamp, filenumber, location,directory, has_replicas,id=None):
         self.name = name
         self.dataset = dataset
         self.scope = scope
@@ -153,7 +155,9 @@ class FileMetadata:
         self.timestamp = timestamp
         self.filenumber = filenumber
         self.location = location
+        self.directory = directory
         self.has_replicas = has_replicas
+        self.id = id
 
     def __getitem__(self, key):
         return getattr(self, key)
@@ -170,9 +174,14 @@ class CustomDataStructure:
         self.timestamp_index = {}
         self.filenumber_index = {}
         self.location_index = {}
+        self.directory_index = {}
         self.has_replicas_index = {}
+        self.id_index = {}
 
     def add_item(self, item):
+        current_max_id = max(self.id_index.keys()) if self.id_index else -1
+        new_id = current_max_id + 1
+
         # Create a FileMetadata instance
         metadata = FileMetadata(
             item["name"],
@@ -184,7 +193,9 @@ class CustomDataStructure:
             item["timestamp"],
             item["filenumber"],
             item["location"],
-            item["has_replicas"]
+            item["directory"],
+            item["has_replicas"],
+            id=new_id
         )
         
         # Append the metadata to the relevant indexes, using lists
@@ -197,7 +208,9 @@ class CustomDataStructure:
         self._append_to_index(self.timestamp_index, item["timestamp"], metadata)
         self._append_to_index(self.filenumber_index, item["filenumber"], metadata)
         self._append_to_index(self.location_index, item["location"], metadata)
+        self._append_to_index(self.directory_index, item["directory"], metadata)
         self._append_to_index(self.has_replicas_index, item["has_replicas"], metadata)
+        self._append_to_index(self.id_index, new_id, metadata)
 
     def find_by_metadata(self, metadata_category, value):
         # Retrieve items by a specific metadata category and value
@@ -223,9 +236,10 @@ class CustomDataStructure:
 def combine_datastructures(datastructure1, datastructure2):
     # Create a new CustomDataStructure instance
     combined_datastructure = CustomDataStructure()
-
+    print("Combining datastructures")
     # Add all the items from datastructure1 to the combined_datastructure
-    for item in datastructure1.name_index.values():
+    for item in datastructure1.id_index.values():
+        #print id
         for metadata in item:
             combined_datastructure.add_item({
                 "name": metadata.name,
@@ -236,9 +250,12 @@ def combine_datastructures(datastructure1, datastructure2):
                 "timestamp": metadata.timestamp,
                 "filenumber": metadata.filenumber,
                 "location": metadata.location,
+                "directory": metadata.directory,
                 "has_replicas": metadata.has_replicas
             })
-
+    print("Number of items in datastructure1:", len(datastructure1.id_index))
+    print("Number of items added to combined_datastructure from datastructure1:", len(combined_datastructure.id_index))
+    
     # Add all the items from datastructure2 to the combined_datastructure
     for item in datastructure2.name_index.values():
         for metadata in item:
@@ -251,7 +268,10 @@ def combine_datastructures(datastructure1, datastructure2):
                 "timestamp": metadata.timestamp,
                 "filenumber": metadata.filenumber,
                 "location": metadata.location,
+                "directory": metadata.directory,
                 "has_replicas": metadata.has_replicas
             })
-
+    print("Number of items in datastructure2:", len(datastructure2.name_index))
+    print("Number of items added to combined_datastructure from datastructure2:", len(combined_datastructure.id_index))
+    
     return combined_datastructure
