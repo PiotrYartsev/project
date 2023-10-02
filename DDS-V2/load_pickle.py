@@ -8,4 +8,4 @@ with open(filename, "rb") as f:
     data_structure = pickle.load(f)
 
 # Access the rse_index attribute and print its keys
-print(data_structure.rse_index.keys())
+print(data_structure.dataset_index.keys())

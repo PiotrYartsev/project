@@ -129,14 +129,9 @@ if __name__ == "__main__":
         print("Loading data from the local database\n")
         Data_from_datasets=(run_threads(thread_count=args.threads,function=RucioDataset.fill_data_from_local,data=list_of_dataset_already_in_local_database))
         Data_from_datasets=[item for sublist in Data_from_datasets for item in sublist]
-
-        time_before_adding_data=datetime.datetime.now()
         print("Combining data from the local database\n")
-        
         Data_from_datasets_datastructure.multiadd(Data_from_datasets)
-        time_after_adding_data=datetime.datetime.now()
 
-        print("it took "+str((time_after_adding_data-time_before_adding_data).total_seconds()))
     loadlocaldbdata=datetime.datetime.now()
     #combibine the list of list into one list
     #print(Data_from_datasets)
@@ -144,24 +139,26 @@ if __name__ == "__main__":
     #RucioFunctions.list_files_dataset
     #This is done in a multithreaded way
     New_database=Data_from_datasets_datastructure
-    number_in_local=len(Data_from_datasets_datastructure.rse_index.keys())
+    number_in_local=len(Data_from_datasets_datastructure.id_index.keys())
     #Data_from_Rucio=CustomDataStructure()
+    n=0
     if len(list_of_dataset_not_in_local_database) > 0:
         print("Loading data from Rucio\n")
         
         for dataset_not_in_local in tqdm((list_of_dataset_not_in_local_database)):
             datastructure=RucioDataset.extract_from_rucio(dataset=dataset_not_in_local,thread_count=args.threads)
             New_database.multiadd(datastructure)
+            n+=len(datastructure)
     loadfromrucio=datetime.datetime.now()
-    print("Data from Rucio "+str(len(New_database.rse_index.keys())-number_in_local))
+    print("Data from Rucio "+str(len(New_database.id_index.keys())-number_in_local))
     print("Data from local "+str(number_in_local))
     print("Combining data from Rucio and the local database\n")
     #New_database=combine_datastructures(datastructure1=Data_from_Rucio,datastructure2=Data_from_datasets_datastructure)
     loadcombinedata=datetime.datetime.now()
-    print(New_database.rse_index.keys())
+    print(New_database.dataset_index.keys())
 
 
-    save_to_file="datastructure.pkl"
+    save_to_file="all.pkl"
     filename="time.txt"
     #delete the old files
     if os.path.isfile(save_to_file):
