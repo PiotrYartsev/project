@@ -84,13 +84,13 @@ class RucioDataset():
         #First, we get the list of files in the dataset using the list_files_dataset function. It does not exist as part of the Rucio PythonAPI (for some reason even thought documentation says it does), so we use the CLI version instead instead
         #FIXME Make this work with python API, we dont want two systems
         files_using_list_dataset_replicas_bulk_CLI=((RucioFunctions.list_dataset_replicas_bulk_CLI(scope=scope,name=dataset_name)))
-        datastructure=CustomDataStructure()
+        datastructure=[]
         if len(files_using_list_dataset_replicas_bulk_CLI)==0:
             return datastructure
         else:
             output=run_threads(thread_count=thread_count,function=RucioDataset.multithreaded_add_to_FileMetadata,data=files_using_list_dataset_replicas_bulk_CLI,const_data=dataset)
-            for item in output:
-                datastructure.add_item(item)
+            datastructure.extend(output)
+            
             return datastructure
     
     @classmethod
@@ -213,6 +213,44 @@ class CustomDataStructure:
         self._append_to_index(self.directory_index, item["directory"], metadata)
         self._append_to_index(self.has_replicas_index, item["has_replicas"], metadata)
         self._append_to_index(self.id_index, new_id, metadata)
+    
+
+    def multiadd(self, items):
+        current_max_id = max(self.id_index.keys()) if self.id_index else -1
+        new_ids = range(current_max_id + 1, current_max_id + len(items) + 1)
+
+        # Create a list of FileMetadata instances
+        metadata_list = [
+            FileMetadata(
+                item["name"],
+                item["dataset"],
+                item["scope"],
+                item["rse"],
+                item["adler32"],
+                item["timestamp"],
+                item["filenumber"],
+                item["location"],
+                item["directory"],
+                item["has_replicas"],
+                id=new_id
+            )
+            for item, new_id in zip(items, new_ids)
+        ]
+
+        # Append the metadata to the relevant indexes, using lists
+        for metadata in (metadata_list):
+            self._append_to_index(self.name_index, metadata.name, metadata)
+            self._append_to_index(self.dataset_index, metadata.dataset, metadata)
+            self._append_to_index(self.scope_index, metadata.scope, metadata)
+            self._append_to_index(self.rse_index, metadata.rse, metadata)
+            self._append_to_index(self.adler32_index, metadata.adler32, metadata)
+            self._append_to_index(self.timestamp_index, metadata.timestamp, metadata)
+            self._append_to_index(self.filenumber_index, metadata.filenumber, metadata)
+            self._append_to_index(self.location_index, metadata.location, metadata)
+            self._append_to_index(self.directory_index, metadata.directory, metadata)
+            self._append_to_index(self.has_replicas_index, metadata.has_replicas, metadata)
+            self._append_to_index(self.id_index, metadata.id, metadata)
+
 
     def find_by_metadata(self, metadata_category, value):
         # Retrieve items by a specific metadata category and value
@@ -240,38 +278,42 @@ def combine_datastructures(datastructure1, datastructure2):
     combined_datastructure = CustomDataStructure()
     print("Combining datastructures")
     # Add all the items from datastructure1 to the combined_datastructure
-    for item in datastructure1.id_index.values():
-        for metadata in item:
-            combined_datastructure.add_item({
-                "name": metadata.name,
-                "dataset": metadata.dataset,
-                "scope": metadata.scope,
-                "rse": metadata.rse,
-                "adler32": metadata.adler32,
-                "timestamp": metadata.timestamp,
-                "filenumber": metadata.filenumber,
-                "location": metadata.location,
-                "directory": metadata.directory,
-                "has_replicas": metadata.has_replicas
-            })
+    combined_datastructure.multiadd([
+        {
+            "name": metadata.name,
+            "dataset": metadata.dataset,
+            "scope": metadata.scope,
+            "rse": metadata.rse,
+            "adler32": metadata.adler32,
+            "timestamp": metadata.timestamp,
+            "filenumber": metadata.filenumber,
+            "location": metadata.location,
+            "directory": metadata.directory,
+            "has_replicas": metadata.has_replicas
+        }
+        for item in tqdm(datastructure1.id_index.values())
+        for metadata in item
+    ])
     print("Number of items in datastructure1:", len(datastructure1.id_index))
     print("Number of items added to combined_datastructure from datastructure1:", len(combined_datastructure.id_index))
     
     # Add all the items from datastructure2 to the combined_datastructure
-    for item in datastructure2.id_index.values():
-        for metadata in item:
-            combined_datastructure.add_item({
-                "name": metadata.name,
-                "dataset": metadata.dataset,
-                "scope": metadata.scope,
-                "rse": metadata.rse,
-                "adler32": metadata.adler32,
-                "timestamp": metadata.timestamp,
-                "filenumber": metadata.filenumber,
-                "location": metadata.location,
-                "directory": metadata.directory,
-                "has_replicas": metadata.has_replicas
-            })
+    combined_datastructure.multiadd([
+        {
+            "name": metadata.name,
+            "dataset": metadata.dataset,
+            "scope": metadata.scope,
+            "rse": metadata.rse,
+            "adler32": metadata.adler32,
+            "timestamp": metadata.timestamp,
+            "filenumber": metadata.filenumber,
+            "location": metadata.location,
+            "directory": metadata.directory,
+            "has_replicas": metadata.has_replicas
+        }
+        for item in tqdm(datastructure2.id_index.values())
+        for metadata in item
+    ])
     print("Number of items in datastructure2:", len(datastructure2.name_index))
     print("Number of items added to combined_datastructure from datastructure2:", len(combined_datastructure.id_index))
     

@@ -11,7 +11,7 @@ import datetime
 import contextlib
 import pickle
 #import tqdm alternative to progressbar that is not tqdm
-from tqdm.auto import tqdm
+from tqdm import tqdm
 """
 
 # Create a logger object
@@ -132,8 +132,8 @@ if __name__ == "__main__":
 
         time_before_adding_data=datetime.datetime.now()
         print("Combining data from the local database\n")
-        for data in Data_from_datasets:
-            Data_from_datasets_datastructure.add_item(data)
+        
+        Data_from_datasets_datastructure.multiadd(Data_from_datasets)
         time_after_adding_data=datetime.datetime.now()
 
         print("it took "+str((time_after_adding_data-time_before_adding_data).total_seconds()))
@@ -143,15 +143,20 @@ if __name__ == "__main__":
     #For data that does not exist in the local database, we need to load it from Rucio.
     #RucioFunctions.list_files_dataset
     #This is done in a multithreaded way
-    Data_from_Rucio=CustomDataStructure()
+    New_database=Data_from_datasets_datastructure
+    number_in_local=len(Data_from_datasets_datastructure.rse_index.keys())
+    #Data_from_Rucio=CustomDataStructure()
     if len(list_of_dataset_not_in_local_database) > 0:
         print("Loading data from Rucio\n")
         
-        for dataset_not_in_local in (list_of_dataset_not_in_local_database):
+        for dataset_not_in_local in tqdm((list_of_dataset_not_in_local_database)):
             datastructure=RucioDataset.extract_from_rucio(dataset=dataset_not_in_local,thread_count=args.threads)
+            New_database.multiadd(datastructure)
     loadfromrucio=datetime.datetime.now()
+    print("Data from Rucio "+str(len(New_database.rse_index.keys())-number_in_local))
+    print("Data from local "+str(number_in_local))
     print("Combining data from Rucio and the local database\n")
-    New_database=combine_datastructures(datastructure1=Data_from_Rucio,datastructure2=Data_from_datasets_datastructure)
+    #New_database=combine_datastructures(datastructure1=Data_from_Rucio,datastructure2=Data_from_datasets_datastructure)
     loadcombinedata=datetime.datetime.now()
     print(New_database.rse_index.keys())
 

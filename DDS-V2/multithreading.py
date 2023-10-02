@@ -27,7 +27,6 @@ def run_threads(thread_count, function, data, const_data=None, print_interval=10
                     local_output.append(result)
 
             
-                    print(f"{object_queue.qsize()} items left in the queue.")
                 except queue.Empty:
                     # If the queue is empty, break out of the loop
                     break
@@ -51,7 +50,7 @@ def run_threads(thread_count, function, data, const_data=None, print_interval=10
 
                     # Print the number of items left in the queue at regular intervals
                     
-                    print(f"{object_queue.qsize()} items left in the queue.")
+
                 except queue.Empty:
                     # If the queue is empty, break out of the loop
                     break
