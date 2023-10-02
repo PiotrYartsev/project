@@ -2,7 +2,7 @@ import threading
 import queue
 
 # Define a reusable multithreading function
-def run_threads(thread_count, function, data,const_data=None):
+def run_threads(thread_count, function, data, const_data=None, print_interval=100):
     # Create a queue for the objects
     object_queue = queue.Queue()
 
@@ -10,7 +10,8 @@ def run_threads(thread_count, function, data,const_data=None):
     for item in data:
         # Print for debugging purposes
         object_queue.put(item)
-    if const_data==None:
+
+    if const_data is None:
         # Function to execute by each thread
         def thread_function(output_list):
             local_output = []
@@ -24,6 +25,9 @@ def run_threads(thread_count, function, data,const_data=None):
 
                     # Append the result to the local output list
                     local_output.append(result)
+
+            
+                    print(f"{object_queue.qsize()} items left in the queue.")
                 except queue.Empty:
                     # If the queue is empty, break out of the loop
                     break
@@ -40,10 +44,14 @@ def run_threads(thread_count, function, data,const_data=None):
                     args = object_queue.get_nowait()
 
                     # Call the provided function with the object's arguments
-                    result = function(args,const_data)  # Pass the entire list as one argument
+                    result = function(args, const_data)  # Pass the entire list as one argument
 
                     # Append the result to the local output list
                     local_output.append(result)
+
+                    # Print the number of items left in the queue at regular intervals
+                    
+                    print(f"{object_queue.qsize()} items left in the queue.")
                 except queue.Empty:
                     # If the queue is empty, break out of the loop
                     break
@@ -64,6 +72,6 @@ def run_threads(thread_count, function, data,const_data=None):
         thread.join()
 
     #print("All threads have finished.")
-    
+
     # Return the combined output list
     return output_list

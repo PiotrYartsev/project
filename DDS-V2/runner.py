@@ -10,7 +10,8 @@ import random
 import datetime
 import contextlib
 import pickle
-
+#import tqdm alternative to progressbar that is not tqdm
+from tqdm.auto import tqdm
 """
 
 # Create a logger object
@@ -59,7 +60,7 @@ verify(logger)
 move_to_archives(today,logger)
 """
 
-def use_local_database(datasets):
+def use_local_database(datasets,args):
     if os.path.isfile('local_rucio_database.db'):
         print("Local database found, checking if the datasets exist in the local database\n")
         LocalRucioDataset=sl.connect('local_rucio_database.db')
@@ -101,6 +102,8 @@ if __name__ == "__main__":
     loaddatasetstime=datetime.datetime.now()
     #choose 20 random datasets
     #datasets=random.sample(datasets,20)
+    print("Number of datasets: "+str(len(datasets))+"\n")
+
 
     #remove any spaces in the dataset names or scopes
     print("Removing spaces from the dataset names and scopes\n")
@@ -111,7 +114,7 @@ if __name__ == "__main__":
     #check if the datasets exist in the local database
 
     if args.localdb: #if we set the --localdb argument, we can use the local database instead of loading the data from Rucio
-        list_of_dataset_not_in_local_database,list_of_dataset_already_in_local_database=use_local_database(datasets)
+        list_of_dataset_not_in_local_database,list_of_dataset_already_in_local_database=use_local_database(datasets,args)
     else: #if we do not set the --localdb argument, we need to load the data from Rucio
         list_of_dataset_not_in_local_database=datasets
         list_of_dataset_already_in_local_database=[]
@@ -126,10 +129,14 @@ if __name__ == "__main__":
         print("Loading data from the local database\n")
         Data_from_datasets=(run_threads(thread_count=args.threads,function=RucioDataset.fill_data_from_local,data=list_of_dataset_already_in_local_database))
         Data_from_datasets=[item for sublist in Data_from_datasets for item in sublist]
-        #print(Data_from_datasets)
-        
+
+        time_before_adding_data=datetime.datetime.now()
+        print("Combining data from the local database\n")
         for data in Data_from_datasets:
             Data_from_datasets_datastructure.add_item(data)
+        time_after_adding_data=datetime.datetime.now()
+
+        print("it took "+str((time_after_adding_data-time_before_adding_data).total_seconds()))
     loadlocaldbdata=datetime.datetime.now()
     #combibine the list of list into one list
     #print(Data_from_datasets)
@@ -148,14 +155,22 @@ if __name__ == "__main__":
     loadcombinedata=datetime.datetime.now()
     print(New_database.rse_index.keys())
 
+
     save_to_file="datastructure.pkl"
+    filename="time.txt"
+    #delete the old files
+    if os.path.isfile(save_to_file):
+        os.remove(save_to_file)
+    if os.path.isfile(filename):
+        os.remove(filename)
+
     with open(save_to_file, 'wb') as f:
         pickle.dump(New_database, f)
         f.close()
     print("Saved datastructure to file: "+save_to_file)
     
 
-    filename="time.txt"
+    
     with open(filename, 'w') as f:
         f.write("Time to load arguments: {:.3f} seconds\n".format((loadargs - timestart).total_seconds()))
         f.write("Time to load datasets: {:.3f} seconds\n".format((loaddatasetstime - loadargs).total_seconds()))
