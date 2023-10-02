@@ -8,6 +8,9 @@ import os
 import sqlite3 as sl
 import random
 import datetime
+import contextlib
+import pickle
+
 """
 
 # Create a logger object
@@ -144,15 +147,22 @@ if __name__ == "__main__":
     New_database=combine_datastructures(datastructure1=Data_from_Rucio,datastructure2=Data_from_datasets_datastructure)
     loadcombinedata=datetime.datetime.now()
     print(New_database.rse_index.keys())
-    print("Time to load arguments: {:.3f} seconds".format((loadargs - timestart).total_seconds()))
-    print("Time to load datasets: {:.3f} seconds".format((loaddatasetstime - loadargs).total_seconds()))
-    print("Time to remove spaces from the datasets: {:.3f} seconds".format((loadremovespaces - loaddatasetstime).total_seconds()))
-    print("Time to load the local database: {:.3f} seconds".format((loadlocaldb - loadremovespaces).total_seconds()))
-    print("Time to load the data from the local database: {:.3f} seconds".format((loadlocaldbdata - loadlocaldb).total_seconds()))
-    print("Time to load the data from Rucio: {:.3f} seconds".format((loadfromrucio - loadlocaldbdata).total_seconds()))
-    print("Time to combine the data from Rucio and the local database: {:.3f} seconds".format((loadcombinedata - loadfromrucio).total_seconds()))
-    print("Total time: {:.3f} seconds".format((loadcombinedata - timestart).total_seconds()))
+
+    save_to_file="datastructure.pkl"
+    with open(save_to_file, 'wb') as f:
+        pickle.dump(New_database, f)
+        f.close()
+    print("Saved datastructure to file: "+save_to_file)
     
-    #next step, compare to the list from storage
-        
+
+    filename="time.txt"
+    with open(filename, 'w') as f:
+        f.write("Time to load arguments: {:.3f} seconds\n".format((loadargs - timestart).total_seconds()))
+        f.write("Time to load datasets: {:.3f} seconds\n".format((loaddatasetstime - loadargs).total_seconds()))
+        f.write("Time to remove spaces from the datasets: {:.3f} seconds\n".format((loadremovespaces - loaddatasetstime).total_seconds()))
+        f.write("Time to load the local database: {:.3f} seconds\n".format((loadlocaldb - loadremovespaces).total_seconds()))
+        f.write("Time to load the data from the local database: {:.3f} seconds\n".format((loadlocaldbdata - loadlocaldb).total_seconds()))
+        f.write("Time to load the data from Rucio: {:.3f} seconds\n".format((loadfromrucio - loadlocaldbdata).total_seconds()))
+        f.write("Time to combine the data from Rucio and the local database: {:.3f} seconds\n".format((loadcombinedata - loadfromrucio).total_seconds()))
+        f.write("Total time: {:.3f} seconds\n".format((loadcombinedata - timestart).total_seconds()))
         

@@ -1,0 +1,8 @@
+Time to load arguments: 0.001 seconds
+Time to load datasets: 7.518 seconds
+Time to remove spaces from the datasets: 0.000 seconds
+Time to load the local database: 0.569 seconds
+Time to load the data from the local database: 1.171 seconds
+Time to load the data from Rucio: 3.377 seconds
+Time to combine the data from Rucio and the local database: 1.098 seconds
+Total time: 13.735 seconds
