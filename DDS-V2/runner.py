@@ -6,7 +6,8 @@ from argument_loader import get_args, get_datasets_from_args
 from multithreading import run_threads
 import os
 import sqlite3 as sl
-
+import random
+import datetime
 """
 
 # Create a logger object
@@ -79,11 +80,11 @@ def use_local_database(datasets):
 
 #Ap0.001GeV-sim-test,Ap0.001GeV,v3.2.10_targetPN-batch1,v1.7.1_ecal_photonuclear-recon_bdt2-batch1,v1.7.1_target_gammamumu-batch30,v1.7.1_target_gammamumu_8gev_reco-batch19,v2.3.0-batch20,v2.3.0-batch34
 if __name__ == "__main__":
-    
+    timestart=datetime.datetime.now()
     # Get the arguments from the command line
     args = get_args()
     print("Loading arguments:\n"+str(args))
-
+    loadargs=datetime.datetime.now()
 
     #check if the number of threads argument is a whole integer and larger or equal to 1
     print("Verifying if the threads argument is valid.\n")
@@ -94,51 +95,64 @@ if __name__ == "__main__":
     # Get the datasets, based on the arguments
     print("Loading datasets\n")
     datasets = get_datasets_from_args(args)
-    #datasets=datasets[0:10]
+    loaddatasetstime=datetime.datetime.now()
+    #choose 20 random datasets
+    #datasets=random.sample(datasets,20)
 
     #remove any spaces in the dataset names or scopes
     print("Removing spaces from the dataset names and scopes\n")
     datasets = [(dataset[0].replace(" ",""),dataset[1].replace(" ","")) for dataset in datasets]
-
+    loadremovespaces=datetime.datetime.now()
 
 
     #check if the datasets exist in the local database
 
     if args.localdb: #if we set the --localdb argument, we can use the local database instead of loading the data from Rucio
-        print("Checking if the datasets exist in the local database\n")
         list_of_dataset_not_in_local_database,list_of_dataset_already_in_local_database=use_local_database(datasets)
     else: #if we do not set the --localdb argument, we need to load the data from Rucio
         list_of_dataset_not_in_local_database=datasets
         list_of_dataset_already_in_local_database=[]
-
+    loadlocaldb=datetime.datetime.now()
 
 
     #For data that already exist in local database and the number of files match, we can use the old local database data isnteaed of loading it from Rucio.
     #This is done by simply extracting the values from Rucio and putting it in the custom data structure
     #This is done in a multithreaded way
+    Data_from_datasets_datastructure=CustomDataStructure()
     if len(list_of_dataset_already_in_local_database) > 0:
         print("Loading data from the local database\n")
         Data_from_datasets=(run_threads(thread_count=args.threads,function=RucioDataset.fill_data_from_local,data=list_of_dataset_already_in_local_database))
         Data_from_datasets=[item for sublist in Data_from_datasets for item in sublist]
         #print(Data_from_datasets)
-        Data_from_datasets_datastructure=CustomDataStructure()
+        
         for data in Data_from_datasets:
             Data_from_datasets_datastructure.add_item(data)
- 
+    loadlocaldbdata=datetime.datetime.now()
     #combibine the list of list into one list
     #print(Data_from_datasets)
     #For data that does not exist in the local database, we need to load it from Rucio.
     #RucioFunctions.list_files_dataset
     #This is done in a multithreaded way
+    Data_from_Rucio=CustomDataStructure()
     if len(list_of_dataset_not_in_local_database) > 0:
         print("Loading data from Rucio\n")
-        Data_from_Rucio=CustomDataStructure()
+        
         for dataset_not_in_local in (list_of_dataset_not_in_local_database):
             datastructure=RucioDataset.extract_from_rucio(dataset=dataset_not_in_local,thread_count=args.threads)
-    
+    loadfromrucio=datetime.datetime.now()
     print("Combining data from Rucio and the local database\n")
     New_database=combine_datastructures(datastructure1=Data_from_Rucio,datastructure2=Data_from_datasets_datastructure)
-    print(New_database.directory_index.keys())
+    loadcombinedata=datetime.datetime.now()
+    print(New_database.rse_index.keys())
+    print("Time to load arguments: {:.3f} seconds".format((loadargs - timestart).total_seconds()))
+    print("Time to load datasets: {:.3f} seconds".format((loaddatasetstime - loadargs).total_seconds()))
+    print("Time to remove spaces from the datasets: {:.3f} seconds".format((loadremovespaces - loaddatasetstime).total_seconds()))
+    print("Time to load the local database: {:.3f} seconds".format((loadlocaldb - loadremovespaces).total_seconds()))
+    print("Time to load the data from the local database: {:.3f} seconds".format((loadlocaldbdata - loadlocaldb).total_seconds()))
+    print("Time to load the data from Rucio: {:.3f} seconds".format((loadfromrucio - loadlocaldbdata).total_seconds()))
+    print("Time to combine the data from Rucio and the local database: {:.3f} seconds".format((loadcombinedata - loadfromrucio).total_seconds()))
+    print("Total time: {:.3f} seconds".format((loadcombinedata - timestart).total_seconds()))
     
+    #next step, compare to the list from storage
         
         

@@ -37,25 +37,24 @@ class RucioDataset():
     
     @classmethod
     def fill_data_from_local(cls, dataset_in_local):
-        LocalRucioDataset=sl.connect('local_rucio_database.db')
-        dataset=dataset_in_local[1]
-        scope=dataset_in_local[0]
-        changed_dataset_name=LocalRucioDataset.execute("SELECT table_name FROM dataset WHERE scope=? AND name=?",(scope,dataset)).fetchall()
-        #changed_dataset_name=LocalRucioDataset.execute(f"SELECT table_name FROM dataset WHERE scope= '{scope}'").fetchall()
-        if len(changed_dataset_name)>1:
-            print("Error: more than one dataset with the same name and scope")
-            exit(1)
-        else:
-            changed_dataset_name=changed_dataset_name[0][0]
-            #open that table and read the data
-            data_in_local_database=LocalRucioDataset.execute("SELECT * FROM {}".format(changed_dataset_name)).fetchall()
-            #fill the FileMetadata class
-            # Create a new instance of CustomDataStructure
-            list_of_metadata=[]
+        # Get a connection to the local database
+        conn = sl.connect('local_rucio_database.db')
 
-            # Loop over the data in the local database and add each item to the custom data structure
+        try:
+            dataset = dataset_in_local[1]
+            scope = dataset_in_local[0]
+
+            # Query the local database for the table name for the given dataset
+            query = "SELECT table_name FROM dataset WHERE scope=? AND name=?"
+            table_name = conn.execute(query, (scope, dataset)).fetchone()[0]
+
+            # Query the local database for all data for the given dataset
+            query = f"SELECT * FROM {table_name}"
+            data_in_local_database = conn.execute(query).fetchall()
+
+            # Create a list of FileMetadata objects from the data
+            list_of_metadata = []
             for item in data_in_local_database:
-                #print(item)
                 metadata = FileMetadata(
                     name=item[1],
                     dataset=dataset,
@@ -70,8 +69,11 @@ class RucioDataset():
                 )
                 list_of_metadata.append(metadata)
 
-            # Return the custom data structure
             return list_of_metadata
+
+        finally:
+            # Close the connection to the local database
+            conn.close()
 
     @classmethod
     def extract_from_rucio(cls,dataset,thread_count):
@@ -239,7 +241,6 @@ def combine_datastructures(datastructure1, datastructure2):
     print("Combining datastructures")
     # Add all the items from datastructure1 to the combined_datastructure
     for item in datastructure1.id_index.values():
-        #print id
         for metadata in item:
             combined_datastructure.add_item({
                 "name": metadata.name,
@@ -257,7 +258,7 @@ def combine_datastructures(datastructure1, datastructure2):
     print("Number of items added to combined_datastructure from datastructure1:", len(combined_datastructure.id_index))
     
     # Add all the items from datastructure2 to the combined_datastructure
-    for item in datastructure2.name_index.values():
+    for item in datastructure2.id_index.values():
         for metadata in item:
             combined_datastructure.add_item({
                 "name": metadata.name,
