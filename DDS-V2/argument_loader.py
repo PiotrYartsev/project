@@ -29,6 +29,9 @@ def get_args():
     if args.datasets:
         args.datasets = args.datasets[0].split(",")
 
+
+
+
     return args
 
 def get_datasets_from_args(args):
@@ -102,7 +105,7 @@ def get_datasets_from_args(args):
             if dataset not in [a[1] for a in datasets]:
                 print(f"Error: dataset {dataset} is not valid")
                 exit(1)
-
+    
     else:
         print("Error: no scopes or datasets specified")
         exit(1)

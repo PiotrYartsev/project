@@ -6,12 +6,10 @@ from argument_loader import get_args, get_datasets_from_args
 from multithreading import run_threads
 import os
 import sqlite3 as sl
-import random
 import datetime
 import contextlib
 import pickle
-#import tqdm alternative to progressbar that is not tqdm
-from tqdm import tqdm
+
 """
 
 # Create a logger object
@@ -82,13 +80,31 @@ def use_local_database(datasets,args):
         list_of_dataset_already_in_local_database=[]
     return list_of_dataset_not_in_local_database,list_of_dataset_already_in_local_database
 
+
+
+
+
 #Ap0.001GeV-sim-test,Ap0.001GeV,v3.2.10_targetPN-batch1,v1.7.1_ecal_photonuclear-recon_bdt2-batch1,v1.7.1_target_gammamumu-batch30,v1.7.1_target_gammamumu_8gev_reco-batch19,v2.3.0-batch20,v2.3.0-batch34
 if __name__ == "__main__":
+
     timestart=datetime.datetime.now()
+
     # Get the arguments from the command line
     args = get_args()
     print("Loading arguments:\n"+str(args))
     loadargs=datetime.datetime.now()
+
+
+    if args.rse:
+        #get a list of valid rses from Rucio
+        valid_rses=list(RucioFunctions.list_rses())
+        valid_rses=[item['rse'] for item in valid_rses]
+        if args.rse not in valid_rses:
+            print("Error: --rse is not a valid rse")
+            exit(1)
+    else:
+        print("Error: --rse is required")
+        exit(1)
 
     #check if the number of threads argument is a whole integer and larger or equal to 1
     print("Verifying if the threads argument is valid.\n")
@@ -96,12 +112,14 @@ if __name__ == "__main__":
         print("Error: --threads must be a whole integer larger or equal to 1")
         exit(1)
     
+
+
     # Get the datasets, based on the arguments
     print("Loading datasets\n")
+
     datasets = get_datasets_from_args(args)
     loaddatasetstime=datetime.datetime.now()
-    #choose 20 random datasets
-    #datasets=random.sample(datasets,20)
+
     print("Number of datasets: "+str(len(datasets))+"\n")
 
 
@@ -120,7 +138,7 @@ if __name__ == "__main__":
         list_of_dataset_already_in_local_database=[]
     loadlocaldb=datetime.datetime.now()
 
-
+    list_of_dataset_already_in_local_database=[(item[0],item[1],args.rse) for item in list_of_dataset_already_in_local_database]
     #For data that already exist in local database and the number of files match, we can use the old local database data isnteaed of loading it from Rucio.
     #This is done by simply extracting the values from Rucio and putting it in the custom data structure
     #This is done in a multithreaded way
@@ -133,6 +151,12 @@ if __name__ == "__main__":
         Data_from_datasets_datastructure.multiadd(Data_from_datasets)
 
     loadlocaldbdata=datetime.datetime.now()
+
+
+
+
+    dataset_not_in_local=[(item[0],item[1],args.rse) for item in list_of_dataset_not_in_local_database]
+
     #combibine the list of list into one list
     #print(Data_from_datasets)
     #For data that does not exist in the local database, we need to load it from Rucio.
@@ -141,23 +165,69 @@ if __name__ == "__main__":
     New_database=Data_from_datasets_datastructure
     number_in_local=len(Data_from_datasets_datastructure.id_index.keys())
     #Data_from_Rucio=CustomDataStructure()
-    n=0
     if len(list_of_dataset_not_in_local_database) > 0:
         print("Loading data from Rucio\n")
         
-        for dataset_not_in_local in tqdm((list_of_dataset_not_in_local_database)):
+        for dataset_not_in_local in ((list_of_dataset_not_in_local_database)):
             datastructure=RucioDataset.extract_from_rucio(dataset=dataset_not_in_local,thread_count=args.threads)
             New_database.multiadd(datastructure)
-            n+=len(datastructure)
+
+
     loadfromrucio=datetime.datetime.now()
     print("Data from Rucio "+str(len(New_database.id_index.keys())-number_in_local))
     print("Data from local "+str(number_in_local))
+    print("Number of datasets "+str(len(New_database.dataset_index.keys())))
     print("Combining data from Rucio and the local database\n")
-    #New_database=combine_datastructures(datastructure1=Data_from_Rucio,datastructure2=Data_from_datasets_datastructure)
     loadcombinedata=datetime.datetime.now()
-    print(New_database.dataset_index.keys())
+
+    #Fix gridftp locations
+    """    
+    if args.rse =="SLAC_GRIDFTP":
+        print("Fixing gridftp locations\n")
+        fix_string=""
+        replace_string="SLAC_GRIDFTP:gsiftp://griddev01.slac.stanford.edu:2811"
+        New_database=fix_location_data(New_database,fix_string,replace_string)
+    """
+    locations=New_database.directory_index.keys()
+    print(locations)
+    
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    """
     save_to_file="all.pkl"
     filename="time.txt"
     #delete the old files
@@ -181,5 +251,4 @@ if __name__ == "__main__":
         f.write("Time to load the data from the local database: {:.3f} seconds\n".format((loadlocaldbdata - loadlocaldb).total_seconds()))
         f.write("Time to load the data from Rucio: {:.3f} seconds\n".format((loadfromrucio - loadlocaldbdata).total_seconds()))
         f.write("Time to combine the data from Rucio and the local database: {:.3f} seconds\n".format((loadcombinedata - loadfromrucio).total_seconds()))
-        f.write("Total time: {:.3f} seconds\n".format((loadcombinedata - timestart).total_seconds()))
-        
+        f.write("Total time: {:.3f} seconds\n".format((loadcombinedata - timestart).total_seconds()))"""

@@ -43,6 +43,8 @@ class RucioDataset():
         try:
             dataset = dataset_in_local[1]
             scope = dataset_in_local[0]
+            rse=dataset_in_local[2]
+            
 
             # Query the local database for the table name for the given dataset
             query = "SELECT table_name FROM dataset WHERE scope=? AND name=?"
@@ -51,6 +53,15 @@ class RucioDataset():
             # Query the local database for all data for the given dataset
             query = f"SELECT * FROM {table_name}"
             data_in_local_database = conn.execute(query).fetchall()
+            if rse =="LUND_GRIDFTP":
+                fix_with_this_string="/projects/hep/fs9/shared/ldmx/ldcs/gridftp/"
+                replace_this_string="gsiftp://hep-fs.lunarc.lu.se:2811/ldcs/"
+                data_in_local_database=[(item[0],item[1],item[2],item[3],item[4],item[5],item[6],item[7].replace(replace_this_string,fix_with_this_string),item[8]) for item in data_in_local_database]
+
+            elif rse=="SLAC_GRIDFTP":
+                fix_with_this_string=""
+                replace_this_string="gsiftp://griddev01.slac.stanford.edu:2811"
+                data_in_local_database=[(item[0],item[1],item[2],item[3],item[4],item[5],item[6],item[7].replace(replace_this_string,fix_with_this_string),item[8]) for item in data_in_local_database]
 
             # Create a list of FileMetadata objects from the data
             list_of_metadata = []
@@ -107,12 +118,24 @@ class RucioDataset():
 
     def multithreaded_add_to_FileMetadata(file, scope_dataset):
         dataset_name=scope_dataset[1]
+        rse=scope_dataset[2]
+        
+        
         scope=file[0]
         name=file[1]
         adler32=file[3]
 
         rse=file[4].split(":")[0]
         location=file[4].replace(rse+":","")
+        if rse =="LUND_GRIDFTP":
+                fix_with_this_string="/projects/hep/fs9/shared/ldmx/ldcs/gridftp/"
+                replace_this_string="gsiftp://hep-fs.lunarc.lu.se:2811/ldcs/"
+                location=location.replace(replace_this_string,fix_with_this_string)
+
+        elif rse=="SLAC_GRIDFTP":
+                fix_with_this_string=""
+                replace_this_string="gsiftp://griddev01.slac.stanford.edu:2811"
+                location=location.replace(replace_this_string,fix_with_this_string)
         timestamp=name.split("_")[-1].replace(".root","").replace("t","")
         filenumber=name.split("_")[-2].replace("run","")
         has_replicas=0

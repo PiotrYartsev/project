@@ -1,0 +1,2 @@
+LUND_GRIDFTP,LUND_GRIDFTP:gsiftp://hep-fs.lunarc.lu.se:2811/ldcs/,/projects/hep/fs9/shared/ldmx/ldcs/gridftp/
+SLAC_GRIDFTP,SLAC_GRIDFTP:gsiftp://griddev01.slac.stanford.edu:2811,
