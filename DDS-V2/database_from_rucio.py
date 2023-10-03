@@ -88,7 +88,6 @@ class RucioDataset():
 
     @classmethod
     def extract_from_rucio(cls,dataset,thread_count):
-
         dataset_name=dataset[1]
         scope=dataset[0]
         #Rucio does not provide all the necessaty information abotu the files in a single place. Therefore, we need to use multiple functions to get all the information
@@ -118,12 +117,8 @@ class RucioDataset():
                     item.has_replicas=1
 
     def multithreaded_add_to_FileMetadata(file, scope_dataset):
-        try:
-            dataset_name=scope_dataset[1]
-            rse=scope_dataset[2]
-        except:
-            print(scope_dataset)
-            raise Exception("Error")
+        dataset_name=scope_dataset[1]
+        rse=scope_dataset[2]
         
         
         scope=file[0]

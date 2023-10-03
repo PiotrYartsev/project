@@ -154,9 +154,7 @@ if __name__ == "__main__":
     loadlocaldbdata=datetime.datetime.now()
 
 
-
-
-    dataset_not_in_local=[(item[0],item[1],args.rse) for item in list_of_dataset_not_in_local_database]
+    list_of_dataset_not_in_local_database=[(item[0],item[1],args.rse) for item in list_of_dataset_not_in_local_database]
 
     #combibine the list of list into one list
     #print(Data_from_datasets)
