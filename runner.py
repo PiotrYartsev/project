@@ -81,7 +81,27 @@ def use_local_database(datasets,args):
     return list_of_dataset_not_in_local_database,list_of_dataset_already_in_local_database
 
 
-
+def extract_from_storage_dump(rse):
+    #find all .txt files
+    txtfiles=[]
+    for file in os.listdir(""):
+        if file.endswith(".txt"):
+            txtfiles.append(file)
+    files_rse=[file for file in txtfiles if rse in file]
+    if len(files_rse) == 0:
+        print("No files for rse: "+rse+" found")
+        exit(1)
+    if len(files_rse) > 1:
+        print("Multiple files for rse: "+rse+" found")
+        exit(1)
+    files_rse=files_rse[0]
+    #laod the data from the file
+    with open(files_rse, 'r') as f:
+        readlines=f.readlines()
+        f.close()
+    #make into list
+    readlines=[line.strip() for line in readlines]
+    return readlines
 
 
 #Ap0.001GeV-sim-test,Ap0.001GeV,v3.2.10_targetPN-batch1,v1.7.1_ecal_photonuclear-recon_bdt2-batch1,v1.7.1_target_gammamumu-batch30,v1.7.1_target_gammamumu_8gev_reco-batch19,v2.3.0-batch20,v2.3.0-batch34
@@ -127,17 +147,14 @@ if __name__ == "__main__":
     #remove any spaces in the dataset names or scopes
     print("Removing spaces from the dataset names and scopes\n")
     datasets = [(dataset[0].replace(" ",""),dataset[1].replace(" ","")) for dataset in datasets]
-    loadremovespaces=datetime.datetime.now()
-
 
     #check if the datasets exist in the local database
-
     if args.localdb: #if we set the --localdb argument, we can use the local database instead of loading the data from Rucio
         list_of_dataset_not_in_local_database,list_of_dataset_already_in_local_database=use_local_database(datasets,args)
     else: #if we do not set the --localdb argument, we need to load the data from Rucio
         list_of_dataset_not_in_local_database=datasets
         list_of_dataset_already_in_local_database=[]
-    loadlocaldb=datetime.datetime.now()
+
 
     list_of_dataset_already_in_local_database=[(item[0],item[1],args.rse) for item in list_of_dataset_already_in_local_database]
     #For data that already exist in local database and the number of files match, we can use the old local database data isnteaed of loading it from Rucio.
@@ -151,7 +168,6 @@ if __name__ == "__main__":
         print("Combining data from the local database\n")
         Data_from_datasets_datastructure.multiadd(Data_from_datasets)
 
-    loadlocaldbdata=datetime.datetime.now()
 
 
     list_of_dataset_not_in_local_database=[(item[0],item[1],args.rse) for item in list_of_dataset_not_in_local_database]
@@ -171,24 +187,25 @@ if __name__ == "__main__":
             datastructure=RucioDataset.extract_from_rucio(dataset=dataset_not_in_local,thread_count=args.threads)
             New_database.multiadd(datastructure)
 
+    #load data from files
+    storage_dump=extract_from_storage_dump()
+    print(storage_dump[0])
 
-    loadfromrucio=datetime.datetime.now()
-    print("Data from Rucio "+str(len(New_database.id_index.keys())-number_in_local))
-    print("Data from local "+str(number_in_local))
-    print("Number of datasets "+str(len(New_database.dataset_index.keys())))
-    print("Combining data from Rucio and the local database\n")
-    loadcombinedata=datetime.datetime.now()
+    #TODO
+    #extract the files from the custome data structure that have rse = args.rse
+    #get a list of directories from the custome data structure
+    #for each directory, retrive all files in the dump that have the same directory
+    #for each file, check if it exist in the custome data structure
+    #create a new object, list or datasetructure, of files missing from storage dump that exist in the custome data structure, and vice versa
 
-    #Fix gridftp locations
-    """    
-    if args.rse =="SLAC_GRIDFTP":
-        print("Fixing gridftp locations\n")
-        fix_string=""
-        replace_string="SLAC_GRIDFTP:gsiftp://griddev01.slac.stanford.edu:2811"
-        New_database=fix_location_data(New_database,fix_string,replace_string)
-    """
-    locations=New_database.directory_index.keys()
-    print(locations)
+    #TODO
+    #add the fucntions for checking if there exist replcias we can repalce the original missign file with
+
+    #TODO
+    #add the function that checks if the file in question is a duplciate file
+
+    #TODO
+    #verification that those files are indeed missing from Rucio
     
 
 
