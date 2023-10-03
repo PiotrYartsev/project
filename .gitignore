@@ -1,9 +1,9 @@
 
 DDS-V2/local_rucio_database.db
 DDS-V2/Rucio_data_LUND_GRIDFTP.db
-.venv
-.vscode
-__pycache__
+.venv/
+.vscode/
+__pycache__/
 *.pkl
 DDS-V2/datastructure.pkl
 DDS-V2/datastructure.pkl
