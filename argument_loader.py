@@ -34,26 +34,37 @@ def get_args():
 
     return args
 
+#Function that retrives a list of datasets that should be used for the dark data search
 def get_datasets_from_args(args):
+    #If we select --all, we want this code to run for all the files in Rucio. THis can not be done with --scopes or --datasets, as we are specifiying what we want to search for while also saying we want to search for everything
     if args.all:
+        #If we also specify --scopes or --datasets, we can not search for everything
         if args.scopes or args.datasets:
             print("Error: cannot specify scopes or datasets when using --all")
             exit(1)
         else:
             print("Loading all datasets\n")
-            # Retrieve a list of all the datasets
+            # Retrieve a list of all the scopes
             scopes_in_rucio = RucioFunctions.list_scopes()
+            
+            #Retrieve the datasets in the scopes
             datasets = []
+
+            #for each scope we retrive the datasets and add them to the list
             for scope in scopes_in_rucio:
+                #We do not want to search for test or validation datasets, as they are not relevant. They have also in teh past caused issues with the dark data search
                 if "." in scope or "test" in scope or "validation" in scope:
                     continue
                 else:
+                    #We retrieve the datasets in the scope and add them to the list
                     output_list = RucioFunctions.list_dataset(scope=scope)
-                    output_list2 = [(scope, dataset) for dataset in output_list]
+                    #we add the scope to the dataset name, as we need it later
+                    output_list2 = [(scope, dataset,args) for dataset in output_list]
                     datasets.extend(output_list2)
 
+    #If we do not select --all, we want to search for specific datasets
+    #Here we search for all datasets that belong to a specific scope
     elif args.scopes and not args.datasets:
-         
         # Retrieve a list of datasets for the specified scopes
         scopes_in_rucio = RucioFunctions.list_scopes()
         scopes_arg = args.scopes
@@ -65,10 +76,12 @@ def get_datasets_from_args(args):
         # Retrieve the datasets in the scopes
         datasets = []
         for scope in scopes_arg:
+            #We retrieve the datasets in the scope and add them to the list
             output_list = RucioFunctions.list_dataset(scope=scope)
+            #we add the scope to the dataset name, as we need it later
             output_list2 = [(scope, name) for name in output_list]
             datasets.extend(output_list2)
-
+    #Here we search for specific datasets. We do somethign similar to the scopes, but we check if the argument we provided 
     elif args.datasets and not args.scopes:
         print("Loading datasets {}.\n".format(args.datasets))
         # Retrieve a list of all the datasets
@@ -76,14 +89,23 @@ def get_datasets_from_args(args):
         scopes_in_rucio = RucioFunctions.list_scopes()
         datasets = []
         for scope in scopes_in_rucio:
+            #We retrieve the datasets in the scope and add them to the list
             output_list = RucioFunctions.list_dataset(scope=scope)
+            #we add the scope to the dataset name, as we need it later. We only add the datasets that we specified in the argument
             output_list2 = [(scope, dataset) for dataset in output_list if dataset in datasets_arg]
             datasets.extend(output_list2)
+        #Check if the datasets are valid
         for dataset in datasets_arg:
             if dataset not in [a[1] for a in datasets]:
                 print(f"Error: dataset {dataset} is not valid")
                 exit(1)
-
+    else:
+        print("Error: no scopes or datasets specified")
+        exit(1)
+    return datasets
+    
+    #Allow for the search of both scoep and dataset at the same time. Could be relevant if datasets share name in different scopes, but for now we ignore
+    """
     elif args.scopes and args.datasets:
         print("Loading datasets {} for scopes {}.\n".format(args.datasets, args.scopes))
         # Retrieve a list of datasets for the specified scopes and datasets
@@ -104,10 +126,4 @@ def get_datasets_from_args(args):
         for dataset in datasets_arg:
             if dataset not in [a[1] for a in datasets]:
                 print(f"Error: dataset {dataset} is not valid")
-                exit(1)
-    
-    else:
-        print("Error: no scopes or datasets specified")
-        exit(1)
-    
-    return datasets
+                exit(1)"""

@@ -10,3 +10,5 @@ DDS-V2/datastructure.pkl
 *.pkl
 DDS-V2/LUND_2023_05_01.txt
 LUND_2023_05_01.txt
+local_rucio_database.db
+LUND_GRIDFTP_2023_05_01.txt
