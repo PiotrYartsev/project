@@ -1,2 +1,0 @@
-rucio_clients==1.26.0
-tqdm==4.65.0
