@@ -12,3 +12,8 @@ DDS-V2/LUND_2023_05_01.txt
 LUND_2023_05_01.txt
 local_rucio_database.db
 LUND_GRIDFTP_2023_05_01.txt
+files_in_database_but_not_in_storage.txt
+files_in_storage_but_not_in_database.txt
+LUND_GRIDFTP_2023-10-06.txt
+storage/LUND_2023-10-06.txt
+files_found_storage.txt

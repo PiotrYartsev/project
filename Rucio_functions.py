@@ -138,12 +138,13 @@ class RucioFunctions:
     # ...
 
     @classmethod
-    def list_dataset_replicas_bulk_CLI(cls, scope, name):
-        # Get the list of files in the dataset
-        command = f"rucio list-file-replicas {scope}:{name}"
+    def list_dataset_replicas_bulk_CLI(cls, scope, name, rse):
+        # Get the list of files in the dataset at the specified RSE
+        command = f"rucio list-file-replicas --rses {rse} {scope}:{name}"
 
         # Run the command and capture the output
         output = subprocess.check_output(command, shell=True)
         output = output.decode("utf-8").strip().split("\n")[3:-2]
-        output=[x.replace(" ","")[1:-1].split("|") for x in output]
+        output = [x.replace(" ", "")[1:-1].split("|") for x in output]
+        output = [(x[0], x[1], x[2], x[3], x[4]) for x in output if x[3] == rse]
         return output

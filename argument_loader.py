@@ -72,6 +72,7 @@ def get_datasets_from_args(args):
         for scope in scopes_arg:
             if scope not in scopes_in_rucio:
                 print(f"Error: scope {scope} is not valid")
+                print("Valid scopes are: " + str(scopes_in_rucio))
                 exit(1)
         # Retrieve the datasets in the scopes
         datasets = []
@@ -98,6 +99,7 @@ def get_datasets_from_args(args):
         for dataset in datasets_arg:
             if dataset not in [a[1] for a in datasets]:
                 print(f"Error: dataset {dataset} is not valid")
+                print("Valid datasets are: " + str([a[1] for a in datasets]))
                 exit(1)
     else:
         print("Error: no scopes or datasets specified")

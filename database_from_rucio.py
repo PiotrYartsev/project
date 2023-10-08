@@ -98,7 +98,7 @@ class RucioDataset():
         
 
     @classmethod
-    def extract_from_rucio(cls,dataset,thread_count):
+    def extract_from_rucio(cls,dataset,thread_count,rse):
         #define some values
         dataset_name=dataset[1]
         scope=dataset[0]
@@ -106,8 +106,7 @@ class RucioDataset():
 
         #First, we get the list of files in the dataset using the list_files_dataset function. It does not exist as part of the Rucio PythonAPI (for some reason even thought documentation says it does), so we use the CLI version instead instead
         #FIXME Make this work with python API, we dont want two systems
-        files_using_list_dataset_replicas_bulk_CLI=((RucioFunctions.list_dataset_replicas_bulk_CLI(scope=scope,name=dataset_name)))
-
+        files_using_list_dataset_replicas_bulk_CLI=((RucioFunctions.list_dataset_replicas_bulk_CLI(scope=scope,name=dataset_name,rse=rse)))
         datastructure=[]
         #If the dataset is empty, we return an empty datastructure
         if len(files_using_list_dataset_replicas_bulk_CLI)==0:
@@ -115,6 +114,7 @@ class RucioDataset():
         else:
             #We use multithreading to process the data from Rucio. We do this as it is faster than doing it in a single thread
             output=run_threads(thread_count=thread_count,function=RucioDataset.multithreaded_add_to_FileMetadata,data=files_using_list_dataset_replicas_bulk_CLI,const_data=dataset)
+            print(output[0].name,output[0].rse)
             datastructure.extend(output)
             
             return datastructure

@@ -26,7 +26,6 @@ def use_local_database(datasets,args):
         #create a list of datasets that we found in the local database and a list of datasets that we did not find in the local database
         dataset_not_in_local_database=[]
         dataset_already_in_local_database=[]
-        print("Moving datasets to the correct list\n")
         for item in output:
             #if its true, put it in databases found in local. If false, put it in databases not found in local
             if item[1]:
@@ -44,6 +43,9 @@ def use_local_database(datasets,args):
 def find_dark_data(Custome_Datasbase, rse, files_in_storage_dump):
     #We find all the files in the custome data structure that have the same rse as the one we are looking for
     files_with_rse=Custome_Datasbase.find_by_metadata("rse",rse)
+    if files_with_rse == None:
+        print("No files with rse: "+rse+" found for datasets"+str(Custome_Datasbase.dataset_index.keys())+"\n")
+        exit(1)
     #We create a new custome data structure with only the files that have the same rse as the one we are looking for
     #FIXME This is hella cluncky, but it works for now
     Files_in_Rucio_data_with_rse=CustomDataStructure()
@@ -61,21 +63,24 @@ def find_dark_data(Custome_Datasbase, rse, files_in_storage_dump):
 
         #list of files in the custome data structure that have the same directory
         directories_database_files_from_database=Files_in_Rucio_data_with_rse.find_by_metadata("directory",directories_database_item)
-        files=[item.location for item in directories_database_files_from_database]
+        files_from_database=[item.location for item in directories_database_files_from_database]
+
 
         #compare the two lists files and files_in_storage_dump
         
         #A cleanup step I am supprise I need to do, but I do FIXME find where this error comes from
         files_in_storage_dump=[item.replace("//","/") for item in files_in_storage_dump]
 
+        print("NUmber of files in storage dump: "+str(len(files_in_storage_dump)))
+        print("NUmber of files in custome data structure: "+str(len(files_from_database)))
 
         #Calculate the difference between the two lists
         #First, we find what files exist in the storage dump but not in the custome data structure
-        files_in_storage_but_not_in_database=set(files)-set(files_in_storage_dump)
-        print("Files in storage but not in database:" + str(files_in_storage_but_not_in_database))
+        files_in_storage_but_not_in_database=set(files_from_database)-set(files_in_storage_dump)
+        #print("Files in storage but not in database:" + str(files_in_storage_but_not_in_database))
         #Second, we find what files exist in the custome data structure but not in the storage dump
-        files_in_database_but_not_in_storage=set(files_in_storage_dump)-set(files)
-        print("Files in database but not in storage:" + str(files_in_database_but_not_in_storage))
+        files_in_database_but_not_in_storage=set(files_in_storage_dump)-set(files_from_database)
+        #print("Files in database but not in storage:" + str(files_in_database_but_not_in_storage))
         print("\n")
     return files_in_storage_but_not_in_database,files_in_database_but_not_in_storage
 
@@ -147,10 +152,8 @@ if __name__ == "__main__":
     datasets = get_datasets_from_args(args)
     print("Number of datasets: "+str(len(datasets))+"\n")
 
-
     #remove any spaces in the dataset names or scopes. Dont know if this even is a problem, but better safe than sorry
     datasets = [(dataset[0].replace(" ",""),dataset[1].replace(" ",""),args.rse) for dataset in datasets]
-
 
     #check if the datasets exist in the local database
     if args.localdb: #if we set the --localdb argument, we can use the local database instead of loading the data from Rucio
@@ -160,11 +163,12 @@ if __name__ == "__main__":
         dataset_not_in_local_database=datasets
         dataset_already_in_local_database=[]
 
-
     #We add the rse to the dataset names, as the dataset names are not unique across rses. FIXME This is a bit cluncky, could probably be added to the use_local_database fucntion
     dataset_already_in_local_database=[(item[0],item[1],args.rse) for item in dataset_already_in_local_database]
     dataset_not_in_local_database=[(item[0],item[1],args.rse) for item in dataset_not_in_local_database]
 
+    print("Number of datasets that already exist in the local database: "+str(len(dataset_already_in_local_database)))
+    print("Number of datasets to be loaded from Rucio: "+str(len(dataset_not_in_local_database))+"\n")
     #For data that already exist in local database and the number of files match, we can use the old local database data isnteaed of loading it from Rucio.
     #This is done by simply extracting the values from Rucio and putting it in the custom data structure
     
@@ -189,19 +193,33 @@ if __name__ == "__main__":
         #For each dataset, we load the data from Rucio in a multithreaded way
         #it was tested and running each dataset seperatly with its subfunctions multitrheaded was faster than runnning the datasets in a seperate thread 
         for dataset_not_in_local in ((dataset_not_in_local_database)):
-            datastructure=RucioDataset.extract_from_rucio(dataset=dataset_not_in_local,thread_count=args.threads)
+            datastructure=RucioDataset.extract_from_rucio(dataset=dataset_not_in_local,thread_count=args.threads, rse=args.rse)
 
             #We add the data from Rucio to the custom data structure
             Files_in_Rucio_data.multiadd(datastructure)
 
+    print("NUmber of files in the custom data structure: "+str(len(Files_in_Rucio_data.id_index.keys()))+"\n")
+    
+    print("Loading the storage dump\n")
     #We load teh stroage dump
     storage_dump=extract_from_storage_dump(args.rse)
 
+    print("Finding the dark data\n")
     #We find the dark data
-    find_dark_data(Files_in_Rucio_data,args.rse,storage_dump)
+    files_in_storage_but_not_in_database,files_in_database_but_not_in_storage=find_dark_data(Files_in_Rucio_data,args.rse,storage_dump)
+    print(len(files_in_storage_but_not_in_database))
+    print(len(files_in_database_but_not_in_storage))
 
-   
+    #write to theie own txt files
+    with open("files_in_storage_but_not_in_database.txt", 'w') as f:
+        for item in files_in_storage_but_not_in_database:
+            f.write("%s\n" % item)
+        f.close()
 
+    with open("files_in_database_but_not_in_storage.txt", 'w') as f:
+        for item in files_in_database_but_not_in_storage:
+            f.write("%s\n" % item)
+        f.close()
 
     #TODO
     #add the fucntions for checking if there exist replcias we can repalce the original missign file with
