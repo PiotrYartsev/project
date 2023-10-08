@@ -6,7 +6,6 @@ from argument_loader import get_args, get_datasets_from_args
 from multithreading import run_threads
 import os
 import sqlite3 as sl
-import datetime
 
 #This function returns two list, one of datasets that already exist in the local database and one one for datasets that do not exist in the local database
 def use_local_database(datasets,args):
