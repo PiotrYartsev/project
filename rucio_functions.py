@@ -1,7 +1,6 @@
 from rucio.client import Client
 from urllib.parse import quote_plus
 import subprocess as subprocess
-import os 
 
 class RucioFunctions:
     rucioclient = Client()
@@ -132,11 +131,6 @@ class RucioFunctions:
             print(f"Error listing datasets: {e}")
             return None
         
-    import subprocess as subprocess
-    import subprocess
-
-    # ...
-
     @classmethod
     def list_dataset_replicas_bulk_CLI(cls, scope, name, rse):
         # Get the list of files in the dataset at the specified RSE

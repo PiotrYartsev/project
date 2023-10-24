@@ -1,7 +1,5 @@
 import sqlite3 as sl
-from tqdm import tqdm
-import os
-from Rucio_functions import RucioFunctions
+from rucio_functions import RucioFunctions
 from multithreading import run_threads
 
 class RucioDataset():

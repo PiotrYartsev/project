@@ -1,5 +1,5 @@
 import argparse
-from Rucio_functions import RucioFunctions
+from rucio_functions import RucioFunctions
 
 def get_args():
     parser = argparse.ArgumentParser(description='Dark Data Search toolkit, software developed for the search and analysis of dark data at LDCS/LDMX.', formatter_class=argparse.RawDescriptionHelpFormatter)
