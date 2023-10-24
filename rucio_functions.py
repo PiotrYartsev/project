@@ -19,6 +19,7 @@ class RucioFunctions:
 
     @classmethod
     def list_rses(cls):
+        #Run the Rucio API command "list_rses", that list the available RSEs
         try:
             rses = cls.rucioclient.list_rses()
             return rses
@@ -28,6 +29,7 @@ class RucioFunctions:
 
     @classmethod
     def list_files_dataset(cls, scope, name):
+        #Run the Rucio API command "list_files", that list the files in a dataset. We use the "long" option to get more information about the files
         try:
             files = cls.rucioclient.list_files(scope=scope, name=name, long=True)
             return files
@@ -37,6 +39,7 @@ class RucioFunctions:
 
     @classmethod
     def get_rse_usage(cls, rse):
+        #Run the Rucio API command "get_rse_usage", that list information about rse. This is usefull if we want to run a comparison of total number of files in storage vs the number of files registered for that storage element
         try:
             rse_info = cls.rucioclient.get_rse_usage(rse)
             return rse_info
@@ -46,6 +49,7 @@ class RucioFunctions:
 
     @classmethod
     def get_metadata(cls, scope, name):
+        #Run the Rucio API command "get_metadata", that list the metadata of a file. Could be used for further analysis of the files, curretnly not implemented NOTE: Maybe something to implement in the future
         try:
             metadata = cls.rucioclient.get_metadata(scope, name)
             return metadata
@@ -55,6 +59,7 @@ class RucioFunctions:
 
     @classmethod
     def list_replicas(cls, scope, name):
+        #For a given file, list all the replicas of that file. This is used as the regular way to retrive information about the files only says which rse it is located at, not the full path. This also contains some other good metadata about the file
         try:
             replicas = cls.rucioclient.list_replicas(dids=[{'scope': scope, 'name': name}])
             return replicas
@@ -64,6 +69,7 @@ class RucioFunctions:
 
     @classmethod
     def list_replicas_batch(cls, file_list):
+        #Same as list_replicas, but for a list of files. This is used to speed up the process of getting the information about the files, as the list_replicas function is quite slow
         # Create a list of DIDs from the input file list
         dids = [{'scope': scope, 'name': name} for scope, name in file_list]
         try:
@@ -77,7 +83,7 @@ class RucioFunctions:
 
     @classmethod
     def count_files_func(cls, scope, dataset_name):
-        #Count the number of files in a dataset
+        #Count the number of files in a dataset, used for comparison with local database
         try:
             #Get the dataset info. There does not exist a function to count the number of files in a dataset, so we have to get the dataset info and there the "available_length" key contains the number of files
             dataset_info = cls.rucioclient.list_dataset_replicas(scope, dataset_name, deep=True)

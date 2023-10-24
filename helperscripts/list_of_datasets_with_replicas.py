@@ -7,7 +7,6 @@ for table in LocalRucioDataset.execute("SELECT name FROM sqlite_master WHERE typ
     if table[0]=="sqlite_sequence" or table[0]=="dataset":
         continue
     else:
-        #print(table[0])
         #find the column has_replicas
         has_replicas=LocalRucioDataset.execute("SELECT has_replicas FROM "+table[0]+" WHERE has_replicas=1").fetchall()
         if len(has_replicas)>0:
@@ -19,7 +18,6 @@ for dataset in list_of_of:
     datase_name=[i[0] for i in datase_name if "LUND_GRIDFTP" in i[1]]
     datasets_to_run.extend(datase_name)
 
-#print(datasets_to_run)
 
 #fimnd random datasets that have files in LUND but do not have has_replicas=1, and LUND_GRIDFTP is not in exist_at_rses
 datasets=LocalRucioDataset.execute("SELECT name FROM dataset WHERE exist_at_rses LIKE '%LUND_GRIDFTP%'").fetchall()

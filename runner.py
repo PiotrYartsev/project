@@ -1,7 +1,7 @@
 #this is the main software that runs all the other parts
 from rucio_functions import RucioFunctions
 
-from database_from_rucio import RucioDataset, CustomDataStructure
+from database_from_rucio import RucioDatasetlocal,RucioDatasetRucio, CustomDataStructure
 from argument_loader import get_args, get_datasets_from_args
 from multithreading import run_threads
 import os
@@ -21,7 +21,7 @@ def use_local_database(datasets,args):
         WHERE exist_at_rses LIKE ?
         """, ('%' + args.rse + '%',)).fetchall()
         #We then check if the datasets exist in the local database. This is done in a multithreaded way. It 
-        output=run_threads(thread_count=args.threads,function=RucioDataset.check_if_exist,data=datasets,const_data=local_database_dataset_data)
+        output=run_threads(thread_count=args.threads,function=RucioDatasetlocal.check_if_exist,data=datasets,const_data=local_database_dataset_data)
         #create a list of datasets that we found in the local database and a list of datasets that we did not find in the local database
         dataset_not_in_local_database=[]
         dataset_already_in_local_database=[]
@@ -177,7 +177,7 @@ if __name__ == "__main__":
     if len(dataset_already_in_local_database) > 0:
         print("Loading data from the local database\n")
         #We load the data from the local database in a multithreaded way
-        Data_from_datasets=(run_threads(thread_count=args.threads,function=RucioDataset.fill_data_from_local,data=dataset_already_in_local_database))
+        Data_from_datasets=(run_threads(thread_count=args.threads,function=RucioDatasetlocal.fill_data_from_local,data=dataset_already_in_local_database))
         #We combine the list of list into one list, as the run_threads function returns a list of list
         Data_from_datasets=[item for sublist in Data_from_datasets for item in sublist]
         print("Combining data from the local database\n")
@@ -192,7 +192,7 @@ if __name__ == "__main__":
         #For each dataset, we load the data from Rucio in a multithreaded way
         #it was tested and running each dataset seperatly with its subfunctions multitrheaded was faster than runnning the datasets in a seperate thread 
         for dataset_not_in_local in ((dataset_not_in_local_database)):
-            datastructure=RucioDataset.extract_from_rucio(dataset=dataset_not_in_local,thread_count=args.threads, rse=args.rse)
+            datastructure=RucioDatasetRucio.extract_from_rucio(dataset=dataset_not_in_local,thread_count=args.threads, rse=args.rse)
 
             #We add the data from Rucio to the custom data structure
             Files_in_Rucio_data.multiadd(datastructure)

@@ -2,7 +2,7 @@ import sqlite3 as sl
 from rucio_functions import RucioFunctions
 from multithreading import run_threads
 
-class RucioDataset():
+class RucioDatasetlocal():
     #Check if the table for the dataset already exist
     @classmethod
     def check_if_exist(cls, dataset_and_scope,local_database_dataset_data):
@@ -94,7 +94,7 @@ class RucioDataset():
         return list_of_metadata
 
         
-
+class RucioDatasetRucio():
     @classmethod
     def extract_from_rucio(cls,dataset,thread_count,rse):
         #define some values
@@ -111,7 +111,7 @@ class RucioDataset():
             return datastructure
         else:
             #We use multithreading to process the data from Rucio. We do this as it is faster than doing it in a single thread
-            output=run_threads(thread_count=thread_count,function=RucioDataset.multithreaded_add_to_FileMetadata,data=files_using_list_dataset_replicas_bulk_CLI,const_data=dataset)
+            output=run_threads(thread_count=thread_count,function=RucioDatasetRucio.multithreaded_add_to_FileMetadata,data=files_using_list_dataset_replicas_bulk_CLI,const_data=dataset)
             print(output[0].name,output[0].rse)
             datastructure.extend(output)
             
@@ -128,7 +128,7 @@ class RucioDataset():
             if len(matching_index)!=1:
                 for item in matching_index:
                     item.has_replicas=1
-
+    @classmethod
     def multithreaded_add_to_FileMetadata(file, scope_dataset):
         #We just define the values we got from Rucio
         dataset_name=scope_dataset[1]
@@ -187,7 +187,7 @@ class RucioDataset():
         # Return the combined data structure
         return combined_data_structure
 
-        
+#Class to store the metadata for a file. It stores information about the files name, dataset, scope, rse, adler32 checksum value, timestamp, filenumber (the number after root), location (directory+name), directory, has_replicas (does it have copies of this file saved at many location) and id (just a unique number)        
 class FileMetadata:
     def __init__(self, name, dataset, scope, rse, adler32, timestamp, filenumber, location,directory, has_replicas,id=None):
         self.name = name
@@ -202,9 +202,11 @@ class FileMetadata:
         self.has_replicas = has_replicas
         self.id = id
 
+    # Define a __repr__ method to print a string representation of the object
     def __getitem__(self, key):
         return getattr(self, key)
         
+#Class to store many instances of FileMetadata. Also allowes for searching for specific metadata values, and return the FileMetadata instances that match the search
 class CustomDataStructure:
     def __init__(self):
         # Initialize dictionaries (indexes) for each metadata category
@@ -221,6 +223,7 @@ class CustomDataStructure:
         self.has_replicas_index = {}
         self.id_index = {}
 
+    #Add item to the data structure
     def add_item(self, item):
         current_max_id = max(self.id_index.keys()) if self.id_index else -1
         new_id = current_max_id + 1

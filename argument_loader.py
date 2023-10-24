@@ -23,6 +23,7 @@ def get_args():
     parser.add_argument('--duplicate-search', dest='duplicate_search', action='store_true', help='Look if dark data is coused by duplciate files', default=False)
 
     args = parser.parse_args()
+    #We split the scopes and datasets into a list, as they are comma separated
     if args.scopes:
         args.scopes = args.scopes[0].split(",")
     
@@ -107,25 +108,3 @@ def get_datasets_from_args(args):
     return datasets
     
     #Allow for the search of both scoep and dataset at the same time. Could be relevant if datasets share name in different scopes, but for now we ignore
-    """
-    elif args.scopes and args.datasets:
-        print("Loading datasets {} for scopes {}.\n".format(args.datasets, args.scopes))
-        # Retrieve a list of datasets for the specified scopes and datasets
-        scopes_in_rucio = RucioFunctions.list_scopes()
-        scopes_arg = args.scopes
-        datasets_arg = args.datasets
-        # Check if the scopes are valid
-        for scope in scopes_arg:
-            if scope not in scopes_in_rucio:
-                print(f"Error: scope {scope} is not valid")
-                exit(1)
-        # Retrieve the datasets in the scopes and datasets
-        datasets = []
-        for scope in scopes_arg:
-            output_list = RucioFunctions.list_dataset(scope=scope)
-            output_list2 = [(scope, dataset) for dataset in output_list if dataset in datasets_arg]
-            datasets.extend(output_list2)
-        for dataset in datasets_arg:
-            if dataset not in [a[1] for a in datasets]:
-                print(f"Error: dataset {dataset} is not valid")
-                exit(1)"""
